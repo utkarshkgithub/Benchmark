@@ -1,0 +1,13 @@
+/* Reset & normalize styles */
+@import "tailwindcss/preflight";
+
+/* Core utility classes */
+@import "tailwindcss/utilities";
+
+/* Optional: enable theme() usage in CSS */
+@import "tailwindcss/theme";
+
+/* Your custom styles */
+body {
+  font-family: 'Inter', sans-serif;
+}
