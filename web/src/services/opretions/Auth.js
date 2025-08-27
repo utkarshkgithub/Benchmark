@@ -1,4 +1,5 @@
-import {setToken,  setLoading, setUserauth } from "../../Slices/authSlice.js"
+import {setToken,  setLoading, setUserauth} from "../../Slices/authSlice.js"
+import {setUserprofile} from '../../Slices/profileSlice.js'
 import { apiConnector } from "../apiconnector.js"
 import { endpoints } from '../api.js'
 import toast from "react-hot-toast"
