@@ -5,8 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'dart:io';
 import '../providers/auth_provider.dart';
 import '../services/auth_service.dart';
-import '../models/user_models.dart';
-import 'home_screen.dart';
+import 'login_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -185,7 +184,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         };
 
         // Call signup service
-        final signupResponse = await AuthService.signup(
+        await AuthService.signup(
           email: userData['email'] as String,
           password: userData['password'] as String,
           firstName: userData['firstName'] as String,
@@ -198,19 +197,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
           deviceId: userData['deviceId'] as String,
         );
 
-        // Create user session data from signup response
-        final userSession = UserSession.fromSignupResponse(signupResponse);
-
-        // Store user session data in auth provider
-        authProvider.setUser(userSession.toJson());
-
-        // Set a placeholder token since your API doesn't return one
-        // You might want to use the userId as a session identifier
-        authProvider.setToken('user_${userSession.userId}');
+        // Clear any existing auth data
+        await authProvider.logout();
 
         if (mounted) {
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Registration successful! Please login to continue.'),
+              backgroundColor: Colors.green,
+            ),
+          );
+
+          // Redirect to login screen
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
           );
         }
       } catch (e) {

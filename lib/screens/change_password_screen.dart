@@ -39,10 +39,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       authProvider.setLoading(true);
 
       try {
+        // Get the stored token
+        final token = await authProvider.getStoredToken();
+        
         await AuthService.changePassword(
           email: widget.userEmail,
           currentPassword: _currentPasswordController.text.trim(),
           newPassword: _newPasswordController.text.trim(),
+          token: token,
         );
 
         setState(() {
