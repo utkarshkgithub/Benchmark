@@ -127,6 +127,7 @@ class AuthService {
     required String email,
     required String currentPassword,
     required String newPassword,
+    String? token,
   }) async {
     if (_backendUrl == null) {
       throw Exception("BACKEND_URL is not set in the .env file");
@@ -142,12 +143,22 @@ class AuthService {
       "newpassword": newPassword,
     };
 
+    // Prepare headers
+    final Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+    };
+
+    // Add authorization header if token is provided
+    if (token != null && token.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+
     try {
       AppLogger.auth('Attempting to change password for email: $email');
 
       final response = await http.post(
         changePasswordUrl,
-        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        headers: headers,
         body: jsonEncode(body),
       );
 

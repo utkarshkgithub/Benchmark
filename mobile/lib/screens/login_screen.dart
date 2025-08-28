@@ -40,11 +40,11 @@ class _LoginScreenState extends State<LoginScreen> {
           deviceId: 'qwert', // Provide the device ID if needed
         );
 
-        authProvider.setToken(token);
+        await authProvider.setToken(token);
 
         // Get user profile
         final user = await AuthService.getUserProfile(token);
-        authProvider.setUser(user);
+        await authProvider.setUser(user);
 
         if (mounted) {
           Navigator.of(context).pushReplacement(
