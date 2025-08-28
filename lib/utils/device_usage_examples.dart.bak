@@ -1,0 +1,266 @@
+// EXAMPLE USAGE OF MODERN UUID + DEVICE SERVICE
+// This file demonstrates how to use the DeviceService with modern UUID approach for attendance tracking
+
+import 'package:flutter/material.dart';
+import '../services/device_service.dart';
+import 'logger.dart';
+
+class ModernDeviceExamples {
+  // Example 1: Simple attendance marking with modern UUID
+  static Future<void> markAttendanceExample() async {
+    try {
+      final success = await DeviceService.markAttendance(
+        username: 'student123',
+        password: 'securePassword',
+        backendUrl: 'https://your-backend.com/api/attendance',
+      );
+
+      if (success) {
+        AppLogger.attendance(
+          'Attendance marked successfully with persistent UUID!',
+        );
+      }
+    } catch (e, stackTrace) {
+      AppLogger.error('Error marking attendance', e, stackTrace);
+    }
+  }
+
+  // Example 2: Get modern device information with UUID
+  static Future<void> getModernDeviceInfoExample() async {
+    try {
+      // Get persistent device UUID (same across app sessions)
+      final deviceId = await DeviceService.getDeviceId();
+      AppLogger.device('Persistent Device UUID: $deviceId');
+
+      // Check if device is already initialized
+      final isInitialized = await DeviceService.isDeviceInitialized();
+      AppLogger.info('Device Initialized: $isInitialized');
+
+      // Get registration information
+      final regInfo = await DeviceService.getDeviceRegistrationInfo();
+      AppLogger.info('Registration Date: ${regInfo?['createdAt']}');
+
+      // Get full device information (includes UUID + hardware info)
+      final deviceInfo = await DeviceService.getDeviceInfo();
+      AppLogger.device('Platform: ${deviceInfo['platform']}');
+      AppLogger.device('Model: ${deviceInfo['model']}');
+      AppLogger.device('Modern UUID: ${deviceInfo['deviceId']}');
+      AppLogger.device('Legacy ID: ${deviceInfo['legacyDeviceId']}');
+    } catch (e, stackTrace) {
+      AppLogger.error('Error getting device info', e, stackTrace);
+    }
+  }
+
+  // Example 3: Compare modern UUID vs legacy device ID
+  static Future<void> compareDeviceIdsExample() async {
+    try {
+      // Modern approach - persistent UUID
+      final modernUuid = await DeviceService.getDeviceId();
+
+      // Legacy approach - platform-specific ID
+      final legacyId = await DeviceService.getLegacyDeviceId();
+
+      AppLogger.device('Modern UUID: $modernUuid');
+      AppLogger.device('Legacy Device ID: $legacyId');
+      AppLogger.info('UUID Length: ${modernUuid.length} characters');
+      AppLogger.info('Legacy ID Length: ${legacyId.length} characters');
+    } catch (e, stackTrace) {
+      AppLogger.error('Error comparing device IDs', e, stackTrace);
+    }
+  }
+
+  // Example 4: Get location information
+  static Future<void> getLocationExample() async {
+    try {
+      // Check permissions first
+      await DeviceService.checkLocationPermissions();
+
+      // Get current location
+      final position = await DeviceService.getCurrentLocation();
+      AppLogger.location('Latitude: ${position.latitude}');
+      AppLogger.location('Longitude: ${position.longitude}');
+      AppLogger.location('Accuracy: ${position.accuracy} meters');
+    } catch (e, stackTrace) {
+      AppLogger.error('Error getting location', e, stackTrace);
+    }
+  }
+
+  // Example 5: Validate user location for attendance
+  static Future<bool> validateLocationExample() async {
+    try {
+      final position = await DeviceService.getCurrentLocation();
+
+      // Check if user is within allowed area (e.g., classroom coordinates)
+      const double classroomLat = 28.7041; // Example: Delhi coordinates
+      const double classroomLon = 77.1025;
+      const double allowedRadius = 50.0; // 50 meters
+
+      final isWithinRange = DeviceService.isWithinAllowedLocation(
+        currentPosition: position,
+        allowedLatitude: classroomLat,
+        allowedLongitude: classroomLon,
+        radiusInMeters: allowedRadius,
+      );
+
+      if (isWithinRange) {
+        AppLogger.success('User is within allowed location for attendance');
+        return true;
+      } else {
+        AppLogger.warning('User is outside allowed location');
+        return false;
+      }
+    } catch (e, stackTrace) {
+      AppLogger.error('Error validating location', e, stackTrace);
+      return false;
+    }
+  }
+
+  // Example 6: Register device for a user
+  static Future<void> registerDeviceExample() async {
+    try {
+      final success = await DeviceService.registerDevice(
+        userId: 'user123',
+        deviceName: 'John\'s Phone',
+        backendUrl: 'https://your-backend.com/api/register-device',
+      );
+
+      if (success) {
+        AppLogger.success('Device registered successfully!');
+      }
+    } catch (e, stackTrace) {
+      AppLogger.error('Error registering device', e, stackTrace);
+    }
+  }
+
+  // Example 7: Reset device UUID (for testing)
+  static Future<void> resetDeviceExample() async {
+    try {
+      final oldUuid = await DeviceService.getDeviceId();
+      AppLogger.info('Old UUID: $oldUuid');
+
+      final newUuid = await DeviceService.resetDeviceId();
+      AppLogger.success('New UUID: $newUuid');
+      AppLogger.success('UUID successfully reset!');
+    } catch (e, stackTrace) {
+      AppLogger.error('Error resetting device UUID', e, stackTrace);
+    }
+  }
+
+  // Example 8: Complete attendance flow with modern UUID validation
+  static Future<void> completeAttendanceFlow({
+    required String username,
+    required String password,
+    required double classroomLat,
+    required double classroomLon,
+  }) async {
+    try {
+      AppLogger.info('Starting attendance flow for user: $username');
+
+      // Step 1: Check location permissions
+      await DeviceService.checkLocationPermissions();
+      AppLogger.success('Location permissions verified');
+
+      // Step 2: Get current location
+      final position = await DeviceService.getCurrentLocation();
+      AppLogger.location(
+        'Current position obtained: ${position.latitude}, ${position.longitude}',
+      );
+
+      // Step 3: Validate location
+      final isWithinRange = DeviceService.isWithinAllowedLocation(
+        currentPosition: position,
+        allowedLatitude: classroomLat,
+        allowedLongitude: classroomLon,
+        radiusInMeters: 100.0,
+      );
+
+      if (!isWithinRange) {
+        throw Exception(
+          'You must be within the classroom area to mark attendance',
+        );
+      }
+      AppLogger.success('Location validation passed');
+
+      // Step 4: Get persistent device UUID
+      final deviceId = await DeviceService.getDeviceId();
+      AppLogger.device('Using device UUID: $deviceId');
+
+      // Step 5: Validate device (check if registered)
+      final isValidDevice = await DeviceService.validateDevice(
+        deviceId: deviceId,
+        userId: username,
+      );
+
+      if (!isValidDevice) {
+        throw Exception('Device UUID not registered for this user');
+      }
+      AppLogger.success('Device validation passed');
+
+      // Step 6: Mark attendance with modern UUID
+      final success = await DeviceService.markAttendance(
+        username: username,
+        password: password,
+      );
+
+      if (success) {
+        AppLogger.attendance(
+          'Attendance marked successfully with persistent UUID!',
+        );
+      }
+    } catch (e, stackTrace) {
+      AppLogger.error('Attendance flow error', e, stackTrace);
+    }
+  }
+}
+
+// Widget example showing how to use in a Flutter UI
+class AttendanceButton extends StatefulWidget {
+  const AttendanceButton({super.key});
+
+  @override
+  State<AttendanceButton> createState() => _AttendanceButtonState();
+}
+
+class _AttendanceButtonState extends State<AttendanceButton> {
+  bool _isLoading = false;
+
+  Future<void> _markAttendance() async {
+    setState(() => _isLoading = true);
+
+    try {
+      await ModernDeviceExamples.completeAttendanceFlow(
+        username: 'student123',
+        password: 'password123',
+        classroomLat: 28.7041,
+        classroomLon: 77.1025,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Attendance marked successfully!')),
+        );
+      }
+    } catch (e, stackTrace) {
+      AppLogger.error('UI Attendance error', e, stackTrace);
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: _isLoading ? null : _markAttendance,
+      child: _isLoading
+          ? const CircularProgressIndicator()
+          : const Text('Mark Attendance'),
+    );
+  }
+}
