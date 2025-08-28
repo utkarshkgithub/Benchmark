@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../services/auth_service.dart';
+import '../utils/device_id_helper.dart';
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
 import 'home_screen.dart';
+import 'dart:developer';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -34,11 +36,22 @@ class _LoginScreenState extends State<LoginScreen> {
       authProvider.setLoading(true);
 
       try {
+        // Get device ID dynamically
+        log('Login: Starting device ID fetch...');
+        final String deviceId = await DeviceIdHelper.getDeviceId();
+        log('Login: Device ID retrieved: $deviceId');
+
+        // Also get device info for debugging
+        final deviceInfo = await DeviceIdHelper.getDeviceInfo();
+        log('Login: Device info: $deviceInfo');
+
+        log('Login: Calling AuthService.mobileLogin with device ID: $deviceId');
         final token = await AuthService.mobileLogin(
           email: _emailController.text.trim(),
           password: _passwordController.text,
-          deviceId: 'qwert', // Provide the device ID if needed
+          deviceId: deviceId,
         );
+        log('Login: Successfully got token: ${token.substring(0, 10)}...');
 
         await authProvider.setToken(token);
 
@@ -46,12 +59,13 @@ class _LoginScreenState extends State<LoginScreen> {
         final user = await AuthService.getUserProfile(token);
         await authProvider.setUser(user);
 
-        if (mounted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-          );
-        }
+        // Ensure widget is still mounted before using context (navigation)
+        if (!mounted) return;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
       } catch (e) {
+        log('Login: Error occurred: $e');
         authProvider.setError(e.toString());
       } finally {
         authProvider.setLoading(false);
@@ -224,6 +238,89 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                         ),
                         const SizedBox(height: 24),
+
+                        // Debug Device ID Button (for testing)
+                        if (true) // Change to false to hide in production
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 16),
+                            child: OutlinedButton.icon(
+                              onPressed: () async {
+                                // Capture context-dependent objects before any awaits
+                                final localContext = context;
+                                final scaffoldMessenger = ScaffoldMessenger.of(
+                                  context,
+                                );
+                                try {
+                                  final deviceId =
+                                      await DeviceIdHelper.getDeviceId();
+                                  final deviceInfo =
+                                      await DeviceIdHelper.getDeviceInfo();
+
+                                  // If widget was disposed while awaiting, bail out
+                                  if (!localContext.mounted) return;
+
+                                  showDialog(
+                                    context: localContext,
+                                    builder: (dialogContext) => AlertDialog(
+                                      title: const Text('Device Information'),
+                                      content: SingleChildScrollView(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text('Device ID: $deviceId'),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              'Platform: ${deviceInfo['platform']}',
+                                            ),
+                                            if (deviceInfo['model'] != null)
+                                              Text(
+                                                'Model: ${deviceInfo['model']}',
+                                              ),
+                                            if (deviceInfo['brand'] != null)
+                                              Text(
+                                                'Brand: ${deviceInfo['brand']}',
+                                              ),
+                                            if (deviceInfo['error'] != null)
+                                              Text(
+                                                'Error: ${deviceInfo['error']}',
+                                                style: const TextStyle(
+                                                  color: Colors.red,
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(dialogContext),
+                                          child: const Text('Close'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                } catch (e) {
+                                  // If widget disposed while awaiting, bail out
+                                  if (!localContext.mounted) return;
+                                  scaffoldMessenger.showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Error getting device ID: $e',
+                                      ),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              },
+                              icon: const Icon(Icons.phone_android),
+                              label: const Text('Test Device ID'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.deepPurple,
+                              ),
+                            ),
+                          ),
 
                         // Sign Up Link
                         Row(

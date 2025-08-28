@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../utils/logger.dart';
+import '../utils/network_logger.dart';
 import '../models/user_models.dart';
 
 class AuthService {
@@ -44,11 +45,22 @@ class AuthService {
 
     try {
       AppLogger.auth('Attempting to register user: $email');
-
+      final headers = {'Content-Type': 'application/json; charset=UTF-8'};
+      NetworkLogger.logRequest(
+        method: 'POST',
+        url: signupUrl,
+        headers: headers,
+        body: jsonEncode(body),
+      );
+  final start = DateTime.now();
       final response = await http.post(
         signupUrl,
-        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        headers: headers,
         body: jsonEncode(body),
+      );
+      NetworkLogger.logResponse(
+        response: response,
+        duration: DateTime.now().difference(start),
       );
 
       // Check if the request was successful
@@ -69,10 +81,17 @@ class AuthService {
         return signupResponse;
       } else {
         // Handle server errors
+        AppLogger.error(
+          'Signup failed with status code: ${response.statusCode}',
+        );
+        AppLogger.error('Response body: ${response.body}');
+
         final errorData = jsonDecode(response.body);
         final errorMessage = errorData['message'] ?? 'Unknown error';
         AppLogger.error('Failed to sign up user: $email', errorMessage);
-        throw Exception('Failed to sign up: $errorMessage');
+        throw Exception(
+          'Failed to sign up: $errorMessage (Status: ${response.statusCode})',
+        );
       }
     } catch (e) {
       AppLogger.error('Error occurred during signup', e);
@@ -100,10 +119,22 @@ class AuthService {
     };
 
     try {
+      final headers = {'Content-Type': 'application/json; charset=UTF-8'};
+      NetworkLogger.logRequest(
+        method: 'POST',
+        url: loginUrl,
+        headers: headers,
+        body: jsonEncode(body),
+      );
+  final start = DateTime.now();
       final response = await http.post(
         loginUrl,
-        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        headers: headers,
         body: jsonEncode(body),
+      );
+      NetworkLogger.logResponse(
+        response: response,
+        duration: DateTime.now().difference(start),
       );
 
       if (response.statusCode == 200) {
@@ -156,10 +187,21 @@ class AuthService {
     try {
       AppLogger.auth('Attempting to change password for email: $email');
 
+      NetworkLogger.logRequest(
+        method: 'POST',
+        url: changePasswordUrl,
+        headers: headers,
+        body: jsonEncode(body),
+      );
+  final start = DateTime.now();
       final response = await http.post(
         changePasswordUrl,
         headers: headers,
         body: jsonEncode(body),
+      );
+      NetworkLogger.logResponse(
+        response: response,
+        duration: DateTime.now().difference(start),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -195,10 +237,22 @@ class AuthService {
     try {
       AppLogger.auth('Attempting to send OTP to email: $email');
 
+      final headers = {'Content-Type': 'application/json; charset=UTF-8'};
+      NetworkLogger.logRequest(
+        method: 'POST',
+        url: sendOTPUrl,
+        headers: headers,
+        body: jsonEncode(body),
+      );
+  final start = DateTime.now();
       final response = await http.post(
         sendOTPUrl,
-        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        headers: headers,
         body: jsonEncode(body),
+      );
+      NetworkLogger.logResponse(
+        response: response,
+        duration: DateTime.now().difference(start),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -241,10 +295,22 @@ class AuthService {
     try {
       AppLogger.auth('Attempting forgot password reset for email: $email');
 
+      final headers = {'Content-Type': 'application/json; charset=UTF-8'};
+      NetworkLogger.logRequest(
+        method: 'POST',
+        url: forgotPasswordUrl,
+        headers: headers,
+        body: jsonEncode(body),
+      );
+  final start = DateTime.now();
       final response = await http.post(
         forgotPasswordUrl,
-        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        headers: headers,
         body: jsonEncode(body),
+      );
+      NetworkLogger.logResponse(
+        response: response,
+        duration: DateTime.now().difference(start),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
