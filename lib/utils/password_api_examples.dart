@@ -39,7 +39,7 @@ class PasswordAPIExamples {
       final result = await AuthService.forgotPassword(
         email: 'usaraamit2007@gmail.com',
         otp: '666666',
-        newPassword: 'qwert',
+        newPassword: 'newPassword123',
       );
 
       AppLogger.success('Password reset result: $result');

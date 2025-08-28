@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:geolocator/geolocator.dart';
-import 'dart:io';
+import 'dart:developer';
 import '../providers/auth_provider.dart';
 import '../services/auth_service.dart';
+import '../utils/device_id_helper.dart';
 import 'login_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -32,7 +32,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   // Page 3 Controllers
   final _rollNumberController = TextEditingController();
   String _branch = 'CSE';
-  String _semester = '1';
+  String _semester = 'I';
 
   final _formKeys = [
     GlobalKey<FormState>(),
@@ -117,20 +117,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  Future<String> _getDeviceId() async {
-    final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-
-    if (Platform.isAndroid) {
-      final AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-      return androidInfo.id;
-    } else if (Platform.isIOS) {
-      final IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-      return iosInfo.identifierForVendor ?? 'unknown';
-    }
-
-    return 'unknown';
-  }
-
   Future<Position> _getCurrentLocation() async {
     // Check if location services are enabled
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -163,7 +149,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
       try {
         // Get device ID and location
-        final String deviceId = await _getDeviceId();
+        final String deviceId = await DeviceIdHelper.getDeviceId();
         final Position position = await _getCurrentLocation();
 
         // Create user data object
@@ -182,6 +168,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           'longitude': position.longitude,
           'accuracy': position.accuracy,
         };
+
+        log('Signup: User data to be sent: $userData');
 
         // Call signup service
         await AuthService.signup(
@@ -204,7 +192,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
           // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Registration successful! Please login to continue.'),
+              content: Text(
+                'Registration successful! Please login to continue.',
+              ),
               backgroundColor: Colors.green,
             ),
           );
@@ -452,10 +442,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             value: 'Faculty',
                             child: Text('Faculty'),
                           ),
-                          DropdownMenuItem(
-                            value: 'Admin',
-                            child: Text('Admin'),
-                          ),
+                          // DropdownMenuItem(
+                          //   value: 'Admin',
+                          //   child: Text('Admin'),
+                          // ),
                         ],
                         onChanged: (value) {
                           setState(() {
@@ -734,12 +724,40 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           prefixIcon: Icon(Icons.calendar_today),
                           border: OutlineInputBorder(),
                         ),
-                        items: List.generate(8, (index) {
-                          return DropdownMenuItem(
-                            value: (index + 1).toString(),
-                            child: Text('Semester ${index + 1}'),
-                          );
-                        }),
+                        items: [
+                          const DropdownMenuItem(
+                            value: 'I',
+                            child: Text('Semester I (1st)'),
+                          ),
+                          const DropdownMenuItem(
+                            value: 'II',
+                            child: Text('Semester II (2nd)'),
+                          ),
+                          const DropdownMenuItem(
+                            value: 'III',
+                            child: Text('Semester III (3rd)'),
+                          ),
+                          const DropdownMenuItem(
+                            value: 'IV',
+                            child: Text('Semester IV (4th)'),
+                          ),
+                          const DropdownMenuItem(
+                            value: 'V',
+                            child: Text('Semester V (5th)'),
+                          ),
+                          const DropdownMenuItem(
+                            value: 'VI',
+                            child: Text('Semester VI (6th)'),
+                          ),
+                          const DropdownMenuItem(
+                            value: 'VII',
+                            child: Text('Semester VII (7th)'),
+                          ),
+                          const DropdownMenuItem(
+                            value: 'VIII',
+                            child: Text('Semester VIII (8th)'),
+                          ),
+                        ],
                         onChanged: (value) {
                           setState(() {
                             _semester = value!;

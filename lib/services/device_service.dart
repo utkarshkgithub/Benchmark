@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:convert';
 import 'dart:io';
+import '../utils/network_logger.dart';
 
 class DeviceService {
   static final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
@@ -278,13 +279,26 @@ class DeviceService {
       final String apiUrl =
           backendUrl ?? 'https://your-backend.com/mark-attendance';
 
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+      final uri = Uri.parse(apiUrl);
+      final headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
+      NetworkLogger.logRequest(
+        method: 'POST',
+        url: uri,
+        headers: headers,
         body: jsonEncode(attendanceData),
+      );
+  final start = DateTime.now();
+      final response = await http.post(
+        uri,
+        headers: headers,
+        body: jsonEncode(attendanceData),
+      );
+      NetworkLogger.logResponse(
+        response: response,
+        duration: DateTime.now().difference(start),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -309,13 +323,27 @@ class DeviceService {
       final String apiUrl =
           backendUrl ?? 'https://your-backend.com/validate-device';
 
+      final uri = Uri.parse(apiUrl);
+      final headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
+      final body = jsonEncode({'deviceId': deviceId, 'userId': userId});
+      NetworkLogger.logRequest(
+        method: 'POST',
+        url: uri,
+        headers: headers,
+        body: body,
+      );
+  final start = DateTime.now();
       final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({'deviceId': deviceId, 'userId': userId}),
+        uri,
+        headers: headers,
+        body: body,
+      );
+      NetworkLogger.logResponse(
+        response: response,
+        duration: DateTime.now().difference(start),
       );
 
       if (response.statusCode == 200) {
@@ -342,19 +370,33 @@ class DeviceService {
       final String apiUrl =
           backendUrl ?? 'https://your-backend.com/register-device';
 
+      final uri = Uri.parse(apiUrl);
+      final headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
+      final body = jsonEncode({
+        'userId': userId,
+        'deviceId': deviceId,
+        'deviceName': deviceName,
+        'deviceInfo': deviceInfo,
+        'registrationTime': DateTime.now().toIso8601String(),
+      });
+      NetworkLogger.logRequest(
+        method: 'POST',
+        url: uri,
+        headers: headers,
+        body: body,
+      );
+  final start = DateTime.now();
       final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({
-          'userId': userId,
-          'deviceId': deviceId,
-          'deviceName': deviceName,
-          'deviceInfo': deviceInfo,
-          'registrationTime': DateTime.now().toIso8601String(),
-        }),
+        uri,
+        headers: headers,
+        body: body,
+      );
+      NetworkLogger.logResponse(
+        response: response,
+        duration: DateTime.now().difference(start),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
