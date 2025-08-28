@@ -13,12 +13,6 @@ const userSchema = new mongoose.Schema(
             required:true,
             trim:true,
         },
-        userName:{
-            type:String,
-            required:true,
-            trim:true,
-            unique:true
-        },
         email:{
             type:String,
             required:true,
@@ -34,25 +28,15 @@ const userSchema = new mongoose.Schema(
             required:true,
             enum:["Admin","Student","Instructor"],
         },
-        additionalDetails:{
-            type:mongoose.Schema.Types.ObjectId,
-            required:true,
-            ref:"Profile",
-        },
+        
         active: {
             type: Boolean,
-            default: true,
+            default: false,
         },
         approved: {
             type: Boolean,
             default: true,
         },
-        subjects:[
-            {
-                type:mongoose.Schema.Types.ObjectId,
-                ref:"Subject",
-            }
-        ],
         image:{
             type:String,
             required:true,
@@ -63,16 +47,8 @@ const userSchema = new mongoose.Schema(
         resetPasswordExpires:{
             type:Date,
         },
-        // deviceId:{
-        //     type:String,
-        //     unique:true,
-        // }
-        // courseProgress:[
-        //     {
-        //         type:mongoose.Schema.Types.ObjectId,
-        //         ref:"CourseProgress",
-        //     }
-        // ],
+        
+            
     },
 	{ 
         timestamps: true 

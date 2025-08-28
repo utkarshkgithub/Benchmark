@@ -5,31 +5,31 @@ const SubjectSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  subjectCode:{
-    type:String,
-    required:true,
-    unique:true
+  subjectCode: {
+    type: String,
+    required: true,
+    unique: true
   },
-  year:{
-    type:String,
-    enum:["1st","2nd","3rd","4th","5th"],
-    required:true,
+  semester: {
+    type: String,
+    required: true,
+    enum: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"],
   },
-  branch:{
-    type:String,
-    enum:["CSE","ECE","MAE","MNC"],
-    required:true,
+  branch: {
+    type: String,
+    enum: ["CSE", "ECE", "MAE", "MNC"],
+    required: true,
   },
-  instructor:{
-    type:mongoose.Schema.Types.ObjectId,
-    required:true,
-    ref:"User",
+  instructor: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: "User",
   },
-  students:[{
-    type:mongoose.Schema.Types.ObjectId,
-    ref:"User",
+  students: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
   }]
-  
+
 });
 
 const Subject = mongoose.model("Subject", SubjectSchema);

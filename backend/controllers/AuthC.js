@@ -4,10 +4,16 @@ import jwt from "jsonwebtoken";
 import otpGenerator from "otp-generator";
 import bcrypt from "bcryptjs";
 import mailSender from '../utils/mailSender.js';
-import Profile from "../models/Profile.js";
 import dotenv from "dotenv";
+import Student from "../models/Student.js";
+import Instructor from "../models/Instructor.js"
 dotenv.config();
-
+// import bcrypt from "bcrypt";
+// import User from "../models/User.js";
+// import Student from "../models/Student.js";
+// import Instructor from "../models/Instructor.js";
+// import OTP from "../models/OTP.js"; // assuming you have this
+// 
 //send otp
 
 export const sendOTP = async (req, res) => {
@@ -15,7 +21,6 @@ export const sendOTP = async (req, res) => {
     try {
         // fetch email from request ki body
         const { email } = req.body;
-        console.log("email:1", email)
         // check if user already exist
         const chackUserPreSent = await User.findOne({ email });
 
@@ -82,150 +87,165 @@ export const sendOTP = async (req, res) => {
 
 //sign-Up
 
+
 export const signUp = async (req, res) => {
     try {
-        //data fetch from request ki body
-
         const {
-            userName,
             firstName,
             lastName,
             email,
-            password,
-            confirmPassword,
             accountType,
+            password,
             otp,
+            rollNumber = "",
+            branch = "",
+            semester = "",
+            deviceId = "",
+            department = ""
         } = req.body;
 
-        //validate krlo
-        // console.log("userName",userName)
-        // console.log("firstName",firstName)
-        // console.log("lastName",lastName)
-        // console.log("email",email)
-        // console.log("password",password)
-        // console.log("confirmPassword",confirmPassword)
-        // console.log("accountType",accountType)
-        // console.log("otp",otp)
-
-        if (!accountType ||
-            !userName ||
+        // ✅ validate required fields
+        if (
             !firstName ||
             !lastName ||
             !email ||
             !password ||
-            !confirmPassword ||
+            !accountType ||
             !otp
         ) {
             return res.status(403).json({
                 success: false,
-                message: "All fields are from ",
+                message: "All required fields must be filled.",
             });
         }
 
-        //2 password match krlo
-
-        if (password !== confirmPassword) {
-            return res.status(400).json({
+        // For Student account, extra fields are required
+        if (
+            accountType === "Student" &&
+            (!rollNumber || !branch || !semester || !deviceId)
+        ) {
+            return res.status(403).json({
                 success: false,
-                message: `Password and confirm Password value does't match,please try again. `,
+                message: "Student account requires rollNumber, branch, semester, deviceId",
+            });
+        } else if (accountType == "Instructor" && (!department)) {
+            return res.status(403).json({
+                success: false,
+                message: "Instructor account requires dedpartment",
             });
         }
 
-        // check user already exist or not
-        const username = await User.findOne({ userName: userName });
-        if (username) {
-            return res.status(400).json({
-                success: false,
-                message: "User name already taken, please choose unique USERNAME",
-            });
-        }
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({
                 success: false,
-                message: "User is already registered",
+                message: "User already registered with this email.",
             });
         }
 
-        //find most recent OTP stored for the user
-        const recentOtp = await OTP.find({ email }).sort({ createdAt: -1 }).limit(1);
-        // console.log(recentOtp);
+        if (accountType == "Student") {
+            const deviceDetails = await Student.findOne({ deviceId });
+            if (deviceDetails) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Device already assigned to other.",
+                });
+            }
+            const rollDetails  = await Student.findOne({rollNumber});
+            if (rollDetails) {
+                return res.status(400).json({
+                    success: false,
+                    message: "ROLL NUMBER should must be Unique",
+                });
+            }
+        }
 
-        //validate OTP
+
+        const recentOtp = await OTP.find({ email })
+            .sort({ createdAt: -1 })
+            .limit(1);
+
         if (recentOtp.length === 0) {
             return res.status(400).json({
                 success: false,
-                message: "OTP not found",
+                message: "OTP not found.",
             });
         } else if (otp !== recentOtp[0].otp) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid OTP",
+                message: "Invalid OTP.",
             });
         }
 
-        //HASH password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        //entry create in db
-        let approved = "";
-        approved === "Instructor" ? (approved = false) : (approved = true);
-        const profileDetails = await Profile.create({
-            gender: null,
-            dateOfBirth: null,
-            about: null,
-            contectNumber: null,
-            year: null,
-            branch: null,
-            subjects: []
-        });
-
-        const user = await User.create({
-            userName,
+        const userDetails = await User.create({
             firstName,
             lastName,
             email,
             password: hashedPassword,
-            accountType: accountType,
-            approved: approved,
-            additionalDetails: profileDetails._id,
+            accountType,
+            approved: accountType === "Instructor" ? false : true,
+            active: true,
             image: `https://api.dicebear.com/5.x/initials/svg?seed=${firstName}%20${lastName}`,
         });
-        // return res
+        let user = "";
+        if (accountType === "Student") {
+            user = await Student.create({
+                userId: userDetails._id,
+                deviceId,
+                rollNumber,
+                branch,
+                semester,
+            });
+        } else if (accountType === "Instructor") {
+            user = await Instructor.create({
+                userId: userDetails._id,
+                department: department , 
+            });
+        }
+
         return res.status(200).json({
             success: true,
-            user,
-            message: "User is registered successfully.",
+            user: user,
+            userDetails:userDetails,
+            message: "User registered successfully.",
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({
             success: false,
-            message: "User cannot be registerd. please try again",
+            message: "User could not be registered, please try again.",
         });
     }
 };
+
 
 //login
 
 export const login = async (req, res) => {
     try {
         // get data from request ki body
-        const { credential, password } = req.body;
-
-        // validation
-        if (!credential || !password) {
+        const { email, password } = req.body;
+        if (!email || !password) {
             return res.status(400).json({
                 success: false,
-                message: "All fields are from , please try again.",
+                message: "All fields are required, please try again.",
             });
         }
         // user check exist or not
 
         const user = await User.findOne({
-            $or: [{ userName: credential }, { email: credential }]
-        }).populate("additionalDetails");
-
+            email
+        });
+        let userDetails;
+        if(user.accountType == "Student"){
+            userDetails = Student.findById({userId:user._id})
+        }else{
+            userDetails = Instructor.findById({userId:user._id})
+        }
+        
+        
         if (!user) {
             return res.status(401).json({
                 success: false,
@@ -234,7 +254,6 @@ export const login = async (req, res) => {
         }
 
         // genrate JWT, after password matching
-
         if (await bcrypt.compare(password, user.password)) {
             const payload = {
                 email: user.email,
@@ -273,6 +292,102 @@ export const login = async (req, res) => {
         });
     }
 };
+export const mobLogin = async (req, res) => {
+    try {
+        // get data from request body
+        const { email, password, deviceId=""} = req.body;
+        if (!email || !password ) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required, please try again.",
+            });
+        }
+
+        // user check exist or not
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: "User is not registered, please signup first",
+            });
+        }
+        
+
+        let studentDetails = null;
+        let instructorDetails = null;
+
+        if (user.accountType === "Student") {
+            studentDetails = await Student.findOne({ userId: user._id });
+            if (!studentDetails) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Student details not found.",
+                });
+            }
+            if (studentDetails.deviceId !== deviceId) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Device not matched, please use old device",
+                });
+            }
+        } else if (user.accountType === "Instructor") {
+            instructorDetails = await Instructor.findOne({ userId: user._id });
+            if (!instructorDetails) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Instructor details not found.",
+                });
+            }
+            // if (instructorDetails.deviceId !== deviceId) {
+            //     return res.status(401).json({
+            //         success: false,
+            //         message: "Device not matched, please use old device",
+            //     });
+            // }
+        }
+
+        // generate JWT, after password matching
+        const isPasswordMatch = await bcrypt.compare(password, user.password);
+        if (!isPasswordMatch) {
+            return res.status(401).json({
+                success: false,
+                message: "Password is incorrect",
+            });
+        }
+
+        const payload = {
+            email: user.email,
+            id: user._id,
+            accountType: user.accountType,
+        };
+        const token = jwt.sign(payload, process.env.JWT_SECRET, {
+            expiresIn: "24h",
+        });
+        user.token = token;
+        user.password = undefined;
+
+        // create cookie and send response
+        const options = {
+            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            httpOnly: true,
+        };
+
+        res.cookie("token", token, options).status(200).json({
+            success: true,
+            token,
+            user,
+            message: "Logged in Successfully.",
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: "Login Failure, please try again",
+        });
+    }
+};
+
 
 //change password
 
@@ -280,10 +395,8 @@ export const changePassword = async (req, res) => {
     try {
         const userDetails = await User.findById(req.user.id);
         // console.log(userDetails)
-
-
         // get data from request
-        const { password, newPassword, confirmPassword } = req.body;
+        const { currentPassword, newPassword } = req.body;
         // validation
         const email = userDetails.email;
         const user = await User.findOne({ email });

@@ -20,11 +20,12 @@ import Instructor from './components/core/dashboard/Instructor/Instructor.jsx'
 import Student from './components/core/dashboard/Student/Student.jsx'
 import ContectUs from './components/core/outside/ContectUs.jsx'
 import Setting from './components/core/dashboard/Setting.jsx'
+import PersonalDetails from './page/PersonalDetails.jsx'
 
 function App() {
 
 const { user } = useSelector((state) => state.auth);
-
+// /
   return (
     <div >
       <Navbar />
@@ -34,6 +35,7 @@ const { user } = useSelector((state) => state.auth);
         <Route path="login" element={<OpenRoute><Login /></OpenRoute>} />
         <Route path="signup" element={<OpenRoute><Signup /></OpenRoute>} />
         <Route path="verify-email" element={<OpenRoute> <VerifyEmail /> </OpenRoute>} />
+        <Route path="personal-details" element={<OpenRoute> <PersonalDetails /> </OpenRoute>} />
         <Route path="forgot-password" element={ <OpenRoute> <ForgotPassword /> </OpenRoute> }/>
         <Route path="update-password/:id" element={<OpenRoute><UpdatePassword /></OpenRoute>}/>
         <Route path="contact" element={ <ContectUs /> } />

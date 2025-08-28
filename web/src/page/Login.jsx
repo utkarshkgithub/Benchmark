@@ -20,7 +20,7 @@ const SignIn = () => {
 
   // Handle the form submission
   const onSubmit = (data) => {
-    dispatch(login(data.credential, data.password, navigate))
+    dispatch(login(data.email, data.password, navigate))
   };
 
   return (
@@ -44,10 +44,10 @@ const SignIn = () => {
               <input
                 type="text"
                 placeholder="Enter your username or email"
-                {...register('credential', { required: 'Username or email is required' })}
-                className={`mt-1 block w-full px-3 py-2 border ${errors.credential ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500`}
+                {...register('email', { required: 'Username or email is required' })}
+                className={`mt-1 block w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500`}
               />
-              {errors.credential && <p className="text-red-500 text-xs mt-1">{errors.credential.message}</p>}
+              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
             </div>
 
             {/* Password Field */}

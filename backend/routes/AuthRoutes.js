@@ -1,10 +1,11 @@
 import express from 'express'
-import { changePassword, login, sendOTP, signUp } from '../controllers/AuthC.js';
+import { changePassword, login, mobLogin, sendOTP, signUp } from '../controllers/AuthC.js';
 const router = express.Router()
-console.log("apich:-0",0)
 router.post("/sendOTP",sendOTP);
 router.post("/signup",signUp);
 router.post("/login",login);
+router.post("/mob-login",mobLogin);
+
 router.post("/changepassword",changePassword);
 // router.post("/forgotPassword",forgotPassword);
 

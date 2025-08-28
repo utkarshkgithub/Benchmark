@@ -1,5 +1,5 @@
-import {setToken,  setLoading, setUserauth} from "../../Slices/authSlice.js"
-import {setUserprofile} from '../../Slices/profileSlice.js'
+import { setToken, setLoading, setUserauth } from "../../Slices/authSlice.js"
+import { setUserprofile } from '../../Slices/profileSlice.js'
 import { apiConnector } from "../apiconnector.js"
 import { endpoints } from '../api.js'
 import toast from "react-hot-toast"
@@ -7,7 +7,7 @@ import toast from "react-hot-toast"
 
 export function sendOtp(email, navigate) {
 
-  return async (dispatch) => { 
+  return async (dispatch) => {
     const toastId = toast.loading("Loading...")
     dispatch(setLoading(true))
     try {
@@ -35,7 +35,6 @@ export function sendOtp(email, navigate) {
 }
 
 export function signUp(
-  userName,
   accountType,
   firstName,
   lastName,
@@ -43,22 +42,26 @@ export function signUp(
   password,
   confirmPassword,
   otp,
-  navigate
+  navigate,
+  deviceId = "",
+  rollNumber = "",
+  branch = "",
+  semester = "",
+  department = ""
 ) {
   return async (dispatch) => {
     const toastId = toast.loading("Loading...")
     dispatch(setLoading(true))
     try {
-      console.log("userName1",userName)
-        console.log("firstName1",firstName)
-        console.log("lastName1",lastName)
-        console.log("email1",email)
-        console.log("password1",password)
-        console.log("confirmPassword1",confirmPassword)
-        console.log("accountType1",accountType)
-        console.log("otp1",otp)
+      console.log("firstName1", firstName)
+      console.log("lastName1", lastName)
+      console.log("email1", email)
+      console.log("password1", password)
+      console.log("confirmPassword1", confirmPassword)
+      console.log("accountType1", accountType)
+      console.log("otp1", otp)
       const response = await apiConnector("POST", endpoints.SIGNUP_API, {
-        userName,
+
         accountType,
         firstName,
         lastName,
@@ -66,6 +69,11 @@ export function signUp(
         password,
         confirmPassword,
         otp,
+        deviceId,
+        rollNumber,
+        branch,
+        semester,
+        department
       })
       console.log("SIGNUP API RESPONSE............", response)
 
@@ -75,7 +83,7 @@ export function signUp(
       toast.success("Signup Successful")
       navigate("/login")
     } catch (error) {
-      
+
       console.log("SIGNUP API ERROR............", error.message)
       toast.error("Signup Failed")
       navigate("/signup")
@@ -85,15 +93,15 @@ export function signUp(
   }
 }
 
-export function login(credential, password, navigate) {
+export function login(email, password, navigate) {
   return async (dispatch) => {
     const toastId = toast.loading("Loading...");
     dispatch(setLoading(true));
-    console.log("email1:-",credential)
-    console.log("password:-",password)
+    console.log("email1:-", email)
+    console.log("password:-", password)
     try {
       const response = await apiConnector("POST", endpoints.LOGIN_API, {
-        credential,
+        email,
         password,
       });
 
@@ -123,11 +131,11 @@ export function login(credential, password, navigate) {
       localStorage.setItem("user", JSON.stringify({ ...user, image: userImage }));
       console.log(user.accountType)
       // Navigate to dashboard based on account type
-      const dashboardPath = user.accountType === "Admin" 
+      const dashboardPath = user.accountType === "Admin"
         ? "/dashboard/admin"
         : user.accountType === "Instructor"
-        ? "/dashboard/instructor"
-        : "/dashboard/student";
+          ? "/dashboard/instructor"
+          : "/dashboard/student";
       navigate(dashboardPath);
     } catch (error) {
       // console.log("LOGIN API ERROR............", error);
@@ -194,7 +202,7 @@ export function resetPassword(password, confirmPassword, token, navigate) {
 }
 
 export function logout(navigate) {
-  
+
   return (dispatch) => {
     dispatch(setToken(null))
     dispatch(setUserauth(null))
