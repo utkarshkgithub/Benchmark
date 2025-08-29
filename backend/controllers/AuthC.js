@@ -190,6 +190,7 @@ export const signUp = async (req, res) => {
             image: `https://api.dicebear.com/5.x/initials/svg?seed=${firstName}%20${lastName}`,
         });
         let user = "";
+        
         if (accountType === "Student") {
             user = await Student.create({
                 userId: userDetails._id,
