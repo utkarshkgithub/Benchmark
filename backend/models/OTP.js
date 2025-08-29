@@ -22,10 +22,10 @@ async function sendVerificationEmail(email, otp) {
   try {
     const mailResponse = await mailSender(
       email,
-      "Verification Email from StudyNotion",
+      "Verification Email from IIITBH",
       otpTemplate(otp),
     );
-    console.log("Email sent Successfully:", mailResponse);
+    // console.log("Email sent Successfully:", mailResponse);
   } catch (error) {
     console.log("Error occured while sending emails: ", error);
     // console.log("otp:-",otp);

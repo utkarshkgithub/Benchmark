@@ -19,8 +19,9 @@ import AddSubject from './components/core/dashboard/Admin/AddSubject.jsx'
 import Instructor from './components/core/dashboard/Instructor/Instructor.jsx'
 import Student from './components/core/dashboard/Student/Student.jsx'
 import ContectUs from './components/core/outside/ContectUs.jsx'
-import Setting from './components/core/dashboard/Setting.jsx'
+// import Setting from './components/core/dashboard/Setting.jsx'
 import PersonalDetails from './page/PersonalDetails.jsx'
+import Settings from './components/core/dashboard/Settings/index.jsx'
 
 function App() {
 
@@ -44,7 +45,7 @@ const { user } = useSelector((state) => state.auth);
 
         <Route element={<ProtectedRoute> <DashBoard /> </ProtectedRoute>} >
           <Route path="dashboard/my-profile" element={<ProtectedRoute> <MyProfile /> </ProtectedRoute>} />
-          <Route path="dashboard/settings" element={<ProtectedRoute> <Setting /> </ProtectedRoute>} />
+          <Route path="dashboard/settings" element={<ProtectedRoute> <Settings /> </ProtectedRoute>} />
           {
             user?.accountType === ACCOUNT_TYPE.STUDENT && (
               <>

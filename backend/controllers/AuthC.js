@@ -7,6 +7,7 @@ import mailSender from '../utils/mailSender.js';
 import dotenv from "dotenv";
 import Student from "../models/Student.js";
 import Instructor from "../models/Instructor.js"
+import { passwordUpdated } from "../mail/templates/passwordUpdate.js";
 dotenv.config();
 // import bcrypt from "bcrypt";
 // import User from "../models/User.js";
@@ -226,7 +227,7 @@ export const signUp = async (req, res) => {
 
 export const login = async (req, res) => {
     try {
-        // get data from request ki body
+        // get data from request body
         const { email, password } = req.body;
         if (!email || !password) {
             return res.status(400).json({
@@ -234,51 +235,60 @@ export const login = async (req, res) => {
                 message: "All fields are required, please try again.",
             });
         }
-        // user check exist or not
 
-        const user = await User.findOne({
-            email
-        });
-        let userDetails;
-        if(user.accountType == "Student"){
-            userDetails = Student.findById({userId:user._id})
-        }else{
-            userDetails = Instructor.findById({userId:user._id})
-        }
-        
-        
+        // check if user exists
+        const user = await User.findOne({ email }).lean();
         if (!user) {
             return res.status(401).json({
                 success: false,
-                message: "User is not registrered, please signup first",
+                message: "User is not registered, please signup first",
             });
         }
 
-        // genrate JWT, after password matching
+        // fetch userDetails based on accountType
+        let userDetails;
+        if (user.accountType === "Student") {
+            userDetails = await Student.findOne({ userId: user._id }).lean();
+        } else {
+            userDetails = await Instructor.findOne({ userId: user._id }).lean();
+        }
+
+        // check password
         if (await bcrypt.compare(password, user.password)) {
             const payload = {
                 email: user.email,
                 id: user._id,
                 accountType: user.accountType,
             };
-            const token = jwt.sign(payload, process.env.JWT_SECRET, {
-                expiresIn: "24h",
-            });
-            user.token = token;
-            user.password = undefined;
 
-            // create cookie and send respponse.
+            const token = jwt.sign(payload, process.env.JWT_SECRET, {
+                expiresIn: "7d",
+            });
+
+            // remove password before sending response
+            delete user.password;
+
+            // combine user + userDetails into one object
+            const fullUser = {
+                ...user,
+                ...userDetails,
+            };
+
+            // create cookie
             const options = {
                 expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
                 httpOnly: true,
             };
-            res.cookie("token", token, options).status(200).json({
-                //res.coookie("key" , "value",options).
-                success: true,
-                token,
-                user,
-                message: "Logged in SuccessFully.",
-            });
+
+            return res
+                .cookie("token", token, options)
+                .status(200)
+                .json({
+                    success: true,
+                    token,
+                    user: fullUser,
+                    message: "Logged in Successfully.",
+                });
         } else {
             return res.status(401).json({
                 success: false,
@@ -293,53 +303,54 @@ export const login = async (req, res) => {
         });
     }
 };
+
+
 export const mobLogin = async (req, res) => {
     try {
         // get data from request body
-        const { email, password, deviceId=""} = req.body;
-        if (!email || !password ) {
+        const { email, password, deviceId = "" } = req.body;
+        if (!email || !password) {
             return res.status(400).json({
                 success: false,
                 message: "All fields are required, please try again.",
             });
         }
 
-        // user check exist or not
-        const user = await User.findOne({ email });
+        // check if user exists
+        const user = await User.findOne({ email }).lean();
         if (!user) {
             return res.status(401).json({
                 success: false,
                 message: "User is not registered, please signup first",
             });
         }
-        
 
-        let studentDetails = null;
-        let instructorDetails = null;
+        let userDetails = null;
 
         if (user.accountType === "Student") {
-            studentDetails = await Student.findOne({ userId: user._id });
-            if (!studentDetails) {
+            userDetails = await Student.findOne({ userId: user._id }).lean();
+            if (!userDetails) {
                 return res.status(404).json({
                     success: false,
                     message: "Student details not found.",
                 });
             }
-            if (studentDetails.deviceId !== deviceId) {
+            if (userDetails.deviceId !== deviceId) {
                 return res.status(401).json({
                     success: false,
                     message: "Device not matched, please use old device",
                 });
             }
         } else if (user.accountType === "Instructor") {
-            instructorDetails = await Instructor.findOne({ userId: user._id });
-            if (!instructorDetails) {
+            userDetails = await Instructor.findOne({ userId: user._id }).lean();
+            if (!userDetails) {
                 return res.status(404).json({
                     success: false,
                     message: "Instructor details not found.",
                 });
             }
-            // if (instructorDetails.deviceId !== deviceId) {
+            // Device check can be enabled here if required:
+            // if (userDetails.deviceId !== deviceId) {
             //     return res.status(401).json({
             //         success: false,
             //         message: "Device not matched, please use old device",
@@ -347,7 +358,7 @@ export const mobLogin = async (req, res) => {
             // }
         }
 
-        // generate JWT, after password matching
+        // check password
         const isPasswordMatch = await bcrypt.compare(password, user.password);
         if (!isPasswordMatch) {
             return res.status(401).json({
@@ -356,38 +367,50 @@ export const mobLogin = async (req, res) => {
             });
         }
 
+        // generate token
         const payload = {
             email: user.email,
             id: user._id,
             accountType: user.accountType,
         };
         const token = jwt.sign(payload, process.env.JWT_SECRET, {
-            expiresIn: "24h",
+            expiresIn: "7d",
         });
-        user.token = token;
-        user.password = undefined;
 
-        // create cookie and send response
+        // remove password field
+        delete user.password;
+
+        // merge user + userDetails + token
+        const fullUser = {
+            ...user,
+            ...userDetails,
+        };
+
+        // cookie options
         const options = {
             expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             httpOnly: true,
         };
 
-        res.cookie("token", token, options).status(200).json({
-            success: true,
-            token,
-            user,
-            message: "Logged in Successfully.",
-        });
+        return res
+            .cookie("token", token, options)
+            .status(200)
+            .json({
+                success: true,
+                token,
+                user: fullUser,
+                message: "Logged in Successfully.",
+            });
 
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({
             success: false,
             message: "Login Failure, please try again",
         });
     }
 };
+
 
 
 //change password
@@ -401,17 +424,13 @@ export const changePassword = async (req, res) => {
         // validation
         const email = userDetails.email;
         const user = await User.findOne({ email });
-        if (!password || !newPassword || !confirmPassword) {
+        if (!currentPassword || !newPassword) {
             return res.status(401).json({
                 success: false,
                 message: "Please fill all details",
             });
-        } else if (newPassword !== confirmPassword) {
-            return res.status(403).json({
-                success: false,
-                message: "NewPassword and confirmPassword not matched, please try again.",
-            });
-        } else if (await bcrypt.compare(password, user.password)) {
+        }
+        else if (await bcrypt.compare(currentPassword, user.password)) {
             const hashedPassword = await bcrypt.hash(newPassword, 10);
 
             // entry create in db

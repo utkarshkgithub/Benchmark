@@ -6,6 +6,7 @@ import CTAButton from '../../common/CTAButton.jsx';
 
 function MyProfile() {
   const { user } = useSelector((state) => state.auth);
+  console.log(user)
   const navigate = useNavigate();
   return (
     <div className='w-[calc(100vw-270px)] max-h-[calc(100vh-65px)] overflow-scroll'>
@@ -28,17 +29,6 @@ function MyProfile() {
 
 
         </div>
-
-        {/* section-2 */}
-        <div className="">
-
-          <h2 className="text-2xl font-bold px-2">About</h2>
-
-          <p className=" my-4 px-2">
-            {user?.additionalDetails?.about ?? "Write something about yourself"}
-          </p>
-        </div>
-
         {/* section-3 */}
 
         <div className=" px-2 rounded mb-4 text-black">
@@ -58,17 +48,6 @@ function MyProfile() {
             <p>{user?.email}</p>
           </div>
           <hr className='text-gray-300 my-4' />
-          <div className='grid md:grid-cols-4 grid-cols-2 max-md:gap-4'>
-            <p className='text-gray-500'>Contect No.</p>
-            <p>{user?.additionalDetails?.contectNumber}</p>
-          </div>
-          <hr className='text-gray-300 my-4' />
-          <div className='grid md:grid-cols-4 grid-cols-2 max-md:gap-4'>
-            <p className='text-gray-500'>Gender</p>
-            <p>{user?.additionalDetails?.gender}</p>
-            <p className='text-gray-500'>Date Of Birth</p>
-            <p>{user?.additionalDetails?.dateOfBirth}</p>
-          </div>
 
         </div>
 
@@ -80,14 +59,14 @@ function MyProfile() {
           <hr className='text-gray-300 mb-4' />
           <div className='grid md:grid-cols-4 grid-cols-2 max-md:gap-4'>
             <p className='text-gray-500'>Year</p>
-            <p>{user?.additionalDetails?.year}</p>
+            <p>{user?.semester}</p>
             <p className='text-gray-500'>Branch</p>
-            <p>{user?.additionalDetails?.branch}</p>
+            <p>{user?.branch}</p>
           </div>
           <hr className='text-gray-300 my-4' />
           <div className='grid md:grid-cols-4 grid-cols-3 max-md:gap-4'>
             <p className='text-gray-500'>Roll Number</p>
-            <p>{user?.additionalDetails?.rollNumber}</p>
+            <p>{user?.rollNumber}</p>
           </div>
         </div>
         {/* section 5 */}

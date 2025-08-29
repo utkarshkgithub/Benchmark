@@ -124,7 +124,7 @@ export function login(email, password, navigate) {
 
       // Save token and user to Redux store
       dispatch(setToken(token));
-      dispatch(setUserauth({ ...user, image: userImage }));
+      dispatch(setUserauth({ ...user, image: userImage}));
 
       // Persist token and user in local storage
       localStorage.setItem("token", token);
