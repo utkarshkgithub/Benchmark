@@ -3,8 +3,11 @@ import CTAButton from './CTAButton'
 import { Link } from 'react-router-dom'
 import { FaGraduationCap } from 'react-icons/fa'
 import { useSelector } from 'react-redux'
+import ProfileDropDown from './ProfileDropDown'
 function Navbar() {
   const {token} = useSelector((state)=>state.auth)
+  const {user} = useSelector((state)=>state.auth)
+
   // console.log(token)
   return (
     <nav className="w-full flex justify-center items-center p-2 bg-black/5 backdrop-blur-md border-b border-b-black/20">
@@ -26,6 +29,9 @@ function Navbar() {
 
 
         </div>)
+        }
+        {
+          token && <ProfileDropDown user={user}/>
         }
       </div>
 

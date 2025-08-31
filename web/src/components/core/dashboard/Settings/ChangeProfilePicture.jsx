@@ -3,7 +3,7 @@ import { FiUpload } from "react-icons/fi"
 import { useDispatch, useSelector } from "react-redux"
 import { updateDisplayPicture } from "../../../../services/opretions/Settings"
 import IconBTN from "../../../common/IconBTN"
-import toast from "react-hot-toast"
+
 
 
 
@@ -11,7 +11,7 @@ export default function ChangeProfilePicture() {
   const { token } = useSelector((state) => state.auth)
   const { user } = useSelector((state) => state.auth)
   const dispatch = useDispatch()
-
+  console.log("11>>11:-",user);
   const [loading, setLoading] = useState(false)
   const [imageFile, setImageFile] = useState(null)
   const [previewSource, setPreviewSource] = useState(null)
@@ -23,7 +23,7 @@ export default function ChangeProfilePicture() {
   }
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0]
+    const file =  e.target.files[0] 
     //// console.log(file)
     if (file) {
       setImageFile(file)
@@ -41,14 +41,10 @@ export default function ChangeProfilePicture() {
 
   const handleFileUpload = () => {
     try {
-      if (!imageFile) {
-        toast.error("Please select an image first")
-        return
-      }
+      //// console.log("uploading...")
       setLoading(true)
       const formData = new FormData()
-      formData.append("displayPicture", imageFile)
-      
+      formData.append("displayPicture", imageFile);
       dispatch(updateDisplayPicture(token, formData))
         .then(() => {
           setLoading(false)
@@ -56,55 +52,61 @@ export default function ChangeProfilePicture() {
           setPreviewSource(null)
         })
         .catch((error) => {
-          console.log("ERROR MESSAGE - ", error.message)
+          console.error("Error updating profile picture:", error)
           setLoading(false)
         })
     } catch (error) {
-      console.log("ERROR MESSAGE - ", error.message)
+     // console.log("ERROR MESSAGE - ", error.message)
       setLoading(false)
     }
   }
 
   return (
-    <>
-      <div className="flex items-center w-full justify-between rounded-md border-[1px] border-richblack-700 bg-richblack-800 mx-auto min-430:p-4  text-richblack-5">
-        <div className="flex gap-x-4">
-          <img
-            src={previewSource || user.image} // Prioritize previewSource over user.image
-            alt={`profile-${user?.firstName}`}
-            className="aspect-square w-[108px] rounded-full object-cover"
+  
+  <div className="flex items-center  lg:ml-[100px]  lg:w-[calc(100vw-450px)] justify-between rounded-md  p-4">
+    <div className="flex gap-4">
+      <img
+        src={previewSource || user?.image || "/default-avatar.png"}
+        alt={`profile-${user?.firstName || "avatar"}`}
+        className="w-24 h-24 rounded-full object-cover"
+      />
+      <div className="space-y-2">
+        <p className="font-medium">Change Profile Picture</p>
+        <div className="flex gap-3">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            className="hidden"
+            accept="image/png, image/gif, image/jpeg"
           />
-          <div className="space-y-2">
-            <p>Change Profile Picture</p>
-            <div className="flex flex-row gap-3">
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                className="hidden"
-                accept="image/png, image/gif, image/jpeg"
-              />
-              <button
-                onClick={handleClick}
-                disabled={loading}
-                className="cursor-pointer rounded-md bg-richblack-700 py-2 px-5 font-semibold text-richblack-50"
-              >
-                Select
-              </button>
-              <IconBTN
-                active="true"
-                text={loading ? "Uploading..." : ""}
-                onClick={handleFileUpload}
-                
-              >
-                {!loading && (<div className="flex items-center justify-center gap-1"><p>{loading ? "Uploading..." : "Upload"}</p><FiUpload className="text-lg text-richblack-900" /></div>
-                  
-                )}
-              </IconBTN>
-            </div>
-          </div>
+          <button
+            onClick={handleClick}
+            disabled={loading}
+            className="rounded-md bg-gray-700 text-white py-1 px-3 hover:bg-gray-600 disabled:opacity-50"
+          >
+            Select
+          </button>
+
+          <IconBTN
+            active="true"
+            text={loading ? "Uploading..." : ""}
+            onClick={handleFileUpload}
+            disabled={loading || !previewSource}
+          >
+            {loading ? (
+              <span className="animate-pulse"></span>
+            ) : (
+              <div className="flex items-center gap-1">
+                <p>Upload</p>
+                <FiUpload className="text-lg" />
+              </div>
+            )}
+          </IconBTN>
         </div>
       </div>
-    </>
+    </div>
+  </div>
+
   )
 }

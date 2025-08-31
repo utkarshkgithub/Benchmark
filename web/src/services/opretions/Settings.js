@@ -34,8 +34,11 @@ export function updateDisplayPicture(token, formData) {
       
       toast.success("Profile picture updated successfully")
       // Update both auth and profile state with the new user data
-      dispatch(setUserauth(response.data.data))
-      dispatch(setUserprofile(response.data.data))
+      const userData = response.data.data;
+      dispatch(setUserauth(userData))
+      dispatch(setUserprofile(userData))
+      // Update localStorage with the new user data
+      localStorage.setItem("user", JSON.stringify(userData))
       return response.data
     } catch (error) {
       console.error("Profile picture update error:", error)

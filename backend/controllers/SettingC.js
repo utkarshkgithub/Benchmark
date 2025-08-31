@@ -1,0 +1,45 @@
+import Instructor from "../models/Instructor.js";
+import Student from "../models/Student.js";
+import User from "../models/User.js";
+import { uploadToCloudinary } from "../utils/imageUploader.js";
+
+export const updateDisplayPicture = async (req, res) => {
+    try {
+        const userPicture = req.files.displayPicture
+        const userId = req.user.id;
+        const image = await uploadToCloudinary(
+            userPicture,
+            process.env.FOLDER_NAME,
+            1000,
+            1000
+        )
+        const updatedProfile = await User.findByIdAndUpdate(
+            { _id: userId },
+            { image: image.secure_url },
+            { new: true }
+        )
+
+        let userDetails;
+        if (updatedProfile.accountType === "Student") {
+            userDetails = await Student.findOne({ userId: updatedProfile._id }).lean();
+        } else {
+            userDetails = await Instructor.findOne({ userId: updatedProfile._id }).lean();
+        }
+        const fullUser = {
+            ...updatedProfile.toObject(),
+            ...(userDetails || {}),
+        };
+
+        res.send({
+            success: true,
+            message: "Image Updated successfully",
+            data: fullUser,
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to upload file"
+        })
+    }
+
+}

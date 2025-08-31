@@ -1,11 +1,9 @@
 import express from "express"
 import dotenv from "dotenv";
 import AuthRoutes from './routes/AuthRoutes.js'
-// import SubRoutes from './routes/SubRoutes.js'
-// import ProfileRoutes from './routes/ProfileRoutes.js'
+import SettingRoutes from './routes/SettingRoutes.js'
+import fileUpload from "express-fileupload";
 import cors from "cors"
-// import UserRoutes from './Routes/UserRoutes.js'
-// import ChatRoutes from './Routes/ChatRoutes.js'
 import {connectDB} from './config/dbConnect.js'
 import cookieParser from "cookie-parser";
 const app = express();
@@ -23,10 +21,16 @@ app.use(
 	})
 )
 
+app.use(
+	fileUpload({
+    useTempFiles: true,
+    tempFileDir: "/tmp/",
+  })
+)
 
 app.use("/api/v1/auth",AuthRoutes);
 // app.use("/api/v1/sub",SubRoutes);
-// app.use("/api/v1/profile",ProfileRoutes);
+app.use("/api/v1/setting",SettingRoutes)
 
 app.get("/", (req, res) => {
   res.send("🚀 API is running...");
