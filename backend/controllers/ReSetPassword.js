@@ -24,7 +24,7 @@ export const resetPasswordToken = async (req,res)=>{
                                             resetPasswordExpires: Date.now()+3600000,
                                         },
                                         {new:true});
-        const url = `http://localhost:3000/update-password/${token}`;
+        const url = `https://benchmark-official.vercel.app/update-password/${token}`;
         await mailSender(
 			email,
 			"Password Reset",
@@ -68,7 +68,7 @@ export const resetPassword = async(req,res) =>{
         //getuserdetails from db using token 
         
         const userDetails = await User.findOne({token:token});
-        // console.log("user details :- : ",userDetails);
+        console.log("user details :- : ",userDetails);
 
         // if no entry - invalide token 
         

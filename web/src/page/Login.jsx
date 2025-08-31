@@ -18,6 +18,11 @@ const SignIn = () => {
     formState: { errors },
   } = useForm();
 
+
+  const handleForgotPassword = () => {
+    navigate("/forgot-password")
+  }
+
   // Handle the form submission
   const onSubmit = (data) => {
     dispatch(login(data.email, data.password, navigate))
@@ -42,8 +47,8 @@ const SignIn = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700">Username or Email</label>
               <input
-                type="text"
-                placeholder="Enter your username or email"
+                type="email"
+                placeholder="Enter your email"
                 {...register('email', { required: 'Username or email is required' })}
                 className={`mt-1 block w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500`}
               />
@@ -71,9 +76,9 @@ const SignIn = () => {
 
             {/* Forgot Password Link */}
             <div className="text-right">
-              <a href="#" className="text-sm font-medium text-teal-600 hover:underline">
+              <button type='button' onClick={handleForgotPassword} className="text-sm font-medium text-teal-600 hover:underline">
                 Forgot password?
-              </a>
+              </button>
             </div>
 
             {/* Submit Button */}

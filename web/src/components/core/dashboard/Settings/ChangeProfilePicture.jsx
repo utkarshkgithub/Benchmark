@@ -3,6 +3,7 @@ import { FiUpload } from "react-icons/fi"
 import { useDispatch, useSelector } from "react-redux"
 import { updateDisplayPicture } from "../../../../services/opretions/Settings"
 import IconBTN from "../../../common/IconBTN"
+import toast from "react-hot-toast"
 
 
 
@@ -40,22 +41,26 @@ export default function ChangeProfilePicture() {
 
   const handleFileUpload = () => {
     try {
-      //// console.log("uploading...")
+      if (!imageFile) {
+        toast.error("Please select an image first")
+        return
+      }
       setLoading(true)
       const formData = new FormData()
       formData.append("displayPicture", imageFile)
-      //// console.log("formdata", formData)
+      
       dispatch(updateDisplayPicture(token, formData))
-        .then((response) => {
+        .then(() => {
           setLoading(false)
-          dispatch(updateUser(response.data.user)) // Update the user data in the Redux store
+          setImageFile(null)
+          setPreviewSource(null)
         })
         .catch((error) => {
-         // console.log("ERROR MESSAGE - ", error.message)
+          console.log("ERROR MESSAGE - ", error.message)
           setLoading(false)
         })
     } catch (error) {
-     // console.log("ERROR MESSAGE - ", error.message)
+      console.log("ERROR MESSAGE - ", error.message)
       setLoading(false)
     }
   }

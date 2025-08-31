@@ -6,12 +6,19 @@ dotenv.config();
 
 export const auth= (req,res,next)=>{
     try{
-        // extract token
-        const token = 
-    req.body.token || 
-    req.cookies?.token || 
-    (req.header("Authorization") ? req.header("Authorization").replace("Bearer ", "") : null);
-        //if token missing ,then return response
+        const token = req.header("Authorization") ? req.header("Authorization").replace("Bearer ", "") : null;
+
+        
+        if(!token){
+            token = req.body.token || req?.cookies?.token
+        }
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: 'Token is missing',
+            });
+        }
+     
         if(!token){
             return res.status(401).json({
                 success:false,
@@ -19,15 +26,12 @@ export const auth= (req,res,next)=>{
             });
         }
 
-        //veerify thee token 
 
         try{
             const decode = jwt.verify(token,process.env.JWT_SECRET);
-            // console.log(decode);
             req.user = decode;
             
         } catch(error){
-            //verification -issue
             return res.status(401).json({
                 success:false,
                 message:'token is invalid',

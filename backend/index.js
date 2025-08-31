@@ -1,10 +1,9 @@
 import express from "express"
 import dotenv from "dotenv";
 import AuthRoutes from './routes/AuthRoutes.js'
-import SubRoutes from './routes/SubRoutes.js'
-import ProfileRoutes from './routes/ProfileRoutes.js'
+// import SubRoutes from './routes/SubRoutes.js'
+// import ProfileRoutes from './routes/ProfileRoutes.js'
 import cors from "cors"
-
 // import UserRoutes from './Routes/UserRoutes.js'
 // import ChatRoutes from './Routes/ChatRoutes.js'
 import {connectDB} from './config/dbConnect.js'
@@ -19,12 +18,15 @@ app.use(
 	cors({
 		origin:["https://benchmark-official.vercel.app","http://localhost:5173"],
 		credentials:true,
+		methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    	allowedHeaders: ["Content-Type", "Authorization"],
 	})
 )
-app.use("/api/v1/auth",AuthRoutes);
-app.use("/api/v1/sub",SubRoutes);
-app.use("/api/v1/profile",ProfileRoutes);
 
+
+app.use("/api/v1/auth",AuthRoutes);
+// app.use("/api/v1/sub",SubRoutes);
+// app.use("/api/v1/profile",ProfileRoutes);
 
 app.get("/", (req, res) => {
   res.send("🚀 API is running...");

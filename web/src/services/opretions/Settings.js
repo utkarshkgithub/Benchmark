@@ -16,8 +16,7 @@ const {
 
 export function updateDisplayPicture(token, formData) {
   return async (dispatch) => {
-    const toastId = toast.loading("Loading...")
-    
+    const toastId = toast.loading("Updating profile picture...")
     try {
       const response = await apiConnector(
         "PUT",
@@ -28,20 +27,23 @@ export function updateDisplayPicture(token, formData) {
           Authorization: `Bearer ${token}`,
         }
       )
-     console.log( "UPDATE_DISPLAY_PICTURE_API API RESPONSE............", response)
 
       if (!response.data.success) {
         throw new Error(response.data.message)
       }
-      toast.success("Display Picture Updated Successfully")
-      console.log(response.data.data);
-      dispatch(setUserauth(response.data.data));
-      dispatch(setUserprofile(response.data.data));
+      
+      toast.success("Profile picture updated successfully")
+      // Update both auth and profile state with the new user data
+      dispatch(setUserauth(response.data.data))
+      dispatch(setUserprofile(response.data.data))
+      return response.data
     } catch (error) {
-     console.log("UPDATE_DISPLAY_PICTURE_API API ERROR............", error)
-      toast.error("Could Not Update Display Picture")
+      console.error("Profile picture update error:", error)
+      toast.error(error.message || "Could not update profile picture")
+      throw error
+    } finally {
+      toast.dismiss(toastId)
     }
-    toast.dismiss(toastId)
   }
 }
 
@@ -85,7 +87,6 @@ export function updateProfile(token, formData,navigate) {
     toast.dismiss(toastId);
   };
 }
-
 
 export async function changePassword(token, formData) {
   const toastId = toast.loading("Loading...");

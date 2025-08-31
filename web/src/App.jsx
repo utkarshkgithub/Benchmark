@@ -22,6 +22,7 @@ import ContectUs from './components/core/outside/ContectUs.jsx'
 // import Setting from './components/core/dashboard/Setting.jsx'
 import PersonalDetails from './page/PersonalDetails.jsx'
 import Settings from './components/core/dashboard/Settings/index.jsx'
+import { BackgroundBeams } from './components/ui/background-beams.jsx'
 
 function App() {
 
@@ -72,6 +73,7 @@ const { user } = useSelector((state) => state.auth);
         </Route>
         </Routes>
       {/* <PWABadge /> */}
+      {/* <BackgroundBeams/> */}
     </div>
   )
 }

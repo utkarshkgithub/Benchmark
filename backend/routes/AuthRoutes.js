@@ -8,7 +8,7 @@ router.post("/signup",signUp);
 router.post("/login",login);
 router.post("/mob-login",mobLogin);
 router.post("/reset-password-token",resetPasswordToken);
-router.post("/resetpassword",resetPassword);
+router.post("/reset-password",resetPassword);
 router.post("/changepassword",auth,changePassword);
 // router.post("/forgotPassword",forgotPassword);
 
