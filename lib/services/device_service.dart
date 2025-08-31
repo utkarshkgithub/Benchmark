@@ -290,7 +290,7 @@ class DeviceService {
         headers: headers,
         body: jsonEncode(attendanceData),
       );
-  final start = DateTime.now();
+      final start = DateTime.now();
       final response = await http.post(
         uri,
         headers: headers,
@@ -335,12 +335,8 @@ class DeviceService {
         headers: headers,
         body: body,
       );
-  final start = DateTime.now();
-      final response = await http.post(
-        uri,
-        headers: headers,
-        body: body,
-      );
+      final start = DateTime.now();
+      final response = await http.post(uri, headers: headers, body: body);
       NetworkLogger.logResponse(
         response: response,
         duration: DateTime.now().difference(start),
@@ -388,12 +384,8 @@ class DeviceService {
         headers: headers,
         body: body,
       );
-  final start = DateTime.now();
-      final response = await http.post(
-        uri,
-        headers: headers,
-        body: body,
-      );
+      final start = DateTime.now();
+      final response = await http.post(uri, headers: headers, body: body);
       NetworkLogger.logResponse(
         response: response,
         duration: DateTime.now().difference(start),

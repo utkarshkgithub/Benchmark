@@ -50,5 +50,8 @@
 	<string>This app needs location access to mark attendance and verify your location.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>This app needs location access to mark attendance and verify your location.</string>
+	<!-- Camera permission for QR scanning -->
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs camera access to scan QR codes.</string>
 </dict>
 </plist>

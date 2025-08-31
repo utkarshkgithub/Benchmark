@@ -52,7 +52,7 @@ class AuthService {
         headers: headers,
         body: jsonEncode(body),
       );
-  final start = DateTime.now();
+      final start = DateTime.now();
       final response = await http.post(
         signupUrl,
         headers: headers,
@@ -126,7 +126,7 @@ class AuthService {
         headers: headers,
         body: jsonEncode(body),
       );
-  final start = DateTime.now();
+      final start = DateTime.now();
       final response = await http.post(
         loginUrl,
         headers: headers,
@@ -193,7 +193,7 @@ class AuthService {
         headers: headers,
         body: jsonEncode(body),
       );
-  final start = DateTime.now();
+      final start = DateTime.now();
       final response = await http.post(
         changePasswordUrl,
         headers: headers,
@@ -244,7 +244,7 @@ class AuthService {
         headers: headers,
         body: jsonEncode(body),
       );
-  final start = DateTime.now();
+      final start = DateTime.now();
       final response = await http.post(
         sendOTPUrl,
         headers: headers,
@@ -302,7 +302,7 @@ class AuthService {
         headers: headers,
         body: jsonEncode(body),
       );
-  final start = DateTime.now();
+      final start = DateTime.now();
       final response = await http.post(
         forgotPasswordUrl,
         headers: headers,
