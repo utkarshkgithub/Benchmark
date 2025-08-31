@@ -531,100 +531,109 @@ class _SignUpScreenState extends State<SignUpScreen> {
           padding: const EdgeInsets.all(24.0),
           child: Form(
             key: _formKeys[1],
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Icon(Icons.security, size: 80, color: Colors.deepPurple),
-                const SizedBox(height: 24),
-                Text(
-                  'OTP Verification',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Icon(
+                    Icons.security,
+                    size: 80,
                     color: Colors.deepPurple,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Enter the 6-digit OTP sent to your email',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 48),
-
-                // OTP Field
-                TextFormField(
-                  controller: _otpController,
-                  keyboardType: TextInputType.number,
-                  maxLength: 6,
-                  decoration: const InputDecoration(
-                    labelText: 'Enter OTP *',
-                    prefixIcon: Icon(Icons.lock_clock),
-                    border: OutlineInputBorder(),
-                    counterText: '',
+                  const SizedBox(height: 24),
+                  Text(
+                    'OTP Verification',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.deepPurple,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'OTP is required';
-                    }
-                    if (value.length != 6) {
-                      return 'OTP must be 6 digits';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 32),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Enter the 6-digit OTP sent to your email',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 48),
 
-                // Next Button
-                ElevatedButton(
-                  onPressed: _nextPage,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                  // OTP Field
+                  TextFormField(
+                    controller: _otpController,
+                    keyboardType: TextInputType.number,
+                    maxLength: 6,
+                    decoration: const InputDecoration(
+                      labelText: 'Enter OTP *',
+                      prefixIcon: Icon(Icons.lock_clock),
+                      border: OutlineInputBorder(),
+                      counterText: '',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'OTP is required';
+                      }
+                      if (value.length != 6) {
+                        return 'OTP must be 6 digits';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Next Button
+                  ElevatedButton(
+                    onPressed: _nextPage,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      'Verify',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                  child: const Text(
-                    'Verify',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  const SizedBox(height: 16),
+
+                  // Resend OTP
+                  TextButton(
+                    onPressed: () async {
+                      try {
+                        await AuthService.sendOTP(
+                          email: _emailController.text.trim(),
+                        );
+
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('OTP resent successfully!'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Failed to resend OTP: $e'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
+                    },
+                    child: const Text('Resend OTP'),
                   ),
-                ),
-                const SizedBox(height: 16),
-
-                // Resend OTP
-                TextButton(
-                  onPressed: () async {
-                    try {
-                      await AuthService.sendOTP(
-                        email: _emailController.text.trim(),
-                      );
-
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('OTP resent successfully!'),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
-                      }
-                    } catch (e) {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Failed to resend OTP: $e'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    }
-                  },
-                  child: const Text('Resend OTP'),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -688,24 +697,35 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           prefixIcon: Icon(Icons.engineering),
                           border: OutlineInputBorder(),
                         ),
+                        isExpanded: true,
                         items: const [
                           DropdownMenuItem(
                             value: 'CSE',
-                            child: Text('CSE (Computer Science & Engineering)'),
+                            child: Text(
+                              'CSE (Computer Science & Engineering)',
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           DropdownMenuItem(
                             value: 'ECE',
                             child: Text(
                               'ECE (Electronics & Communication Engineering)',
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           DropdownMenuItem(
                             value: 'MNC',
-                            child: Text('MNC (Mathematics & Computing)'),
+                            child: Text(
+                              'MNC (Mathematics & Computing)',
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           DropdownMenuItem(
                             value: 'Mechatronics',
-                            child: Text('Mechatronics Engineering'),
+                            child: Text(
+                              'Mechatronics Engineering',
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ],
                         onChanged: (value) {
@@ -724,38 +744,63 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           prefixIcon: Icon(Icons.calendar_today),
                           border: OutlineInputBorder(),
                         ),
+                        isExpanded: true,
                         items: [
                           const DropdownMenuItem(
                             value: 'I',
-                            child: Text('Semester I (1st)'),
+                            child: Text(
+                              'Semester I (1st)',
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           const DropdownMenuItem(
                             value: 'II',
-                            child: Text('Semester II (2nd)'),
+                            child: Text(
+                              'Semester II (2nd)',
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           const DropdownMenuItem(
                             value: 'III',
-                            child: Text('Semester III (3rd)'),
+                            child: Text(
+                              'Semester III (3rd)',
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           const DropdownMenuItem(
                             value: 'IV',
-                            child: Text('Semester IV (4th)'),
+                            child: Text(
+                              'Semester IV (4th)',
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           const DropdownMenuItem(
                             value: 'V',
-                            child: Text('Semester V (5th)'),
+                            child: Text(
+                              'Semester V (5th)',
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           const DropdownMenuItem(
                             value: 'VI',
-                            child: Text('Semester VI (6th)'),
+                            child: Text(
+                              'Semester VI (6th)',
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           const DropdownMenuItem(
                             value: 'VII',
-                            child: Text('Semester VII (7th)'),
+                            child: Text(
+                              'Semester VII (7th)',
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           const DropdownMenuItem(
                             value: 'VIII',
-                            child: Text('Semester VIII (8th)'),
+                            child: Text(
+                              'Semester VIII (8th)',
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ],
                         onChanged: (value) {

@@ -39,7 +39,9 @@ class NetworkLogger {
     final method = req?.method ?? 'UNKNOWN';
     final url = req?.url.toString() ?? 'UNKNOWN_URL';
     final took = duration != null ? ' in ${duration.inMilliseconds}ms' : '';
-    AppLogger.network('HTTP Response ← $method $url → ${response.statusCode}$took');
+    AppLogger.network(
+      'HTTP Response ← $method $url → ${response.statusCode}$took',
+    );
     if (response.headers.isNotEmpty) {
       AppLogger.network('Response Headers', response.headers);
     }
