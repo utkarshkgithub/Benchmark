@@ -4,11 +4,9 @@ import mongoose from "mongoose";
 const attendenceSchema = new mongoose.Schema(
     {
         date: {
-            type:mongoose.Schema.Types.ObjectId,
-            ref:"User",
-            unique:true,
+            type:String,
         },
-        subjects:{
+        subject:{
             type:mongoose.Schema.Types.ObjectId,
             ref:"Subject",
         },
