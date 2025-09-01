@@ -383,6 +383,7 @@ export const mobLogin = async (req, res) => {
             ...user,
             ...userDetails,
         };
+        // console.log("uuserData:-",fullUser)
 
         // cookie options
         const options = {
@@ -390,23 +391,23 @@ export const mobLogin = async (req, res) => {
             httpOnly: true,
         };
 
-        return res
-            .cookie("token", token, options)
-            .status(200)
-            .json({
-                success: true,
-                token,
-                user: fullUser,
-                message: "Logged in Successfully.",
-            });
+            return res
+                .cookie("token", token, options)
+                .status(200)
+                .json({
+                    success: true,
+                    token,
+                    user: fullUser,
+                    message: "Logged in Successfully.",
+                });
 
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({
-            success: false,
-            message: "Login Failure, please try again",
-        });
-    }
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                success: false,
+                message: "Login Failure, please try again",
+            });
+        }
 };
 
 
