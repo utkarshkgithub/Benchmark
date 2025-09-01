@@ -271,29 +271,25 @@ class AuthService {
     }
   }
 
-  /// Resets user password using email, OTP, and new password
+  /// Sends a magic link to the user's email for password reset
   /// Returns success message on completion
   static Future<String> forgotPassword({
     required String email,
-    required String otp,
-    required String newPassword,
   }) async {
     if (_backendUrl == null) {
       throw Exception("BACKEND_URL is not set in the .env file");
     }
 
     final forgotPasswordUrl = Uri.parse(
-      '$_backendUrl/api/v1/auth/forgotpassword',
+      '$_backendUrl/api/v1/auth/reset-password-token',
     );
 
     final Map<String, String> body = {
       "email": email,
-      "otp": otp,
-      "newpassword": newPassword,
     };
 
     try {
-      AppLogger.auth('Attempting forgot password reset for email: $email');
+      AppLogger.auth('Attempting to send magic link for email: $email');
 
       final headers = {'Content-Type': 'application/json; charset=UTF-8'};
       NetworkLogger.logRequest(
@@ -315,20 +311,20 @@ class AuthService {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
-        AppLogger.success('Password reset successfully for email: $email');
-        return responseData['message'] ?? 'Password reset successfully';
+        AppLogger.success('Magic link sent successfully for email: $email');
+        return responseData['message'] ?? 'Magic link sent successfully';
       } else {
         final errorData = jsonDecode(response.body);
         final errorMessage = errorData['message'] ?? 'Unknown error';
         AppLogger.error(
-          'Failed to reset password for email: $email',
+          'Failed to send magic link for email: $email',
           errorMessage,
         );
-        throw Exception('Failed to reset password: $errorMessage');
+        throw Exception('Failed to send magic link: $errorMessage');
       }
     } catch (e) {
-      AppLogger.error('Error occurred during password reset', e);
-      throw Exception('An error occurred during password reset: $e');
+      AppLogger.error('Error occurred during magic link sending', e);
+      throw Exception('An error occurred during magic link sending: $e');
     }
   }
 

@@ -38,8 +38,8 @@ class PasswordAPIExamples {
     try {
       final result = await AuthService.forgotPassword(
         email: 'usaraamit2007@gmail.com',
-        otp: '666666',
-        newPassword: 'newPassword123',
+        // otp: '666666',
+        // newPassword: 'newPassword123',
       );
 
       AppLogger.success('Password reset result: $result');
@@ -118,8 +118,8 @@ class PasswordAPIExamples {
       // Step 3: Reset password using OTP
       final result = await AuthService.forgotPassword(
         email: email,
-        otp: otp,
-        newPassword: newPassword,
+        // otp: otp,
+        // newPassword: newPassword,
       );
 
       AppLogger.success('Password reset successfully: $result');
