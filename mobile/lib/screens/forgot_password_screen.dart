@@ -13,20 +13,15 @@ class ForgotPasswordScreen extends StatefulWidget {
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
-  final _otpController = TextEditingController();
-  final _newPasswordController = TextEditingController();
   bool _emailSent = false;
-  bool _showOtpForm = false;
 
   @override
   void dispose() {
     _emailController.dispose();
-    _otpController.dispose();
-    _newPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleSendOtp() async {
+  Future<void> _handleSendMagicLink() async {
     if (_formKey.currentState!.validate()) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
@@ -34,46 +29,23 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       authProvider.setLoading(true);
 
       try {
-        // Call the sendOTP API
-        await AuthService.sendOTP(email: _emailController.text.trim());
-
-        setState(() {
-          _showOtpForm = true;
-        });
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('OTP sent to your email. Please check your inbox.'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
-      } catch (e) {
-        authProvider.setError(e.toString());
-      } finally {
-        authProvider.setLoading(false);
-      }
-    }
-  }
-
-  Future<void> _handleResetPassword() async {
-    if (_formKey.currentState!.validate()) {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-
-      authProvider.clearError();
-      authProvider.setLoading(true);
-
-      try {
+        // Call the forgotPassword API to send magic link
         await AuthService.forgotPassword(
           email: _emailController.text.trim(),
-          otp: _otpController.text.trim(),
-          newPassword: _newPasswordController.text.trim(),
         );
 
         setState(() {
           _emailSent = true;
         });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Magic link sent to your email. Please check your inbox.'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       } catch (e) {
         authProvider.setError(e.toString());
       } finally {
@@ -127,9 +99,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          _showOtpForm
-                              ? 'Enter the OTP sent to your email and your new password.'
-                              : 'Enter your email address to receive an OTP for password reset.',
+                          'Enter your email address to receive a magic link for password reset.',
                           style: Theme.of(context).textTheme.bodyLarge
                               ?.copyWith(color: Colors.grey[600]),
                           textAlign: TextAlign.center,
@@ -140,7 +110,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         TextFormField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
-                          enabled: !_showOtpForm, // Disable after OTP is sent
                           decoration: const InputDecoration(
                             labelText: 'Email',
                             prefixIcon: Icon(Icons.email),
@@ -158,48 +127,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             return null;
                           },
                         ),
-
-                        // Show OTP and password fields if OTP form is active
-                        if (_showOtpForm) ...[
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _otpController,
-                            keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                              labelText: 'OTP',
-                              prefixIcon: Icon(Icons.confirmation_number),
-                              border: OutlineInputBorder(),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter the OTP';
-                              }
-                              if (value.length != 6) {
-                                return 'OTP must be 6 digits';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _newPasswordController,
-                            obscureText: true,
-                            decoration: const InputDecoration(
-                              labelText: 'New Password',
-                              prefixIcon: Icon(Icons.lock),
-                              border: OutlineInputBorder(),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter a new password';
-                              }
-                              if (value.length < 6) {
-                                return 'Password must be at least 6 characters';
-                              }
-                              return null;
-                            },
-                          ),
-                        ],
 
                         const SizedBox(height: 32),
 
@@ -220,13 +147,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             ),
                           ),
 
-                        // Reset Password Button
+                        // Send Magic Link Button
                         ElevatedButton(
                           onPressed: authProvider.isLoading
                               ? null
-                              : (_showOtpForm
-                                    ? _handleResetPassword
-                                    : _handleSendOtp),
+                              : _handleSendMagicLink,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.deepPurple,
                             foregroundColor: Colors.white,
@@ -246,9 +171,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                     ),
                                   ),
                                 )
-                              : Text(
-                                  _showOtpForm ? 'Reset Password' : 'Send OTP',
-                                  style: const TextStyle(
+                              : const Text(
+                                  'Send Magic Link',
+                                  style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -256,31 +181,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         ),
                         const SizedBox(height: 24),
 
-                        // Back to Login Link or Reset Form
-                        if (_showOtpForm)
-                          TextButton(
-                            onPressed: () {
-                              setState(() {
-                                _showOtpForm = false;
-                                _otpController.clear();
-                                _newPasswordController.clear();
-                              });
-                            },
-                            child: const Text(
-                              'Try Different Email',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          )
-                        else
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text(
-                              'Back to Login',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
+                        // Back to Login Link
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text(
+                            'Back to Login',
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
+                        ),
                       ],
                     ),
                   );
@@ -301,7 +211,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         const Icon(Icons.check_circle, size: 80, color: Colors.green),
         const SizedBox(height: 24),
         Text(
-          'Password Reset Successfully!',
+          'Magic Link Sent!',
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: Colors.green,
@@ -310,7 +220,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
         const SizedBox(height: 16),
         Text(
-          'Your password has been reset successfully. You can now login with your new password.',
+          'A password reset link has been sent to your email. Please check your inbox and click the link to reset your password.',
           style: Theme.of(
             context,
           ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
