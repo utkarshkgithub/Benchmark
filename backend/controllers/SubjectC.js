@@ -1,22 +1,23 @@
 import Instructor from "../models/Instructor.js";
 import Subject from "../models/Subject.js";
+import User from "../models/User.js";
 
 export const createSubject = async (req, res) => {
   try {
     const {
       instructor = "",
-      branch = "",
+      branches = [],
       semester = "",
       subjectCode = "",
       subjectName = "",
     } = req.body;
 
-    if (!instructor || !branch || !semester || !subjectCode || !subjectName) {
+    if (!instructor || !branches.length || !semester || !subjectCode || !subjectName) {
       return res
         .status(400)
         .json({ success: false, message: "All fields are required" });
     }
-
+    console.log("instructor:-",instructor);
     // check subject already exists in semester
     const existSubject = await Subject.findOne({ semester, subjectCode });
     if (existSubject) {
@@ -28,7 +29,15 @@ export const createSubject = async (req, res) => {
     }
 
     // check instructor
-    const instructorDetails = await Instructor.findById(instructor);
+    const userDetails = await User.findById(instructor);
+    if (!userDetails) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found." });
+    }
+    
+    // Find instructor details where userId matches
+    const instructorDetails = await Instructor.findOne({ userId: userDetails._id });
     if (!instructorDetails) {
       return res
         .status(404)
@@ -39,26 +48,30 @@ export const createSubject = async (req, res) => {
     const newSubject = await Subject.create({
       subjectName,
       subjectCode,
-      instructor,
+      instructor: userDetails._id,  // use the user ID here
       semester,
-      branch,
+      branches,
     });
 
-    // add subject reference inside instructor
-    await Instructor.findByIdAndUpdate(instructor, {
+    await Instructor.findByIdAndUpdate(instructorDetails._id, {
       $push: { subjectsTaught: newSubject._id },
     });
 
-    // populate instructor with subjects taught
     const populatedSubject = await Subject.findById(newSubject._id)
       .populate({
         path: "instructor",
-        populate: {
-          path: "subjectsTaught",
-          select: "subjectName subjectCode semester branch", // only useful fields
-        },
+        select: "firstName lastName email accountType",
+        model: "User"
       })
       .lean();
+
+    const instructorSubjects = await Subject.find({
+      instructor: userDetails._id
+    })
+    .select("subjectName subjectCode semester branch")
+    .lean();
+
+    populatedSubject.instructor.subjects = instructorSubjects;
 
     return res.status(201).json({
       success: true,
@@ -72,3 +85,20 @@ export const createSubject = async (req, res) => {
       .json({ success: false, message: "Internal server error." });
   }
 };
+
+
+export const fetchInstructor = async (req,res) => {
+  try {
+    const users = await User.find({accountType:"Instructor"}, { firstName: 1 , lastName:1, email:1}).lean();
+    
+    return res.status(200).json({
+      success: true,
+      message: "All Instructor fetched successfully",
+      data: users,
+    });
+  } catch (error) {
+    console.error("Error fetching Instructor:", error);
+    return s500(res, error.message);
+  }
+    
+}

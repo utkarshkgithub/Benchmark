@@ -20,6 +20,7 @@ import Instructor from './components/core/dashboard/Instructor/Instructor.jsx'
 import Student from './components/core/dashboard/Student/Student.jsx'
 import ContectUs from './components/core/outside/ContectUs.jsx'
 import PersonalDetails from './page/PersonalDetails.jsx'
+import AssignSubject from './components/core/dashboard/Student/AssignSubject.jsx'
 
 function App() {
 
@@ -47,7 +48,7 @@ const { user } = useSelector((state) => state.auth);
             user?.accountType === ACCOUNT_TYPE.STUDENT && (
               <>
                 <Route path="dashboard/student" element={<ProtectedRoute><Student/></ProtectedRoute>} />
-
+                <Route path='dashboard/registration' element={<ProtectedRoute><AssignSubject/></ProtectedRoute>} > </Route>
               </>
             )
           }

@@ -15,11 +15,10 @@ const SubjectSchema = new mongoose.Schema({
     required: true,
     enum: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"],
   },
-  branch: {
+  branches: [{
     type: String,
     enum: ["CSE", "ECE", "MAE", "MNC"],
-    required: true,
-  },
+  }],
   instructor: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,

@@ -322,7 +322,9 @@ export const mobLogin = async (req, res) => {
         let userDetails = null;
 
         if (user.accountType === "Student") {
-            userDetails = await Student.findOne({ userId: user._id }).lean();
+           userDetails = await Student.findOne({ userId: user._id })
+                .populate("subjects") // ✅ populate subjects
+                .lean();
             if (!userDetails) {
                 return res.status(404).json({
                     success: false,
@@ -336,7 +338,9 @@ export const mobLogin = async (req, res) => {
                 });
             }
         } else if (user.accountType === "Instructor") {
-            userDetails = await Instructor.findOne({ userId: user._id }).lean();
+            userDetails = await Instructor.findOne({ userId: user._id })
+                .populate("subjectsTaught") // ✅ populate subjectsTaught
+                .lean();
             if (!userDetails) {
                 return res.status(404).json({
                     success: false,
