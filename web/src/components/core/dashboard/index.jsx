@@ -8,8 +8,8 @@ function MyProfile() {
   const { user } = useSelector((state) => state.auth);
 
   return (
-    <div className='w-[calc(100vw-270px)] max-h-[calc(100vh-69px)] overflow-scroll'>
-      <div className="p-5 flex flex-col gap-6">
+    <div className='flex justify-end items-center'>
+      <div className="p-5 flex flex-col gap-6 w-11/12">
         <h1 className="font-extrabold text-4xl">My Profile</h1>
 
         {/* section-1 (Image + Name + Email) */}
@@ -41,13 +41,13 @@ function MyProfile() {
         </div>
 
         {/* section-4 Academic Information */}
-        <div className="px-2 rounded mb-4 text-black">
+        {user?.accountType == "Student" && <div className="px-2 rounded mb-4 text-black">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold">Academic Information</h2>
           </div>
           <hr className='text-gray-300 mb-4' />
           <div className='grid md:grid-cols-4 grid-cols-2 max-md:gap-4'>
-            <p className='text-gray-500'>Year</p>
+            <p className='text-gray-500'>Semester</p>
             <p>{user?.semester}</p>
             <p className='text-gray-500'>Branch</p>
             <p>{user?.branch}</p>
@@ -57,7 +57,21 @@ function MyProfile() {
             <p className='text-gray-500'>Roll Number</p>
             <p>{user?.rollNumber}</p>
           </div>
-        </div>
+        </div>}
+        {user?.accountType == "Instructor" && <div className="px-2 rounded mb-4 text-black">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">Academic Information</h2>
+          </div>
+          <hr className='text-gray-300 mb-4' />
+          <div className='grid md:grid-cols-4 grid-cols-2 max-md:gap-4'>
+            <p className='text-gray-500'>Department</p>
+            <p>{user?.department}</p>
+            <p className='text-gray-500'>Role</p>
+            <p>{user?.accountType}</p>
+          </div>
+         
+          
+        </div>}
       </div>
     </div>
   );

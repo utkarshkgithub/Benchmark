@@ -2,6 +2,7 @@ import express from "express"
 import dotenv from "dotenv";
 import AuthRoutes from './routes/AuthRoutes.js'
 import SettingRoutes from './routes/SettingRoutes.js'
+import SubjectRoutes from "./routes/SubRoutes.js"
 import fileUpload from "express-fileupload";
 import cors from "cors"
 import {connectDB} from './config/dbConnect.js'
@@ -29,9 +30,8 @@ app.use(
 )
 
 app.use("/api/v1/auth",AuthRoutes);
-// app.use("/api/v1/sub",SubRoutes);
 app.use("/api/v1/setting",SettingRoutes)
-
+app.use("/api/v1/subject",SubjectRoutes)
 app.get("/", (req, res) => {
   res.send("🚀 API is running...");
 });

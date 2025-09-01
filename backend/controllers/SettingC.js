@@ -21,10 +21,15 @@ export const updateDisplayPicture = async (req, res) => {
 
         let userDetails;
         if (updatedProfile.accountType === "Student") {
-            userDetails = await Student.findOne({ userId: updatedProfile._id }).lean();
-        } else {
-            userDetails = await Instructor.findOne({ userId: updatedProfile._id }).lean();
+            userDetails = await Student.findOne({ userId: updatedProfile._id })
+                .populate("subjects")
+                .lean();
+        } else if (updatedProfile.accountType === "Instructor") {
+            userDetails = await Instructor.findOne({ userId: updatedProfile._id })
+                .populate("subjectsTaught") 
+                .lean();
         }
+
         const fullUser = {
             ...updatedProfile.toObject(),
             ...(userDetails || {}),

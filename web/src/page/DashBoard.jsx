@@ -20,23 +20,9 @@ function DashBoard() {
   }
   return (
     <div className=' flex gap-2 box-border'>
-      <div className='w-[250px] bg-white p-4  flex flex-col'>
-        <div className='w-full h-[60px] '>
-          <div className='flex gap-2 items-center'>
-            <div className=' w-[20%]  object-cover'>
-              <img src={user?.image} alt="" className='rounded-[50%]' />
-            </div>
-            <div>
-              <p className='text-black font-bold'>{user?.firstName} {user?.lastName}</p>
-              <div className='flex box-border'>
-                <p className='text-gray-500 pr-1 mr-1'>{user?.userName}</p>
-
-                <p className='text-gray-600'>({user?.accountType})</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className='w-[230px]'>
+      <div className='w-[50px] bg-white p-4  flex flex-col'>
+        
+        <div className='w-[50px]'>
           <Sidebar />
         </div>
       </div>

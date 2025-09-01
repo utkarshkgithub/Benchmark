@@ -13,7 +13,7 @@ function SidebarLink({ link, iconName }) {
     return (
         <NavLink
             to={link.path}
-            className={`relative px-2 py-2 text-sm font-medium ${matchRoute(link.path) ? 'bg-gray-200 rounded-sm' : 'bg-opacity-0'}`}
+            className={`relative text-sm font-medium ${matchRoute(link.path) ? 'bg-gray-200 rounded-sm' : 'bg-opacity-0'}`}
         >
 
             <span className={`absolute left-0 top-0 w-[0.2rem] h-full bg-yellow-5 ${matchRoute(link.path) ? 'bg-opacity-100' : 'bg-opacity-0'}`}>
@@ -21,8 +21,6 @@ function SidebarLink({ link, iconName }) {
 
             </span>
             <div className='flex items-center gap-x-2'>
-                <Icon className='text-[18px]'/>
-                <span>{link.name}</span>
             </div>
         </NavLink>
     )

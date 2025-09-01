@@ -9,14 +9,8 @@ import Student from "../models/Student.js";
 import Instructor from "../models/Instructor.js"
 import { passwordUpdated } from "../mail/templates/passwordUpdate.js";
 dotenv.config();
-// import bcrypt from "bcrypt";
-// import User from "../models/User.js";
-// import Student from "../models/Student.js";
-// import Instructor from "../models/Instructor.js";
-// import OTP from "../models/OTP.js"; // assuming you have this
-// 
-//send otp
 
+//send otp
 export const sendOTP = async (req, res) => {
     console.log("2:---")
     try {
@@ -87,8 +81,6 @@ export const sendOTP = async (req, res) => {
 };
 
 //sign-Up
-
-
 export const signUp = async (req, res) => {
     try {
         const {
@@ -222,13 +214,10 @@ export const signUp = async (req, res) => {
     }
 };
 
-
-//login
-
 export const login = async (req, res) => {
     try {
-        // get data from request body
         const { email, password } = req.body;
+
         if (!email || !password) {
             return res.status(400).json({
                 success: false,
@@ -237,7 +226,7 @@ export const login = async (req, res) => {
         }
 
         // check if user exists
-        const user = await User.findOne({ email }).lean();
+        const user = await User.findOne({ email });
         if (!user) {
             return res.status(401).json({
                 success: false,
@@ -245,65 +234,70 @@ export const login = async (req, res) => {
             });
         }
 
-        // fetch userDetails based on accountType
-        let userDetails;
-        if (user.accountType === "Student") {
-            userDetails = await Student.findOne({ userId: user._id }).lean();
-        } else {
-            userDetails = await Instructor.findOne({ userId: user._id }).lean();
-        }
-
         // check password
-        if (await bcrypt.compare(password, user.password)) {
-            const payload = {
-                email: user.email,
-                id: user._id,
-                accountType: user.accountType,
-            };
-
-            const token = jwt.sign(payload, process.env.JWT_SECRET, {
-                expiresIn: "7d",
-            });
-
-            // remove password before sending response
-            delete user.password;
-
-            // combine user + userDetails into one object
-            const fullUser = {
-                ...user,
-                ...userDetails,
-            };
-
-            // create cookie
-            const options = {
-                expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-                httpOnly: true,
-            };
-
-            return res
-                .cookie("token", token, options)
-                .status(200)
-                .json({
-                    success: true,
-                    token,
-                    user: fullUser,
-                    message: "Logged in Successfully.",
-                });
-        } else {
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+        if (!isPasswordCorrect) {
             return res.status(401).json({
                 success: false,
                 message: "Password is incorrect",
             });
         }
+
+        // fetch userDetails with subject population
+        let userDetails;
+        if (user.accountType === "Student") {
+            userDetails = await Student.findOne({ userId: user._id })
+                .populate("subjects") // ✅ populate subjects
+                .lean();
+        } else if (user.accountType === "Instructor") {
+            userDetails = await Instructor.findOne({ userId: user._id })
+                .populate("subjectsTaught") // ✅ populate subjectsTaught
+                .lean();
+        }
+
+        // generate JWT
+        const payload = {
+            email: user.email,
+            id: user._id,
+            accountType: user.accountType,
+        };
+
+        const token = jwt.sign(payload, process.env.JWT_SECRET, {
+            expiresIn: "7d",
+        });
+
+        // remove password before sending response
+        const { password: _, ...userWithoutPassword } = user.toObject();
+
+        // combine user + userDetails into one object
+        const fullUser = {
+            ...userWithoutPassword,
+            ...userDetails,
+        };
+
+        // create cookie
+        const options = {
+            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            httpOnly: true,
+        };
+
+        return res
+            .cookie("token", token, options)
+            .status(200)
+            .json({
+                success: true,
+                token,
+                user: fullUser,
+                message: "Logged in Successfully.",
+            });
     } catch (error) {
-        console.log(error);
+        console.log("Login error:", error);
         return res.status(500).json({
             success: false,
             message: "Login Failure, please try again",
         });
     }
 };
-
 
 export const mobLogin = async (req, res) => {
     try {
@@ -412,9 +406,7 @@ export const mobLogin = async (req, res) => {
 };
 
 
-
 //change password
-
 export const changePassword = async (req, res) => {
     try {
         const userDetails = await User.findById(req.user.id);
@@ -486,5 +478,3 @@ export const changePassword = async (req, res) => {
         });
     }
 };
-
-

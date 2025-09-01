@@ -47,6 +47,7 @@ const { user } = useSelector((state) => state.auth);
             user?.accountType === ACCOUNT_TYPE.STUDENT && (
               <>
                 <Route path="dashboard/student" element={<ProtectedRoute><Student/></ProtectedRoute>} />
+
               </>
             )
           }
