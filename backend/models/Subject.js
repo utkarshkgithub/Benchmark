@@ -27,7 +27,12 @@ const SubjectSchema = new mongoose.Schema({
   students: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-  }]
+  }],
+  isMinnor: {
+    type: Boolean,
+    default: false,
+    required: true
+  }
 
 });
 

@@ -1,9 +1,10 @@
 import React from 'react'
+import IconBTN from '../../../common/IconBTN'
 
 function AssignSubject() {
   return (
     <div>
-      Assing subject
+      <IconBTN text="Assign Subject" active={true}/>
     </div>
   )
 }
