@@ -312,57 +312,57 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 16),
 
                 // Classroom Seating Card
-                Card(
-                  elevation: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        const Icon(
-                          Icons.event_seat,
-                          size: 48,
-                          color: Colors.deepPurple,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Classroom Seating',
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.deepPurple,
-                              ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Select seats in the classroom layout',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const ClassroomBenchesScreen(),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.event_seat),
-                          label: const Text('View Seating'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.deepPurple,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 12,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                // Card(
+                //   elevation: 4,
+                //   child: Padding(
+                //     padding: const EdgeInsets.all(16.0),
+                //     child: Column(
+                //       children: [
+                //         const Icon(
+                //           Icons.event_seat,
+                //           size: 48,
+                //           color: Colors.deepPurple,
+                //         ),
+                //         const SizedBox(height: 16),
+                //         Text(
+                //           'Classroom Seating',
+                //           style: Theme.of(context).textTheme.titleLarge
+                //               ?.copyWith(
+                //                 fontWeight: FontWeight.bold,
+                //                 color: Colors.deepPurple,
+                //               ),
+                //         ),
+                //         const SizedBox(height: 8),
+                //         const Text(
+                //           'Select seats in the classroom layout',
+                //           textAlign: TextAlign.center,
+                //           style: TextStyle(color: Colors.grey),
+                //         ),
+                //         const SizedBox(height: 16),
+                //         ElevatedButton.icon(
+                //           onPressed: () {
+                //             Navigator.of(context).push(
+                //               MaterialPageRoute(
+                //                 builder: (context) =>
+                //                     const ClassroomBenchesScreen(),
+                //               ),
+                //             );
+                //           },
+                //           icon: const Icon(Icons.event_seat),
+                //           label: const Text('View Seating'),
+                //           style: ElevatedButton.styleFrom(
+                //             backgroundColor: Colors.deepPurple,
+                //             foregroundColor: Colors.white,
+                //             padding: const EdgeInsets.symmetric(
+                //               horizontal: 24,
+                //               vertical: 12,
+                //             ),
+                //           ),
+                //         ),
+                //       ],
+                //     ),
+                //   ),
+                // ),
 
                 const SizedBox(height: 16),
 
