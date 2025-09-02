@@ -1,9 +1,12 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import '../utils/network_logger.dart';
 import '../utils/logger.dart';
+import '../providers/auth_provider.dart';
 
 class QRScannerScreen extends StatefulWidget {
   const QRScannerScreen({super.key});
@@ -13,6 +16,7 @@ class QRScannerScreen extends StatefulWidget {
 }
 
 class _QRScannerScreenState extends State<QRScannerScreen> {
+  static final String? _backendUrl = dotenv.env['BACKEND_URL'];
   MobileScannerController cameraController = MobileScannerController();
   bool _isProcessing = false;
 
@@ -27,6 +31,14 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     setState(() => _isProcessing = true);
 
     try {
+      // Get the auth token from the provider
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final token = authProvider.token;
+
+      if (token == null) {
+        throw Exception('No authentication token found. Please log in again.');
+      }
+
       // Parse QR data as JSON
       Map<String, dynamic> qrJson;
       try {
@@ -38,12 +50,12 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         AppLogger.warning('QR Code is not valid JSON, wrapping it', qrJson);
       }
 
-      // Send POST request to httpbin.org
-      const String endpoint = 'https://httpbin.org/post';
-      final uri = Uri.parse(endpoint);
+      // Send POST request to backend with auth header
+      final uri = Uri.parse('$_backendUrl/api/v1/subject/verifyqrcode');
       final headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
       };
 
       NetworkLogger.logRequest(
@@ -198,7 +210,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'The QR data will be sent to httpbin.org/post',
+                    'The QR data will be sent to the backend for verification',
                     style: TextStyle(color: Colors.white70, fontSize: 14),
                     textAlign: TextAlign.center,
                   ),
