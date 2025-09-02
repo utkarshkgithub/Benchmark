@@ -9,6 +9,19 @@ class AuthService {
   // Get the backend URL from the environment variables
   static final String? _backendUrl = dotenv.env['BACKEND_URL'];
 
+  // Store the current session token
+  static String? _currentSessionToken;
+
+  /// Set the current session token (to be called after login)
+  static void setSessionToken(String token) {
+    _currentSessionToken = token;
+  }
+
+  /// Get the current session token
+  static String? getSessionToken() {
+    return _currentSessionToken;
+  }
+
   /// Registers a new user by sending data to the signup endpoint.
   /// Returns SignupResponse with user data on success.
   static Future<SignupResponse> signup({
@@ -29,7 +42,6 @@ class AuthService {
 
     final signupUrl = Uri.parse('$_backendUrl/api/v1/auth/signup');
 
-    // The data to be sent in the request body
     final Map<String, String> body = {
       "firstName": firstName,
       "lastName": lastName,
@@ -63,11 +75,8 @@ class AuthService {
         duration: DateTime.now().difference(start),
       );
 
-      // Check if the request was successful
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
-
-        // Parse the response into our SignupResponse model
         final signupResponse = SignupResponse.fromJson(responseData);
 
         AppLogger.success(
@@ -80,7 +89,6 @@ class AuthService {
 
         return signupResponse;
       } else {
-        // Handle server errors
         AppLogger.error(
           'Signup failed with status code: ${response.statusCode}',
         );
@@ -100,8 +108,8 @@ class AuthService {
   }
 
   /// Authenticates a user with email, password, and deviceId.
-  /// Returns a user token on success.
-  static Future<String> mobileLogin({
+  /// Returns LoginResponse (token + user data) on success.
+  static Future<LoginResponse> mobileLogin({
     required String email,
     required String password,
     required String deviceId,
@@ -139,8 +147,19 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
-        final String token = responseData['token'];
-        return token;
+
+        // Debug: Log the raw API response
+        print('Raw API Response: $responseData');
+        if (responseData['user'] != null) {
+          print('User object from API: ${responseData['user']}');
+        }
+
+        final loginResponse = LoginResponse.fromJson(responseData);
+
+        // Store the session token for future requests
+        setSessionToken(loginResponse.token);
+
+        return loginResponse;
       } else {
         final errorData = jsonDecode(response.body);
         throw Exception(
@@ -152,8 +171,6 @@ class AuthService {
     }
   }
 
-  /// Changes user password with current password verification
-  /// Returns success message on completion
   static Future<String> changePassword({
     required String email,
     required String currentPassword,
@@ -174,12 +191,10 @@ class AuthService {
       "newpassword": newPassword,
     };
 
-    // Prepare headers
     final Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
     };
 
-    // Add authorization header if token is provided
     if (token != null && token.isNotEmpty) {
       headers['Authorization'] = 'Bearer $token';
     }
@@ -223,8 +238,6 @@ class AuthService {
     }
   }
 
-  /// Sends OTP to the user's email address
-  /// Returns success message on completion
   static Future<String> sendOTP({required String email}) async {
     if (_backendUrl == null) {
       throw Exception("BACKEND_URL is not set in the .env file");
@@ -271,11 +284,7 @@ class AuthService {
     }
   }
 
-  /// Sends a magic link to the user's email for password reset
-  /// Returns success message on completion
-  static Future<String> forgotPassword({
-    required String email,
-  }) async {
+  static Future<String> forgotPassword({required String email}) async {
     if (_backendUrl == null) {
       throw Exception("BACKEND_URL is not set in the .env file");
     }
@@ -284,9 +293,7 @@ class AuthService {
       '$_backendUrl/api/v1/auth/reset-password-token',
     );
 
-    final Map<String, String> body = {
-      "email": email,
-    };
+    final Map<String, String> body = {"email": email};
 
     try {
       AppLogger.auth('Attempting to send magic link for email: $email');
@@ -328,20 +335,78 @@ class AuthService {
     }
   }
 
-  // --- Other methods from your original class can be implemented similarly ---
+  static Future<Map<String, dynamic>> generateQRToken(
+    String subjectCode,
+    String token,
+  ) async {
+    if (_backendUrl == null) {
+      throw Exception("BACKEND_URL is not set in the .env file");
+    }
 
-  /// Logs out the current user
+    final qrTokenUrl = Uri.parse('$_backendUrl/api/v1/subject/qrcode');
+
+    final Map<String, String> body = {"subjectCode": subjectCode};
+
+    try {
+      AppLogger.auth(
+        'Attempting to generate QR token for subject: $subjectCode',
+      );
+
+      final headers = {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      };
+      NetworkLogger.logRequest(
+        method: 'POST',
+        url: qrTokenUrl,
+        headers: headers,
+        body: jsonEncode(body),
+      );
+      final start = DateTime.now();
+      final response = await http.post(
+        qrTokenUrl,
+        headers: headers,
+        body: jsonEncode(body),
+      );
+      NetworkLogger.logResponse(
+        response: response,
+        duration: DateTime.now().difference(start),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseData = jsonDecode(response.body);
+        print('Debug: QR Token API Response: $responseData');
+        AppLogger.success(
+          'QR token generated successfully for subject: $subjectCode',
+        );
+        return responseData;
+      } else {
+        print(
+          'Debug: QR Token API Error - Status: ${response.statusCode}, Body: ${response.body}',
+        );
+        final errorData = jsonDecode(response.body);
+        final errorMessage = errorData['message'] ?? 'Unknown error';
+        AppLogger.error(
+          'Failed to generate QR token for subject: $subjectCode',
+          errorMessage,
+        );
+        throw Exception('Failed to generate QR token: $errorMessage');
+      }
+    } catch (e) {
+      AppLogger.error('Error occurred during QR token generation', e);
+      throw Exception('An error occurred during QR token generation: $e');
+    }
+  }
+
   static Future<void> logout(String token) async {
     // TODO: Implement backend API call for logout
   }
 
-  /// Validates if the current token is still valid
   static Future<bool> validateToken(String token) async {
     // TODO: Implement backend API call for token validation
     return true;
   }
 
-  /// Gets current user profile
   static Future<Map<String, dynamic>> getUserProfile(String token) async {
     // TODO: Implement backend API call to get user profile
     return {};

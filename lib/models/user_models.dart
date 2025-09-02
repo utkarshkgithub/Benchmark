@@ -1,5 +1,67 @@
 // User data models for handling API responses
 
+class SubjectInfo {
+  final String id;
+  final String subjectName;
+  final String subjectCode;
+  final String semester;
+  final String branch;
+  final String instructor;
+  final List<dynamic> students;
+  final int version;
+
+  SubjectInfo({
+    required this.id,
+    required this.subjectName,
+    required this.subjectCode,
+    required this.semester,
+    required this.branch,
+    required this.instructor,
+    required this.students,
+    required this.version,
+  });
+
+  factory SubjectInfo.fromJson(Map<String, dynamic> json) {
+    return SubjectInfo(
+      id: json['_id']?.toString() ?? '',
+      subjectName: json['subjectName']?.toString() ?? '',
+      subjectCode: json['subjectCode']?.toString() ?? '',
+      semester: json['semester']?.toString() ?? '',
+      branch: json['branch']?.toString() ?? '',
+      instructor: json['instructor']?.toString() ?? '',
+      students: json['students'] ?? [],
+      version: json['__v'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'subjectName': subjectName,
+      'subjectCode': subjectCode,
+      'semester': semester,
+      'branch': branch,
+      'instructor': instructor,
+      'students': students,
+      '__v': version,
+    };
+  }
+}
+
+class LoginResponse {
+  final String token;
+  final User user;
+
+  LoginResponse({required this.token, required this.user});
+
+  factory LoginResponse.fromJson(Map<String, dynamic> json) {
+    return LoginResponse(
+      token: json['token'],
+      user: User.fromJson(json['user']),
+    );
+  }
+}
+
 class SignupResponse {
   final bool success;
   final User user;
@@ -40,9 +102,15 @@ class User {
   final String semester;
   final List<dynamic> subjects;
   final String id;
+  final String accountType;
   final DateTime createdAt;
   final DateTime updatedAt;
   final int version;
+  final List<SubjectInfo> subjectsTaught; // Changed to SubjectInfo objects
+  final String firstName;
+  final String lastName;
+  final String email;
+  final String image;
 
   User({
     required this.userId,
@@ -52,23 +120,84 @@ class User {
     required this.semester,
     required this.subjects,
     required this.id,
+    required this.accountType,
     required this.createdAt,
     required this.updatedAt,
     required this.version,
+    required this.subjectsTaught,
+    required this.firstName,
+    required this.lastName,
+    required this.email,
+    required this.image,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
+    // Debug logging
+    print('User.fromJson - Raw JSON: $json');
+
+    // Handle subjectsTaught field for instructors
+    List<SubjectInfo> subjectsTaught = [];
+    if (json['subjectsTaught'] != null && json['subjectsTaught'] is List) {
+      for (var subject in json['subjectsTaught']) {
+        if (subject is Map<String, dynamic>) {
+          subjectsTaught.add(SubjectInfo.fromJson(subject));
+        }
+      }
+    }
+
+    // Extract required fields with fallbacks
+    String accountType = json['accountType']?.toString() ?? '';
+    String firstName = json['firstName']?.toString() ?? '';
+    String lastName = json['lastName']?.toString() ?? '';
+    String email = json['email']?.toString() ?? '';
+    String image = json['image']?.toString() ?? '';
+    String userId = json['userId']?.toString() ?? '';
+    String deviceId = json['deviceId']?.toString() ?? '';
+    String rollNumber = json['rollNumber']?.toString() ?? '';
+    String branch = json['branch']?.toString() ?? '';
+    String semester = json['semester']?.toString() ?? '';
+    String id = json['_id']?.toString() ?? '';
+
+    // Handle DateTime parsing safely
+    DateTime createdAt = DateTime.now();
+    DateTime updatedAt = DateTime.now();
+
+    try {
+      if (json['createdAt'] != null) {
+        createdAt = DateTime.parse(json['createdAt'].toString());
+      }
+    } catch (e) {
+      print('Error parsing createdAt: $e');
+    }
+
+    try {
+      if (json['updatedAt'] != null) {
+        updatedAt = DateTime.parse(json['updatedAt'].toString());
+      }
+    } catch (e) {
+      print('Error parsing updatedAt: $e');
+    }
+
+    print('User.fromJson - Found accountType: "$accountType"');
+    print('User.fromJson - Found subjectsTaught: $subjectsTaught');
+
     return User(
-      userId: json['userId'] ?? '',
-      deviceId: json['deviceId'] ?? '',
-      rollNumber: json['rollNumber'] ?? '',
-      branch: json['branch'] ?? '',
-      semester: json['semester'] ?? '',
+      userId: userId,
+      deviceId: deviceId,
+      rollNumber: rollNumber,
+      branch: branch,
+      semester: semester,
       subjects: json['subjects'] ?? [],
-      id: json['_id'] ?? '',
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      id: id,
+      accountType: accountType,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
       version: json['__v'] ?? 0,
+      subjectsTaught: subjectsTaught,
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      image: image,
     );
   }
 
@@ -81,11 +210,20 @@ class User {
       'semester': semester,
       'subjects': subjects,
       '_id': id,
+      'accountType': accountType,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       '__v': version,
+      'subjectsTaught': subjectsTaught.map((s) => s.toJson()).toList(),
+      'firstName': firstName,
+      'lastName': lastName,
+      'email': email,
+      'image': image,
     };
   }
+
+  // Helper method to get full name
+  String get fullName => '$firstName $lastName';
 }
 
 class UserDetails {
@@ -168,6 +306,7 @@ class UserSession {
   final String profileImage;
   final bool isActive;
   final bool isApproved;
+  final List<SubjectInfo> subjectsTaught; // Changed to SubjectInfo objects
 
   UserSession({
     required this.userId,
@@ -181,6 +320,7 @@ class UserSession {
     required this.profileImage,
     required this.isActive,
     required this.isApproved,
+    required this.subjectsTaught,
   });
 
   factory UserSession.fromSignupResponse(SignupResponse response) {
@@ -196,6 +336,24 @@ class UserSession {
       profileImage: response.userDetails.image,
       isActive: response.userDetails.active,
       isApproved: response.userDetails.approved,
+      subjectsTaught: response.user.subjectsTaught,
+    );
+  }
+
+  factory UserSession.fromUser(User user) {
+    return UserSession(
+      userId: user.userId,
+      email: user.email,
+      fullName: user.fullName,
+      rollNumber: user.rollNumber,
+      branch: user.branch,
+      semester: user.semester,
+      deviceId: user.deviceId,
+      accountType: user.accountType,
+      profileImage: user.image,
+      isActive: true, // Default value, adjust as needed
+      isApproved: true, // Default value, adjust as needed
+      subjectsTaught: user.subjectsTaught,
     );
   }
 
@@ -212,10 +370,20 @@ class UserSession {
       'profileImage': profileImage,
       'isActive': isActive,
       'isApproved': isApproved,
+      'subjectsTaught': subjectsTaught.map((s) => s.toJson()).toList(),
     };
   }
 
   factory UserSession.fromJson(Map<String, dynamic> json) {
+    List<SubjectInfo> subjectsTaught = [];
+    if (json['subjectsTaught'] != null && json['subjectsTaught'] is List) {
+      for (var subject in json['subjectsTaught']) {
+        if (subject is Map<String, dynamic>) {
+          subjectsTaught.add(SubjectInfo.fromJson(subject));
+        }
+      }
+    }
+
     return UserSession(
       userId: json['userId'] ?? '',
       email: json['email'] ?? '',
@@ -228,6 +396,7 @@ class UserSession {
       profileImage: json['profileImage'] ?? '',
       isActive: json['isActive'] ?? false,
       isApproved: json['isApproved'] ?? false,
+      subjectsTaught: subjectsTaught,
     );
   }
 }
