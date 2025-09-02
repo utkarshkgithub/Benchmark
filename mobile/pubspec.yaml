@@ -7,6 +7,9 @@ environment:
   sdk: ^3.9.0
 
 dependencies:
+  mobile_scanner: ^5.2.3
+  google_mlkit_barcode_scanning: ^0.10.0
+  camera: ^0.10.5+9
   qr_flutter: ^4.1.0
   flutter:
     sdk: flutter
@@ -20,7 +23,6 @@ dependencies:
   uuid: ^4.5.1
   flutter_dotenv: ^5.1.0
   shared_preferences: ^2.3.2
-  mobile_scanner: ^5.1.1
   vector_math: ^2.1.4
 
 dev_dependencies:

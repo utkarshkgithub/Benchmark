@@ -68,7 +68,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
         if (loginResponse.user.accountType == "Instructor") {
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => InstructorPage(user: loginResponse.user)),
+            MaterialPageRoute(
+              builder: (context) => InstructorPage(user: loginResponse.user),
+            ),
           );
         } else {
           Navigator.of(context).pushReplacement(
@@ -77,11 +79,44 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       } catch (e) {
         log('Login: Error occurred: $e');
-        authProvider.setError(e.toString());
+        // Extract clean error message
+        String errorMessage = _extractCleanErrorMessage(e.toString());
+        authProvider.setError(errorMessage);
       } finally {
         authProvider.setLoading(false);
       }
     }
+  }
+
+  String _extractCleanErrorMessage(String errorString) {
+    // Remove "Exception: " prefix if present
+    if (errorString.startsWith('Exception: ')) {
+      errorString = errorString.substring(11);
+    }
+
+    // Extract clean error messages for common cases
+    if (errorString.contains('Device already assigned to other')) {
+      return 'Device already assigned to other';
+    }
+    if (errorString.contains('Invalid credentials') ||
+        errorString.contains('Email or password is incorrect')) {
+      return 'Invalid email or password';
+    }
+    if (errorString.contains('User not found') ||
+        errorString.contains('No user found')) {
+      return 'No account found with this email';
+    }
+    if (errorString.contains('Network') || errorString.contains('connection')) {
+      return 'Network error. Please check your connection';
+    }
+
+    // For other errors, try to extract the main message before any status code
+    final parts = errorString.split('(Status:');
+    if (parts.isNotEmpty) {
+      return parts[0].trim();
+    }
+
+    return errorString;
   }
 
   @override
@@ -250,85 +285,84 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 24),
 
-                          // Debug Device ID Button
-                          Container(
-                            margin: const EdgeInsets.only(bottom: 16),
-                            child: OutlinedButton.icon(
-                              onPressed: () async {
-                                final localContext = context;
-                                final scaffoldMessenger = ScaffoldMessenger.of(
-                                  context,
-                                );
-                                try {
-                                  final deviceId =
-                                      await DeviceIdHelper.getDeviceId();
-                                  final deviceInfo =
-                                      await DeviceIdHelper.getDeviceInfo();
-
-                                  if (!localContext.mounted) return;
-
-                                  showDialog(
-                                    context: localContext,
-                                    builder: (dialogContext) => AlertDialog(
-                                      title: const Text('Device Information'),
-                                      content: SingleChildScrollView(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text('Device ID: $deviceId'),
-                                            const SizedBox(height: 8),
-                                            Text(
-                                              'Platform: ${deviceInfo['platform']}',
-                                            ),
-                                            if (deviceInfo['model'] != null)
-                                              Text(
-                                                'Model: ${deviceInfo['model']}',
-                                              ),
-                                            if (deviceInfo['brand'] != null)
-                                              Text(
-                                                'Brand: ${deviceInfo['brand']}',
-                                              ),
-                                            if (deviceInfo['error'] != null)
-                                              Text(
-                                                'Error: ${deviceInfo['error']}',
-                                                style: const TextStyle(
-                                                  color: Colors.red,
-                                                ),
-                                              ),
-                                          ],
-                                        ),
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(dialogContext),
-                                          child: const Text('Close'),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                } catch (e) {
-                                  if (!localContext.mounted) return;
-                                  scaffoldMessenger.showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'Error getting device ID: $e',
-                                      ),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                }
-                              },
-                              icon: const Icon(Icons.phone_android),
-                              label: const Text('Test Device ID'),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: Colors.deepPurple,
-                              ),
-                            ),
-                          ),
-
+                          // Debug Device ID Button - Commented out for production
+                          // Container(
+                          //   margin: const EdgeInsets.only(bottom: 16),
+                          //   child: OutlinedButton.icon(
+                          //     onPressed: () async {
+                          //       final localContext = context;
+                          //       final scaffoldMessenger = ScaffoldMessenger.of(
+                          //         context,
+                          //       );
+                          //       try {
+                          //         final deviceId =
+                          //             await DeviceIdHelper.getDeviceId();
+                          //         final deviceInfo =
+                          //             await DeviceIdHelper.getDeviceInfo();
+                          //
+                          //         if (!localContext.mounted) return;
+                          //
+                          //         showDialog(
+                          //           context: localContext,
+                          //           builder: (dialogContext) => AlertDialog(
+                          //             title: const Text('Device Information'),
+                          //             content: SingleChildScrollView(
+                          //               child: Column(
+                          //                 crossAxisAlignment:
+                          //                     CrossAxisAlignment.start,
+                          //                 mainAxisSize: MainAxisSize.min,
+                          //                 children: [
+                          //                   Text('Device ID: $deviceId'),
+                          //                   const SizedBox(height: 8),
+                          //                   Text(
+                          //                     'Platform: ${deviceInfo['platform']}',
+                          //                   ),
+                          //                   if (deviceInfo['model'] != null)
+                          //                     Text(
+                          //                       'Model: ${deviceInfo['model']}',
+                          //                     ),
+                          //                   if (deviceInfo['brand'] != null)
+                          //                     Text(
+                          //                       'Brand: ${deviceInfo['brand']}',
+                          //                     ),
+                          //                   if (deviceInfo['error'] != null)
+                          //                     Text(
+                          //                       'Error: ${deviceInfo['error']}',
+                          //                       style: const TextStyle(
+                          //                         color: Colors.red,
+                          //                       ),
+                          //                     ),
+                          //                 ],
+                          //               ),
+                          //             ),
+                          //             actions: [
+                          //               TextButton(
+                          //                 onPressed: () =>
+                          //                     Navigator.pop(dialogContext),
+                          //                 child: const Text('Close'),
+                          //               ),
+                          //             ],
+                          //           ),
+                          //         );
+                          //       } catch (e) {
+                          //         if (!localContext.mounted) return;
+                          //         scaffoldMessenger.showSnackBar(
+                          //           SnackBar(
+                          //             content: Text(
+                          //               'Error getting device ID: $e',
+                          //             ),
+                          //             backgroundColor: Colors.red,
+                          //           ),
+                          //         );
+                          //       }
+                          //     },
+                          //     icon: const Icon(Icons.phone_android),
+                          //     label: const Text('Test Device ID'),
+                          //     style: OutlinedButton.styleFrom(
+                          //       foregroundColor: Colors.deepPurple,
+                          //     ),
+                          //   ),
+                          // ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [

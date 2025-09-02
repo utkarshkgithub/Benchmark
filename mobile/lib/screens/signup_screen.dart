@@ -95,9 +95,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
             );
 
             if (mounted) {
+              String errorMessage = _extractCleanErrorMessage(e.toString());
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Failed to send OTP: $e'),
+                  content: Text('Failed to send OTP: $errorMessage'),
                   backgroundColor: Colors.red,
                 ),
               );
@@ -205,7 +206,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
           );
         }
       } catch (e) {
-        authProvider.setError(e.toString());
+        // Extract clean error message
+        String errorMessage = _extractCleanErrorMessage(e.toString());
+        authProvider.setError(errorMessage);
       } finally {
         authProvider.setLoading(false);
       }
@@ -869,5 +872,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ),
       ),
     );
+  }
+
+  String _extractCleanErrorMessage(String errorString) {
+    // Remove "Exception: " prefix if present
+    if (errorString.startsWith('Exception: ')) {
+      errorString = errorString.substring(11);
+    }
+
+    // Extract clean error messages for common cases
+    if (errorString.contains('Device already assigned to other')) {
+      return 'Device already assigned to other';
+    }
+    if (errorString.contains('Email already exists') ||
+        errorString.contains('User already exists')) {
+      return 'Email already registered';
+    }
+    if (errorString.contains('Invalid OTP') ||
+        errorString.contains('OTP expired')) {
+      return 'Invalid or expired OTP';
+    }
+    if (errorString.contains('Network') || errorString.contains('connection')) {
+      return 'Network error. Please check your connection';
+    }
+
+    // For other errors, try to extract the main message before any status code
+    final parts = errorString.split('(Status:');
+    if (parts.isNotEmpty) {
+      return parts[0].trim();
+    }
+
+    return errorString;
   }
 }
