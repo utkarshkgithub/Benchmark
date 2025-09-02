@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class AuthProvider extends ChangeNotifier {
   String? _token;
@@ -30,8 +31,7 @@ class AuthProvider extends ChangeNotifier {
 
       final userJson = prefs.getString(_userKey);
       if (userJson != null) {
-        // Note: You might want to use json.decode here if storing as JSON
-        // For now, treating as simple string storage
+        _user = json.decode(userJson);
       }
 
       notifyListeners();
@@ -61,9 +61,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       if (user != null) {
-        // Convert to JSON string if needed
-        // await prefs.setString(_userKey, json.encode(user));
-        // For now, just remove when null
+        await prefs.setString(_userKey, json.encode(user));
       } else {
         await prefs.remove(_userKey);
       }
@@ -112,11 +110,23 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    _token = null;
-    _user = null;
-    _error = null;
-    await _storeToken(null);
-    await _storeUser(null);
-    notifyListeners();
+    try {
+      // Clear in-memory data
+      _token = null;
+      _user = null;
+      _error = null;
+      _isLoading = false;
+
+      // Clear persistent storage
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_tokenKey);
+      await prefs.remove(_userKey);
+      await prefs.clear(); // Clear all stored data to be safe
+
+      notifyListeners();
+    } catch (e) {
+      _error = 'Failed to logout properly';
+      notifyListeners();
+    }
   }
 }
