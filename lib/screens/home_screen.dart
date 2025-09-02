@@ -130,269 +130,298 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _handleLogout(context),
-            tooltip: 'Logout',
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            const Icon(Icons.home, size: 80, color: Colors.deepPurple),
-            const SizedBox(height: 24),
-            const Text(
-              'This is Home Screen',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.deepPurple,
-              ),
-            ),
-            const SizedBox(height: 32),
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        // Get user data
+        final user = authProvider.user;
+        String userName = 'Student';
 
-            // Location and Distance Card
-            Card(
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+        if (user != null) {
+          final firstName = user['firstName'] ?? '';
+          final lastName = user['lastName'] ?? '';
+          if (firstName.isNotEmpty || lastName.isNotEmpty) {
+            userName = '$firstName $lastName'.trim();
+          }
+        }
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Student Dashboard'),
+            backgroundColor: Colors.deepPurple,
+            foregroundColor: Colors.white,
+            automaticallyImplyLeading: false,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.logout),
+                onPressed: () => _handleLogout(context),
+                tooltip: 'Logout',
+              ),
+            ],
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                const Icon(Icons.school, size: 80, color: Colors.deepPurple),
+                const SizedBox(height: 24),
+                Text(
+                  'Welcome $userName',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepPurple,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Student Dashboard',
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+
+                // Location and Distance Card
+                Card(
+                  elevation: 4,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.location_on, color: Colors.deepPurple),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Location & Distance',
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.deepPurple,
-                              ),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.location_on,
+                              color: Colors.deepPurple,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Location & Distance',
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.deepPurple,
+                                  ),
+                            ),
+                          ],
+                        ),
+                        const Divider(),
+                        const SizedBox(height: 8),
+
+                        if (_isLocationLoading)
+                          const Center(child: CircularProgressIndicator())
+                        else ...[
+                          _buildInfoRow('Current Location', _currentLocation),
+                          _buildInfoRow(
+                            'Target Location',
+                            '${targetLatitude.toStringAsFixed(6)}, ${targetLongitude.toStringAsFixed(6)}',
+                          ),
+                          _buildInfoRow(
+                            'Distance from Target',
+                            _distanceFromTarget,
+                          ),
+                        ],
+
+                        const SizedBox(height: 16),
+                        Center(
+                          child: ElevatedButton.icon(
+                            onPressed: _loadLocationAndDistance,
+                            icon: const Icon(Icons.my_location),
+                            label: const Text('Update Location'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.deepPurple,
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                    const Divider(),
-                    const SizedBox(height: 8),
-
-                    if (_isLocationLoading)
-                      const Center(child: CircularProgressIndicator())
-                    else ...[
-                      _buildInfoRow('Current Location', _currentLocation),
-                      _buildInfoRow(
-                        'Target Location',
-                        '${targetLatitude.toStringAsFixed(6)}, ${targetLongitude.toStringAsFixed(6)}',
-                      ),
-                      _buildInfoRow(
-                        'Distance from Target',
-                        _distanceFromTarget,
-                      ),
-                    ],
-
-                    const SizedBox(height: 16),
-                    Center(
-                      child: ElevatedButton.icon(
-                        onPressed: _loadLocationAndDistance,
-                        icon: const Icon(Icons.my_location),
-                        label: const Text('Update Location'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurple,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
 
-            const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-            // Device Information Card
-            Card(
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                // Device Information Card
+                Card(
+                  elevation: 4,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.phone_android,
+                              color: Colors.deepPurple,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Device Information',
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.deepPurple,
+                                  ),
+                            ),
+                          ],
+                        ),
+                        const Divider(),
+                        const SizedBox(height: 8),
+
+                        if (_isLoading)
+                          const Center(child: CircularProgressIndicator())
+                        else ...[
+                          _buildInfoRow('Device ID', _deviceId),
+                          if (_deviceInfo != null) ...[
+                            _buildInfoRow(
+                              'Platform',
+                              _deviceInfo!['platform'] ?? 'Unknown',
+                            ),
+                            _buildInfoRow(
+                              'Model',
+                              _deviceInfo!['model'] ?? 'Unknown',
+                            ),
+                            if (_deviceInfo!['brand'] != null)
+                              _buildInfoRow('Brand', _deviceInfo!['brand']),
+                            if (_deviceInfo!['version'] != null)
+                              _buildInfoRow('Version', _deviceInfo!['version']),
+                            if (_deviceInfo!['error'] != null)
+                              _buildErrorRow('Error', _deviceInfo!['error']),
+                          ],
+                        ],
+
+                        const SizedBox(height: 16),
+                        Center(
+                          child: ElevatedButton.icon(
+                            onPressed: _loadDeviceInfo,
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('Refresh Device Info'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.deepPurple,
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Classroom Seating Card
+                Card(
+                  elevation: 4,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
                       children: [
                         const Icon(
-                          Icons.phone_android,
+                          Icons.event_seat,
+                          size: 48,
                           color: Colors.deepPurple,
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(height: 16),
                         Text(
-                          'Device Information',
+                          'Classroom Seating',
                           style: Theme.of(context).textTheme.titleLarge
                               ?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.deepPurple,
                               ),
                         ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Select seats in the classroom layout',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const ClassroomBenchesScreen(),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.event_seat),
+                          label: const Text('View Seating'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepPurple,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
-                    const Divider(),
-                    const SizedBox(height: 8),
+                  ),
+                ),
 
-                    if (_isLoading)
-                      const Center(child: CircularProgressIndicator())
-                    else ...[
-                      _buildInfoRow('Device ID', _deviceId),
-                      if (_deviceInfo != null) ...[
-                        _buildInfoRow(
-                          'Platform',
-                          _deviceInfo!['platform'] ?? 'Unknown',
+                const SizedBox(height: 16),
+
+                // QR Scanner Button
+                Card(
+                  elevation: 4,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        const Icon(
+                          Icons.qr_code_scanner,
+                          size: 48,
+                          color: Colors.deepPurple,
                         ),
-                        _buildInfoRow(
-                          'Model',
-                          _deviceInfo!['model'] ?? 'Unknown',
+                        const SizedBox(height: 16),
+                        Text(
+                          'QR Code Scanner',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.deepPurple,
+                              ),
                         ),
-                        if (_deviceInfo!['brand'] != null)
-                          _buildInfoRow('Brand', _deviceInfo!['brand']),
-                        if (_deviceInfo!['version'] != null)
-                          _buildInfoRow('Version', _deviceInfo!['version']),
-                        if (_deviceInfo!['error'] != null)
-                          _buildErrorRow('Error', _deviceInfo!['error']),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Scan QR codes and send data to httpbin.org',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const QRScannerScreen(),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.qr_code_scanner),
+                          label: const Text('Scan QR Code'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepPurple,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                          ),
+                        ),
                       ],
-                    ],
-
-                    const SizedBox(height: 16),
-                    Center(
-                      child: ElevatedButton.icon(
-                        onPressed: _loadDeviceInfo,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Refresh Device Info'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurple,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-
-            const SizedBox(height: 16),
-
-            // Classroom Seating Card
-            Card(
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    const Icon(
-                      Icons.event_seat,
-                      size: 48,
-                      color: Colors.deepPurple,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Classroom Seating',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.deepPurple,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Select seats in the classroom layout',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const ClassroomBenchesScreen(),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.event_seat),
-                      label: const Text('View Seating'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepPurple,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // QR Scanner Button
-            Card(
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    const Icon(
-                      Icons.qr_code_scanner,
-                      size: 48,
-                      color: Colors.deepPurple,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'QR Code Scanner',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.deepPurple,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Scan QR codes and send data to httpbin.org',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const QRScannerScreen(),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.qr_code_scanner),
-                      label: const Text('Scan QR Code'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepPurple,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 

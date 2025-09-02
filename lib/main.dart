@@ -4,6 +4,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'providers/auth_provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/instructor_screen.dart';
+import 'models/user_models.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -64,8 +66,16 @@ class _MyAppState extends State<MyApp> {
         home: Consumer<AuthProvider>(
           builder: (context, authProvider, child) {
             // Check if user is authenticated
-            if (authProvider.isAuthenticated) {
-              return const HomeScreen();
+            if (authProvider.isAuthenticated && authProvider.user != null) {
+              // Check account type and route accordingly
+              final accountType = authProvider.user!['accountType'];
+              if (accountType == 'Instructor') {
+                // Convert user data to User object for instructor page
+                final user = User.fromJson(authProvider.user!);
+                return InstructorPage(user: user);
+              } else {
+                return const HomeScreen();
+              }
             } else {
               return const LoginScreen();
             }
