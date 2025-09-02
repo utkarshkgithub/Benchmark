@@ -302,8 +302,8 @@ class _InstructorPageState extends State<InstructorPage> {
         // QR Code in the center
         Center(
           child: Container(
-            margin: const EdgeInsets.all(16.0),
-            padding: const EdgeInsets.all(20),
+            margin: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
