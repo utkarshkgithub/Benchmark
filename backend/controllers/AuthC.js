@@ -8,6 +8,7 @@ import dotenv from "dotenv";
 import Student from "../models/Student.js";
 import Instructor from "../models/Instructor.js"
 import { passwordUpdated } from "../mail/templates/passwordUpdate.js";
+import Subject from "../models/Subject.js";
 dotenv.config();
 
 //send otp
@@ -80,139 +81,151 @@ export const sendOTP = async (req, res) => {
     }
 };
 
-//sign-Up
+
 export const signUp = async (req, res) => {
-    try {
-        const {
-            firstName,
-            lastName,
-            email,
-            accountType,
-            password,
-            otp,
-            rollNumber = "",
-            branch = "",
-            semester = "",
-            deviceId = "",
-            department = ""
-        } = req.body;
-
-        // ✅ validate required fields
-        if (
-            !firstName ||
-            !lastName ||
-            !email ||
-            !password ||
-            !accountType ||
-            !otp
-        ) {
-            return res.status(403).json({
-                success: false,
-                message: "All required fields must be filled.",
-            });
-        }
-
-        // For Student account, extra fields are required
-        if (
-            accountType === "Student" &&
-            (!rollNumber || !branch || !semester || !deviceId)
-        ) {
-            return res.status(403).json({
-                success: false,
-                message: "Student account requires rollNumber, branch, semester, deviceId",
-            });
-        } else if (accountType == "Instructor" && (!department)) {
-            return res.status(403).json({
-                success: false,
-                message: "Instructor account requires dedpartment",
-            });
-        }
-
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({
-                success: false,
-                message: "User already registered with this email.",
-            });
-        }
-
-        if (accountType == "Student") {
-            const deviceDetails = await Student.findOne({ deviceId });
-            if (deviceDetails) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Device already assigned to other.",
-                });
-            }
-            const rollDetails  = await Student.findOne({rollNumber});
-            if (rollDetails) {
-                return res.status(400).json({
-                    success: false,
-                    message: "ROLL NUMBER should must be Unique",
-                });
-            }
-        }
-
-
-        const recentOtp = await OTP.find({ email })
-            .sort({ createdAt: -1 })
-            .limit(1);
-
-        if (recentOtp.length === 0) {
-            return res.status(400).json({
-                success: false,
-                message: "OTP not found.",
-            });
-        } else if (otp !== recentOtp[0].otp) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid OTP.",
-            });
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const userDetails = await User.create({
-            firstName,
-            lastName,
-            email,
-            password: hashedPassword,
-            accountType,
-            approved: accountType === "Instructor" ? false : true,
-            active: true,
-            image: `https://api.dicebear.com/5.x/initials/svg?seed=${firstName}%20${lastName}`,
-        });
-        let user = "";
-        
-        if (accountType === "Student") {
-            user = await Student.create({
-                userId: userDetails._id,
-                deviceId,
-                rollNumber,
-                branch,
-                semester,
-            });
-        } else if (accountType === "Instructor") {
-            user = await Instructor.create({
-                userId: userDetails._id,
-                department: department , 
-            });
-        }
-
-        return res.status(200).json({
-            success: true,
-            user: user,
-            userDetails:userDetails,
-            message: "User registered successfully.",
-        });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({
-            success: false,
-            message: "User could not be registered, please try again.",
-        });
+  try {
+    const {
+      firstName,
+      lastName,
+      email,
+      accountType,
+      password,
+      otp,
+      rollNumber = "",
+      branch = "",
+      semester = "",
+      deviceId = "",
+      department = "",
+      subjects = [],   // ✅ frontend will send selected subject IDs
+    } = req.body;
+    for(let i = 0;i<subjects.length;i++){
+        console.log("subject:-",subjects[i]);
     }
+    // ✅ validate required fields
+    if (!firstName || !lastName || !email || !password || !accountType || !otp) {
+      return res.status(403).json({
+        success: false,
+        message: "All required fields must be filled.",
+      });
+    }
+
+    // For Student account, extra fields are required
+    if (
+      accountType === "Student" &&
+      (!rollNumber || !branch || !semester || !deviceId)
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "Student account requires rollNumber, branch, semester, deviceId",
+      });
+    } else if (accountType === "Instructor" && !department) {
+      return res.status(403).json({
+        success: false,
+        message: "Instructor account requires department",
+      });
+    }
+
+    // ✅ check existing user
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "User already registered with this email.",
+      });
+    }
+
+    if (accountType === "Student") {
+      const deviceDetails = await Student.findOne({ deviceId });
+      if (deviceDetails) {
+        return res.status(400).json({
+          success: false,
+          message: "Device already assigned to other.",
+        });
+      }
+      const rollDetails = await Student.findOne({ rollNumber });
+      if (rollDetails) {
+        return res.status(400).json({
+          success: false,
+          message: "ROLL NUMBER should must be Unique",
+        });
+      }
+    }
+
+    // ✅ OTP check
+    const recentOtp = await OTP.find({ email })
+      .sort({ createdAt: -1 })
+      .limit(1);
+
+    if (recentOtp.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP not found.",
+      });
+    } else if (otp !== recentOtp[0].otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP.",
+      });
+    }
+
+    // ✅ password hash
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // ✅ create base user
+    const userDetails = await User.create({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      accountType,
+      approved: accountType === "Instructor" ? false : true,
+      active: true,
+      image: `https://api.dicebear.com/5.x/initials/svg?seed=${firstName}%20${lastName}`,
+    });
+
+    let user = "";
+
+    if (accountType === "Student") {
+      // ✅ create student with subjects
+      user = await Student.create({
+        userId: userDetails._id,
+        deviceId,
+        rollNumber,
+        branch,
+        semester,
+        subjects, // ✅ store subject IDs here
+      });
+
+      // Then update all selected subjects with the student's userId
+      if (subjects && subjects.length > 0) {
+        await Subject.updateMany(
+          { _id: { $in: subjects } },
+          { $addToSet: { students: userDetails._id } }
+        );
+      }
+    } else if (accountType === "Instructor") {
+      user = await Instructor.create({
+        userId: userDetails._id,
+        department,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      user,
+      userDetails,
+      message: "User registered successfully.",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "User could not be registered, please try again.",
+    });
+  }
 };
+
+
 
 export const login = async (req, res) => {
     try {

@@ -28,7 +28,7 @@ const SubjectSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   }],
-  isMinnor: {
+  isMinor: {
     type: Boolean,
     default: false,
     required: true
