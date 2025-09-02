@@ -39,11 +39,8 @@ export const generateQr = async (req, res) => {
 
         // ✅ Prepare payload with correct attendenceId
         const payload = {
-            email: userDetails.email,
             id: userDetails._id,
-            accountType: userDetails.accountType,
-            subjectCode: subjectCode,
-            date: new Date().toISOString(), // readable timestamp
+            subjectCode: subjectCode, // readable timestamp
             attendenceId: attendence._id.toString(), // ensure it's string
         };
 
