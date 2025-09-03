@@ -105,6 +105,7 @@ export const signUp = async (req, res) => {
         success: false,
         message: "All required fields must be filled.",
       });
+      
     }
 
     // For Student account, extra fields are required

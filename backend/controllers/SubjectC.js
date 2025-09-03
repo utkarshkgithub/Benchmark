@@ -1,6 +1,10 @@
 import Instructor from "../models/Instructor.js";
-import Subject from "../models/Subject.js";
 import User from "../models/User.js";
+import Attendence from "../models/Attendence.js";
+import Subject from "../models/Subject.js";
+import Student from "../models/Student.js";
+// controllers/attendanceController.js
+
 
 export const createSubject = async (req, res) => {
   try {
@@ -132,6 +136,74 @@ export const fetchSubjects = async (req, res) => {
       success: false,
       message: "Error fetching subjects",
       error: error.message,
+    });
+  }
+};
+
+
+
+export const fetchInstructorSubjects = async (req, res) => {
+  try {
+    const userId = req.user.id; // instructor id from JWT
+
+    const subjects = await Subject.find({ instructor: userId })
+      .populate("instructor", "firstName lastName email");
+
+    return res.status(200).json({
+      success: true,
+      subjects,
+    });
+  } catch (error) {
+    console.error("Error fetching instructor subjects:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch instructor subjects",
+    });
+  }
+};
+
+
+
+export const fetchAttendanceBySubject = async (req, res) => {
+  try {
+    const { subjectId } = req.params;
+    const instructorId = req.user.id;
+
+    // ✅ check subject belongs to instructor
+    const subject = await Subject.findOne({ _id: subjectId, instructor: instructorId });
+    if (!subject) {
+      return res.status(403).json({ success: false, message: "Unauthorized access to subject" });
+    }
+
+    // ✅ get attendance records
+    const attendance = await Attendence.find({ subject: subjectId })
+      .populate("presentStudent", "firstName lastName email")
+      .sort({ createdAt: -1 });
+
+    // ✅ calculate total students by branch
+    const totalStudents = await Student.countDocuments({
+      subjects: subjectId,
+      branch: { $in: subject.branches },
+    });
+
+    // ✅ format response
+    const formatted = attendance.map((rec) => ({
+      _id: rec._id,
+      date: rec.date,
+      branch: subject.branches.join(", "),
+      totalStudents: totalStudents,
+      presentStudent: rec.presentStudent,
+    }));
+
+    return res.status(200).json({
+      success: true,
+      attendance: formatted,
+    });
+  } catch (error) {
+    console.error("Error fetching attendance:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch attendance records",
     });
   }
 };

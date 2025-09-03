@@ -15,7 +15,7 @@ function Navbar() {
       <div className='flex justify-between items-center md:w-[75%] w-[90%]'>
         <Link to="/">
         <h2 className="text-2xl font-bold text-black tracking-wide flex justify-center items-center gap-2">
-          <FaGraduationCap  className="mx-auto h-12 w-12 text-teal-600" />BENCHMARK
+          <img src="https://upload.wikimedia.org/wikipedia/en/thumb/c/c6/Indian_Institute_of_Information_Technology%2C_Bhagalpur_logo.png/250px-Indian_Institute_of_Information_Technology%2C_Bhagalpur_logo.png" alt="" width={50}/>BENCHMARK
         </h2>
         </Link>
         {
