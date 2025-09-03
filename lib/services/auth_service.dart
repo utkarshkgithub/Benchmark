@@ -35,6 +35,7 @@ class AuthService {
     required String branch,
     required String semester,
     required String deviceId,
+    List<String>? subjects,
   }) async {
     if (_backendUrl == null) {
       throw Exception("BACKEND_URL is not set in the .env file");
@@ -42,7 +43,7 @@ class AuthService {
 
     final signupUrl = Uri.parse('$_backendUrl/api/v1/auth/signup');
 
-    final Map<String, String> body = {
+    final Map<String, dynamic> body = {
       "firstName": firstName,
       "lastName": lastName,
       "email": email,
@@ -53,6 +54,7 @@ class AuthService {
       "branch": branch,
       "semester": semester,
       "deviceId": deviceId,
+      "subjects": subjects ?? [],
     };
 
     try {
