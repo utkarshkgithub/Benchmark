@@ -98,9 +98,7 @@ export const signUp = async (req, res) => {
       department = "",
       subjects = [],   // ✅ frontend will send selected subject IDs
     } = req.body;
-    for(let i = 0;i<subjects.length;i++){
-        console.log("subject:-",subjects[i]);
-    }
+
     // ✅ validate required fields
     if (!firstName || !lastName || !email || !password || !accountType || !otp) {
       return res.status(403).json({
@@ -186,23 +184,36 @@ export const signUp = async (req, res) => {
     let user = "";
 
     if (accountType === "Student") {
-      // ✅ create student with subjects
+      // ✅ पहले frontend से आए हुए subjects
+      let finalSubjects = [...subjects];
+
+      // ✅ अब DB से branch + semester match वाले सारे subjects निकालो
+      const branchSemesterSubjects = await Subject.find({
+        branch: branch,
+        semester: semester,
+      }).select("_id");
+
+      // ✅ extra subjects को भी final list में add कर दो
+      const extraSubjectIds = branchSemesterSubjects.map((sub) => sub._id.toString());
+
+      // ✅ दोनों arrays को merge करके unique बना दो
+      finalSubjects = [...new Set([...finalSubjects, ...extraSubjectIds])];
+
+      // ✅ अब student create करो
       user = await Student.create({
         userId: userDetails._id,
         deviceId,
         rollNumber,
         branch,
         semester,
-        subjects, // ✅ store subject IDs here
+        subjects: finalSubjects, // ✅ सारे subjects (frontend वाले + auto added)
       });
 
-      // Then update all selected subjects with the student's userId
-      if (subjects && subjects.length > 0) {
-        await Subject.updateMany(
-          { _id: { $in: subjects } },
-          { $addToSet: { students: userDetails._id } }
-        );
-      }
+      // ✅ सारे subjects में student को भी add करो
+      await Subject.updateMany(
+        { _id: { $in: finalSubjects } },
+        { $addToSet: { students: userDetails._id } }
+      );
     } else if (accountType === "Instructor") {
       user = await Instructor.create({
         userId: userDetails._id,

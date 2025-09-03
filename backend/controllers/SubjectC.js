@@ -10,6 +10,7 @@ export const createSubject = async (req, res) => {
       semester = "",
       subjectCode = "",
       subjectName = "",
+      isMinor = false,
     } = req.body;
 
     if (!instructor || !branches.length || !semester || !subjectCode || !subjectName) {
@@ -17,7 +18,7 @@ export const createSubject = async (req, res) => {
         .status(400)
         .json({ success: false, message: "All fields are required" });
     }
-    console.log("instructor:-",instructor);
+
     // check subject already exists in semester
     const existSubject = await Subject.findOne({ semester, subjectCode });
     if (existSubject) {
@@ -48,9 +49,10 @@ export const createSubject = async (req, res) => {
     const newSubject = await Subject.create({
       subjectName,
       subjectCode,
-      instructor: userDetails._id,  // use the user ID here
+      instructor: userDetails._id,  
       semester,
       branches,
+      isMinor,
     });
 
     await Instructor.findByIdAndUpdate(instructorDetails._id, {
@@ -85,6 +87,7 @@ export const createSubject = async (req, res) => {
       .json({ success: false, message: "Internal server error." });
   }
 };
+
 
 
 export const fetchInstructor = async (req,res) => {

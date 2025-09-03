@@ -13,6 +13,7 @@ const AddSubject = () => {
   const { token } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const [loading,setLoading] = useState(false);
+
   const fetchInstructor = async () => {
     try {
       const response = await apiConnector("GET", subjectEndPoints.FATCH_INSTRUCTOR_API);
@@ -33,10 +34,14 @@ const AddSubject = () => {
     formData.append("subjectCode", data.subjectCode);
     formData.append("instructor", data.instructor);
     formData.append("semester", data.semester);
+
     // Handle multiple branches
     data.branches.forEach(branch => {
       formData.append("branches", branch);
     });
+
+    // Handle isMinor
+    formData.append("isMinor", data.isMinor ? true : false);
 
     try {
       setLoading(true);
@@ -92,7 +97,7 @@ const AddSubject = () => {
                 {...register('instructor', { required: true })}
               >
                 <option value="">Select an instructor</option>
-                {allInstructor.map((instructor, index) => (
+                {allInstructor.map((instructor) => (
                   <option value={instructor._id} key={instructor._id}>
                     {instructor.firstName} {instructor.lastName}
                   </option>
@@ -135,6 +140,18 @@ const AddSubject = () => {
                   </label>
                 ))}
               </div>
+            </div>
+
+            {/* Is Minor */}
+            <div className="col-span-full">
+              <label className="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-1">
+                <input
+                  type="checkbox"
+                  {...register('isMinor')}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span>Is this a Minor Subject?</span>
+              </label>
             </div>
           </div>
 

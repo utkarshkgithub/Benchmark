@@ -34,6 +34,10 @@ export function sendOtp(email, navigate) {
   }
 }
 
+
+
+
+
 export function signUp(
   accountType,
   firstName,
@@ -55,15 +59,47 @@ export function signUp(
     const toastId = toast.loading("Loading...");
     dispatch(setLoading(true));
     try {
-      console.log("firstName1", firstName);
-      console.log("lastName1", lastName);
-      console.log("email1", email);
-      console.log("password1", password);
-      console.log("confirmPassword1", confirmPassword);
-      console.log("accountType1", accountType);
-      console.log("otp1", otp);
-      console.log("isMinor", isMinor);
-      console.log("selectedSubjects", selectedSubjects);
+      // Create the request payload
+      const signupData = {
+        accountType,
+        firstName,
+        lastName,
+        email,
+        password,
+        confirmPassword,
+        otp,
+        deviceId,
+        rollNumber,
+        branch,
+        semester,
+        department,
+        subjects: selectedSubjects,
+      };
+
+      // Log all data being sent
+      console.log("🚀 SIGNUP REQUEST DATA:");
+      console.log("----------------------------------------");
+      console.log("👤 Basic Info:");
+      console.log("   First Name:", firstName);
+      console.log("   Last Name:", lastName);
+      console.log("   Email:", email);
+      console.log("   Account Type:", accountType);
+      console.log("   OTP:", otp);
+      console.log("----------------------------------------");
+      
+      if (accountType === "Student") {
+        console.log("📚 Student Specific Data:");
+        console.log("   Device ID:", deviceId);
+        console.log("   Roll Number:", rollNumber);
+        console.log("   Branch:", branch);
+        console.log("   Semester:", semester);
+        console.log("   Is Minor Opted:", isMinor);
+        console.log("   Selected Subjects:", selectedSubjects);
+      } else {
+        console.log("👨‍🏫 Instructor Specific Data:");
+        console.log("   Department:", department);
+      }
+      console.log("----------------------------------------");
 
       const response = await apiConnector("POST", endpoints.SIGNUP_API, {
         accountType,
@@ -82,7 +118,14 @@ export function signUp(
       });
 
 
-      console.log("SIGNUP API RESPONSE............", response);
+      console.log("🔄 SIGNUP API RESPONSE:");
+      console.log("----------------------------------------");
+      console.log("Status:", response.status);
+      console.log("Success:", response.data.success);
+      console.log("Message:", response.data.message);
+      console.log("User Details:", response.data.userDetails);
+      console.log("Additional Data:", response.data.user);
+      console.log("----------------------------------------");
 
       if (!response.data.success) {
         throw new Error(response.data.message);
@@ -99,113 +142,6 @@ export function signUp(
     toast.dismiss(toastId);
   };
 }
-
-
-
-// export function signUp(
-//   accountType,
-//   firstName,
-//   lastName,
-//   email,
-//   password,
-//   confirmPassword,
-//   otp,
-//   navigate,
-//   deviceId = "",
-//   rollNumber = "",
-//   branch = "",
-//   semester = "",
-//   department = "",
-//   isMinor = false,
-//   selectedSubjects = []
-// ) {
-//   return async (dispatch) => {
-//     const toastId = toast.loading("Loading...");
-//     dispatch(setLoading(true));
-//     try {
-//       // Create the request payload
-//       const signupData = {
-//         accountType,
-//         firstName,
-//         lastName,
-//         email,
-//         password,
-//         confirmPassword,
-//         otp,
-//         deviceId,
-//         rollNumber,
-//         branch,
-//         semester,
-//         department,
-//         subjects: selectedSubjects,
-//       };
-
-//       // Log all data being sent
-//       console.log("🚀 SIGNUP REQUEST DATA:");
-//       console.log("----------------------------------------");
-//       console.log("👤 Basic Info:");
-//       console.log("   First Name:", firstName);
-//       console.log("   Last Name:", lastName);
-//       console.log("   Email:", email);
-//       console.log("   Account Type:", accountType);
-//       console.log("   OTP:", otp);
-//       console.log("----------------------------------------");
-      
-//       if (accountType === "Student") {
-//         console.log("📚 Student Specific Data:");
-//         console.log("   Device ID:", deviceId);
-//         console.log("   Roll Number:", rollNumber);
-//         console.log("   Branch:", branch);
-//         console.log("   Semester:", semester);
-//         console.log("   Is Minor Opted:", isMinor);
-//         console.log("   Selected Subjects:", selectedSubjects);
-//       } else {
-//         console.log("👨‍🏫 Instructor Specific Data:");
-//         console.log("   Department:", department);
-//       }
-//       console.log("----------------------------------------");
-
-//       const response = await apiConnector("POST", endpoints.SIGNUP_API, {
-//         accountType,
-//         firstName,
-//         lastName,
-//         email,
-//         password,
-//         confirmPassword,
-//         otp,
-//         deviceId,
-//         rollNumber,
-//         branch,
-//         semester,
-//         department,
-//         subjects: selectedSubjects, // ✅ add this
-//       });
-
-
-//       console.log("🔄 SIGNUP API RESPONSE:");
-//       console.log("----------------------------------------");
-//       console.log("Status:", response.status);
-//       console.log("Success:", response.data.success);
-//       console.log("Message:", response.data.message);
-//       console.log("User Details:", response.data.userDetails);
-//       console.log("Additional Data:", response.data.user);
-//       console.log("----------------------------------------");
-
-//       if (!response.data.success) {
-//         throw new Error(response.data.message);
-//       }
-
-//       toast.success("Signup Successful");
-//       navigate("/login");
-//     } catch (error) {
-//       console.log("SIGNUP API ERROR............", error.message);
-//       toast.error("Signup Failed");
-//       navigate("/signup");
-//     }
-//     dispatch(setLoading(false));
-//     toast.dismiss(toastId);
-//   };
-// }
 
 
 
