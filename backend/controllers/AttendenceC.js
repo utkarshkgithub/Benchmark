@@ -23,34 +23,45 @@ export const generateQr = async (req, res) => {
       return res.status(404).json({ success: false, message: "Subject not found" });
     }
 
-    const attendence = await Attendence.create({
-      date: new Date().toISOString(),
+    // ✅ Step 1: Check for existing attendance in last 5 minutes
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    let attendence = await Attendence.findOne({
       subject: subjectDetails._id,
       instructor: userDetails._id,
-      presentStudent: []
+      createdAt: { $gte: fiveMinutesAgo }
     });
 
+    // ✅ Step 2: If not found, create new attendance
+    if (!attendence) {
+      attendence = await Attendence.create({
+        date: new Date().toISOString(),
+        subject: subjectDetails._id,
+        instructor: userDetails._id,
+        presentStudent: []
+      });
+    }
+
+    // ✅ Step 3: Generate fresh JWT
     const payload = {
       id: userDetails._id,
       subjectCode,
       attendenceId: attendence._id.toString(),
     };
-
     const jwtToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "2m" });
 
-    // 🔑 generate shortId (7 chars)
+    // ✅ Step 4: Generate shortId (7 chars)
     const shortId = crypto.randomBytes(4).toString("hex").slice(0, 7);
 
-    // save mapping in DB
+    // ✅ Step 5: Save mapping in DB
     await Token.create({
       shortId,
       jwt: jwtToken,
-      expireAt: Date.now() + 2 * 60 * 1000, // 2 minutes
+      expireAt: Date.now() + 2 * 60 * 1000, // auto-expire 2 min
     });
 
     return res.status(200).json({
       success: true,
-      token: shortId, // only send shortId
+      token: shortId,
       message: "QR token generated successfully."
     });
   } catch (error) {
@@ -58,6 +69,7 @@ export const generateQr = async (req, res) => {
     return res.status(500).json({ success: false, message: "Token generation failed" });
   }
 };
+
 
 
 export const verifyQrCode = async (req, res) => {
