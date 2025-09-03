@@ -26,5 +26,6 @@ export const settingsEndpoints = {
 export const subjectEndPoints = {
   ADD_SUBJECT_API:BASE_URL + "/subject/create-subject",
   FATCH_INSTRUCTOR_API:BASE_URL + "/subject/fetch-instructor",
-  FETCH_ALL_SUBJECTS_API:BASE_URL + "/subject/fetch-subjects"
+  FETCH_ALL_SUBJECTS_API:BASE_URL + "/subject/fetch-subjects",
+  FETCH_STUDENT_ATTENDANCE_API: BASE_URL + "/subject/student",
 }
