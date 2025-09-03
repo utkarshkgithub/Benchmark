@@ -15,7 +15,7 @@ const Student = () => {
     setLoading(true);
     try {
       const res = await fetchStudentAttendance(token);
-      setAttendance(res?.data?.attendance || []); // ✅ correct key
+      setAttendance(res?.data?.attendance || []); // ✅ correct key from API
     } catch (err) {
       console.error("Error fetching attendance:", err);
       setError("Failed to fetch attendance");
@@ -29,7 +29,7 @@ const Student = () => {
 
   useEffect(() => {
     const filtered = attendance.filter((record) =>
-      record.subject?.code?.toLowerCase().includes(searchTerm.toLowerCase())
+      record.subjectName?.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredAttendance(filtered);
   }, [attendance, searchTerm]);
@@ -64,7 +64,7 @@ const Student = () => {
           <div className="relative">
             <input
               type="text"
-              placeholder="Search by subject code..."
+              placeholder="Search by subject name..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full md:w-64 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -92,38 +92,55 @@ const Student = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Subject
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  Total Classes
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Present Count
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Percentage
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredAttendance.map((record) => (
-                <tr key={record._id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-bold">
-                    {record.date}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {record.subject?.name} ({record.subject?.code})
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    {record.presentStudent.some((s) => s._id === user._id) ? (
-                      <span className="px-3 py-1 bg-green-100 text-green-700 rounded-lg font-semibold">
-                        Present
+              {filteredAttendance.length > 0 ? (
+                filteredAttendance.map((record, index) => (
+                  <tr key={index}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-bold">
+                      {record.subjectName}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {record.totalClasses}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {record.presentCount}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <span
+                        className={`px-3 py-1 rounded-lg font-semibold ${
+                          parseFloat(record.percentage) >= 75
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {record.percentage}%
                       </span>
-                    ) : (
-                      <span className="px-3 py-1 bg-red-100 text-red-700 rounded-lg font-semibold">
-                        Absent
-                      </span>
-                    )}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="4"
+                    className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500"
+                  >
+                    No attendance data available
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

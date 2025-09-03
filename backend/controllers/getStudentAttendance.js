@@ -16,7 +16,7 @@ export const fetchStudentAttendance = async (req, res) => {
     const attendanceRecords = await Attendence.find({
       subject: { $in: student.subjects },
     })
-      .populate("subject", "name code")
+      .populate("subject", "subjectName subjectCode")
       .populate("presentStudent", "firstName lastName email");
 
     // ✅ Calculate attendance summary
@@ -34,7 +34,7 @@ export const fetchStudentAttendance = async (req, res) => {
 
       return {
         subjectId: sub._id,
-        subjectName: sub.name || "N/A",
+        subjectName: sub.subjectName || "N/A",
         totalClasses,
         presentCount,
         percentage: totalClasses > 0 ? ((presentCount / totalClasses) * 100).toFixed(2) : "0.00",
