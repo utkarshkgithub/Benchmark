@@ -14,11 +14,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   // Target coordinates (25.259149, 87.040193)
-  // static const double targetLatitude = 25.259149;
-  static const double targetLatitude = 25.2523147;
-  // static const double targetLongitude = 87.040193;
-  static const double targetLongitude = 87.03284;
-  static const double maxDistanceAllowed = 60.0; // 60 meters
+  static const double targetLatitude = 25.259149;
+  // static const double targetLatitude = 25.259080; //lib
+  // static const double targetLatitude = 25.2523147;  //ranitalab
+  static const double targetLongitude = 87.040193;
+  // static const double targetLongitude = 87.039935;  //lib
+  // static const double targetLongitude = 87.03284;  //ranitalab
+  static const double maxDistanceAllowed = 400.0; // 60 meters
 
   @override
   void initState() {

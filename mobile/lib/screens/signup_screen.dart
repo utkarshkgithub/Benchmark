@@ -1,11 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'dart:developer';
 import '../providers/auth_provider.dart';
 import '../services/auth_service.dart';
 import '../utils/device_id_helper.dart';
 import 'login_screen.dart';
+
+// Subject model
+class Subject {
+  final String id;
+  final String subjectName;
+  final String subjectCode;
+  final String semester;
+  final List<String> branches;
+  final bool isMinor;
+
+  Subject({
+    required this.id,
+    required this.subjectName,
+    required this.subjectCode,
+    required this.semester,
+    required this.branches,
+    required this.isMinor,
+  });
+
+  factory Subject.fromJson(Map<String, dynamic> json) {
+    return Subject(
+      id: json['_id'] ?? '',
+      subjectName: json['subjectName'] ?? '',
+      subjectCode: json['subjectCode'] ?? '',
+      semester: json['semester'] ?? '',
+      branches: List<String>.from(json['branches'] ?? []),
+      isMinor: json['isMinor'] ?? false,
+    );
+  }
+}
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -33,6 +65,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _rollNumberController = TextEditingController();
   String _branch = 'CSE';
   String _semester = 'I';
+  bool _hasMinorSubject = false;
+  List<String> _selectedMinorSubjects = [];
+  List<Subject> _allSubjects = []; // Store all subjects fetched once
+  bool _isLoadingSubjects = false;
+  bool _subjectsFetched = false; // Track if subjects have been fetched
 
   final _formKeys = [
     GlobalKey<FormState>(),
@@ -113,6 +150,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
           );
+
+          // Fetch subjects when moving to page 3 (student details page)
+          if (_currentPage == 2) {
+            _fetchSubjects();
+          }
         }
       }
     }
@@ -141,7 +183,79 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return await Geolocator.getCurrentPosition();
   }
 
+  Future<void> _fetchSubjects() async {
+    // Only fetch once
+    if (_subjectsFetched || _isLoadingSubjects) return;
+
+    setState(() {
+      _isLoadingSubjects = true;
+    });
+
+    try {
+      final response = await http.get(
+        Uri.parse(
+          'https://benchmark-official.onrender.com/api/v1/subject/fetch-subjects',
+        ),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          final List<dynamic> subjectsData = data['data'] ?? [];
+          final List<Subject> subjects = subjectsData
+              .map((subjectJson) => Subject.fromJson(subjectJson))
+              .toList();
+
+          setState(() {
+            _allSubjects = subjects;
+            _subjectsFetched = true;
+            // Reset selected minor subjects when new data is loaded
+            _selectedMinorSubjects.clear();
+          });
+        }
+      }
+    } catch (e) {
+      log('Error fetching subjects: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load subjects: $e'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } finally {
+      setState(() {
+        _isLoadingSubjects = false;
+      });
+    }
+  }
+
+  // Get filtered minor subjects based on current semester and branch
+  List<Subject> get _availableMinorSubjects {
+    return _allSubjects
+        .where(
+          (subject) =>
+              subject.isMinor &&
+              subject.semester == _semester &&
+              subject.branches.contains(_branch),
+        )
+        .toList();
+  }
+
   Future<void> _handleRegistration() async {
+    // Custom validation for minor subjects
+    if (_hasMinorSubject && _selectedMinorSubjects.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select at least one minor subject'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     if (_formKeys[_currentPage].currentState!.validate()) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
@@ -168,6 +282,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           'latitude': position.latitude,
           'longitude': position.longitude,
           'accuracy': position.accuracy,
+          'hasMinorSubject': _hasMinorSubject,
+          'minorSubjectIds': _hasMinorSubject ? _selectedMinorSubjects : [],
         };
 
         log('Signup: User data to be sent: $userData');
@@ -184,6 +300,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
           branch: userData['branch'] as String,
           semester: userData['semester'] as String,
           deviceId: userData['deviceId'] as String,
+          subjects: _allSubjects
+              .where(
+                (subject) =>
+                    subject.semester == _semester &&
+                    subject.branches.contains(_branch),
+              )
+              .map((subject) => subject.id)
+              .toList(),
         );
 
         // Clear any existing auth data
@@ -809,9 +933,153 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         onChanged: (value) {
                           setState(() {
                             _semester = value!;
+                            // Reset minor subject selections when semester changes
+                            _selectedMinorSubjects.clear();
+                            _hasMinorSubject = false;
                           });
                         },
                       ),
+                      const SizedBox(height: 16),
+
+                      // Minor Subject Checkbox
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: _hasMinorSubject,
+                            onChanged: (value) {
+                              setState(() {
+                                _hasMinorSubject = value ?? false;
+                                if (!_hasMinorSubject) {
+                                  _selectedMinorSubjects.clear();
+                                } else {
+                                  // Fetch subjects when checkbox is checked (if not already fetched)
+                                  _fetchSubjects();
+                                }
+                              });
+                            },
+                          ),
+                          const Expanded(
+                            child: Text(
+                              'Opted for Minor Subject',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // Minor Subject Dropdown (show only when checkbox is checked)
+                      if (_hasMinorSubject) ...[
+                        const SizedBox(height: 16),
+                        if (_isLoadingSubjects)
+                          const Card(
+                            child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12),
+                                  Text('Loading minor subjects...'),
+                                ],
+                              ),
+                            ),
+                          )
+                        else if (_availableMinorSubjects.isEmpty)
+                          Card(
+                            color: Colors.orange[50],
+                            child: const Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.info, color: Colors.orange),
+                                  SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      'No minor subjects available for your semester and branch.',
+                                      style: TextStyle(color: Colors.orange),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        else
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Select Minor Subject(s):',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey[300]!),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Column(
+                                  children: _availableMinorSubjects.map((
+                                    subject,
+                                  ) {
+                                    final isSelected = _selectedMinorSubjects
+                                        .contains(subject.id);
+                                    return CheckboxListTile(
+                                      title: Text(
+                                        subject.subjectName,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      subtitle: Text(
+                                        'Code: ${subject.subjectCode}',
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                      value: isSelected,
+                                      onChanged: (bool? value) {
+                                        setState(() {
+                                          if (value == true) {
+                                            _selectedMinorSubjects.add(
+                                              subject.id,
+                                            );
+                                          } else {
+                                            _selectedMinorSubjects.remove(
+                                              subject.id,
+                                            );
+                                          }
+                                        });
+                                      },
+                                      controlAffinity:
+                                          ListTileControlAffinity.trailing,
+                                      dense: true,
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                              if (_hasMinorSubject &&
+                                  _selectedMinorSubjects.isEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: Text(
+                                    'Please select at least one minor subject',
+                                    style: TextStyle(
+                                      color: Colors.red[600],
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                      ],
                       const SizedBox(height: 32),
 
                       // Error Message
