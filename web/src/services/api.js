@@ -29,6 +29,7 @@ export const settingsEndpoints = {
     FETCH_ALL_SUBJECTS_API:BASE_URL + "/subject/fetch-subjects",
     FETCH_STUDENT_ATTENDANCE_API: BASE_URL + "/subject/student",
     FETCH_SUBJECTS_BY_INSTRUCTOR: BASE_URL + "/subject/instructor-subjects",
-    FETCH_ATTENDANCE_BY_SUBJECT:BASE_URL + "/subject/fetch-by-subject"
+    FETCH_ATTENDANCE_BY_SUBJECT:BASE_URL + "/subject/fetch-by-subject",
+    FETCH_GENRATE_API:BASE_URL+"/subject/qrcode"
     
   }

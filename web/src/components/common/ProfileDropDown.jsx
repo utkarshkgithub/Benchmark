@@ -26,12 +26,22 @@ function ProfileDropDown({ user }) {
         </Link>
       )}
       {user.accountType === "Instructor" && (
-        <Link
-          to="/dashboard/instructor"
-          className="font-bold hover:text-gray-800"
-        >
-          Dashboard
-        </Link>
+        <div className="flex gap-4">
+          <Link
+            to="/dashboard/genrate-qr"
+            className="font-bold hover:text-gray-800"
+          >
+            ShowQR
+          </Link>
+          <Link
+            to="/dashboard/instructor"
+            className="font-bold hover:text-gray-800"
+          >
+            Dashboard
+          </Link>
+          
+        </div>
+
       )}
       {user.accountType === "Admin" && (
         <Link

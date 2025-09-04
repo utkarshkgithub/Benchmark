@@ -20,6 +20,7 @@ import Instructor from './components/core/dashboard/Instructor/Instructor.jsx'
 import Student from './components/core/dashboard/Student/Student.jsx'
 import ContectUs from './components/core/outside/ContectUs.jsx'
 import PersonalDetails from './page/PersonalDetails.jsx'
+import InstructorQR from './components/core/dashboard/Instructor/InstructorQR.jsx'
 
 function App() {
 
@@ -54,6 +55,7 @@ const { user } = useSelector((state) => state.auth);
             user?.accountType === ACCOUNT_TYPE.INSTRUCTOR && (
               <>
                 <Route path="dashboard/instructor" element={<ProtectedRoute><Instructor/></ProtectedRoute>} />
+                <Route path="dashboard/genrate-qr" element={<ProtectedRoute><InstructorQR/></ProtectedRoute>} />
 
               </>
             )
