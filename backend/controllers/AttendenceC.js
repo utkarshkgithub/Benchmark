@@ -135,7 +135,7 @@ export const verifyQrCode = async (req, res) => {
     });
   } catch (error) {
     console.error("Verify QR error:", error);
-    return res.status(500).json({ success: false, message: "QR verification failed" });
+    return res.status(500).json({ success: false, message: "QR verification failed",error:error });
   }
 };
 
