@@ -149,3 +149,75 @@ export const fetchInstructorSubjects = async (token) =>{
         toast.dismiss(toastId);
     }
 }
+
+export const getSubjectStudents = async (token, subjectId) => {
+    const toastId = toast.loading("Loading students...");
+    try {
+        const response = await apiConnector(
+            "POST",
+            subjectEndPoints.GET_SUBJECT_STUDENTS_API,
+            { subjectId },
+            {
+                Authorization: `Bearer ${token}`,
+            }
+        );
+        if (!response.data.success) {
+            throw new Error(response.data.message);
+        }
+        toast.success("Students loaded");
+        return response;
+    } catch (error) {
+        console.error("GET_SUBJECT_STUDENTS_API API ERROR............", error);
+        toast.error("Failed to load students");
+    } finally {
+        toast.dismiss(toastId);
+    }
+};
+
+export const getAttendanceDetails = async (token, attendanceId) => {
+    const toastId = toast.loading("Fetching attendance...");
+    try {
+        const response = await apiConnector(
+            "POST",
+            subjectEndPoints.GET_ATTENDANCE_DETAILS_API,
+            { attendanceId },
+            {
+                Authorization: `Bearer ${token}`,
+            }
+        );
+        if (!response.data.success) {
+            throw new Error(response.data.message);
+        }
+        toast.success("Attendance loaded");
+        return response;
+    } catch (error) {
+        console.error("GET_ATTENDANCE_DETAILS_API API ERROR............", error);
+        toast.error("Failed to load attendance");
+    } finally {
+        toast.dismiss(toastId);
+    }
+};
+
+export const updateAttendance = async (token, attendanceId, updatedStudents) => {
+    const toastId = toast.loading("Submitting changes...");
+    try {
+        const response = await apiConnector(
+            "PUT",
+            subjectEndPoints.UPDATE_ATTENDANCE_API,
+            { attendanceId, updatedStudents },
+            {
+                Authorization: `Bearer ${token}`,
+            }
+        );
+        if (!response.data.success) {
+            throw new Error(response.data.message);
+        }
+        toast.success("Attendance updated");
+        return response;
+    } catch (error) {
+        console.error("UPDATE_ATTENDANCE_API API ERROR............", error);
+        toast.error("Failed to update attendance");
+    } finally {
+        toast.dismiss(toastId);
+    }
+};

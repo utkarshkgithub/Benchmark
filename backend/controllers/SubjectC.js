@@ -213,3 +213,25 @@ export const fetchAttendanceBySubject = async (req, res) => {
     });
   }
 };
+
+export const getSubjectStudents = async (req, res) => {
+  try {
+    const { subjectId } = req.body;
+    const subject = await Subject.findById(subjectId).populate("students", "firstName lastName email");
+
+    if (!subject) {
+      return res.status(404).json({ success: false, message: "Subject not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      subject,
+    });
+  } catch (error) {
+    console.error("Error fetching subject students:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch subject students",
+    });
+  }
+};

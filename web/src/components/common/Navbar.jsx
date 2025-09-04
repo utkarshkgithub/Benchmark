@@ -12,9 +12,9 @@ function Navbar() {
   return (
     <nav className="w-full flex justify-center items-center p-2 bg-black/5 backdrop-blur-md border-b border-b-black/20">
       {/* Brand */}
-      <div className='flex justify-between items-center md:w-[75%] w-[90%]'>
+      <div className='flex justify-between items-center gap-2 md:w-[75%] w-[90%]'>
         <Link to="/">
-        <h2 className="text-2xl font-bold text-black tracking-wide flex justify-center items-center gap-2">
+        <h2 className="text-2xl font-bold text-black tracking-wide flex justify-center items-center gap-4">
           <img src="https://upload.wikimedia.org/wikipedia/en/thumb/c/c6/Indian_Institute_of_Information_Technology%2C_Bhagalpur_logo.png/250px-Indian_Institute_of_Information_Technology%2C_Bhagalpur_logo.png" alt="" width={50}/>BENCHMARK
         </h2>
         </Link>

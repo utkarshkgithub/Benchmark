@@ -1,7 +1,7 @@
 import express from 'express'
-import { createSubject, fetchAttendanceBySubject, fetchInstructor,fetchInstructorSubjects,fetchSubjects } from '../controllers/SubjectC.js';
+import { createSubject, fetchAttendanceBySubject, fetchInstructor,fetchInstructorSubjects,fetchSubjects, getSubjectStudents } from '../controllers/SubjectC.js';
 import { auth, isAdmin, isInstructor, isStudent } from '../middleware/auth.js';
-import { generateQr, verifyQrCode } from '../controllers/AttendenceC.js';
+import { generateQr, getAttendanceDetails, updateAttendance, verifyQrCode } from '../controllers/AttendenceC.js';
 import { fetchStudentAttendance } from '../controllers/getStudentAttendance.js';
 const router = express.Router()
 
@@ -13,4 +13,8 @@ router.get("/fetch-subjects",fetchSubjects)
 router.get("/student", auth,isStudent, fetchStudentAttendance);
 router.get("/instructor-subjects", auth, isInstructor, fetchInstructorSubjects);
 router.get("/fetch-by-subject/:subjectId", auth, fetchAttendanceBySubject);
+router.put("/updateAttendance", auth, isInstructor, updateAttendance);
+router.post("/getSubjectStudents", auth, isInstructor, getSubjectStudents);
+router.post("/getAttendanceDetails", auth, isInstructor, getAttendanceDetails);
+
 export default router;
