@@ -80,12 +80,13 @@ export const verifyQrCode = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid request" });
     }
 
+    // 1️⃣ Find token
     const tokenDoc = await Token.findOne({ shortId: qr_data });
     if (!tokenDoc) {
       return res.status(401).json({ success: false, message: "Invalid or expired QR code" });
     }
 
-    // 2️⃣ decode jwt
+    // 2️⃣ Decode JWT
     let decoded;
     try {
       decoded = jwt.verify(tokenDoc.jwt, process.env.JWT_SECRET);
@@ -95,37 +96,54 @@ export const verifyQrCode = async (req, res) => {
 
     const { attendenceId } = decoded;
 
-    // 3️⃣ get attendance
+    // 3️⃣ Get attendance
     const attendance = await Attendence.findById(attendenceId).populate("subject");
     if (!attendance) {
       return res.status(404).json({ success: false, message: "Attendance not found" });
     }
 
+    // 4️⃣ Get subject details + students
     const subject = await Subject.findById(attendance.subject._id).populate("students");
+    if (!subject) {
+      return res.status(404).json({ success: false, message: "Subject not found" });
+    }
 
-    // 4️⃣ check if subject contains this student
+    // 5️⃣ Check if subject contains this student
     const isInSubject = subject.students.some(
       (stu) => stu._id.toString() === userId.toString()
     );
     if (!isInSubject) {
-      return res.status(403).json({ success: false, message: "You are not eligible for this subject (not in subject list)" });
+      return res.status(403).json({
+        success: false,
+        message: "You are not eligible for this subject (not in subject list)",
+      });
     }
 
-    // 5️⃣ check if student has this subject in User model
-    const userDetails = await Student.findById({userId:userId}).populate("subjects");
-    const isEligible = userDetails.subjects.some(
+    // 6️⃣ Check in Student model (userId + subjects)
+    const studentDetails = await Student.findOne({ userId }).populate("subjects");
+    if (!studentDetails) {
+      return res.status(404).json({ success: false, message: "Student details not found" });
+    }
+
+    const isEligible = studentDetails.subjects.some(
       (subj) => subj._id.toString() === subject._id.toString()
     );
     if (!isEligible) {
-      return res.status(403).json({ success: false, message: "You are not eligible for this subject (not in user subjects)" });
+      return res.status(403).json({
+        success: false,
+        message: "You are not eligible for this subject (not in student subjects)",
+      });
     }
 
-    // 6️⃣ already marked?
+    // 7️⃣ Already marked?
     if (attendance.presentStudent.includes(userId)) {
-      return res.status(400).json({ success: false, message: "Already marked present" });
+      return res.status(400).json({
+        success: false,
+        message: "Already marked present",
+      });
     }
 
-    // 7️⃣ mark attendance
+    // 8️⃣ Mark attendance
     attendance.presentStudent.push(userId);
     await attendance.save();
 
@@ -135,9 +153,14 @@ export const verifyQrCode = async (req, res) => {
     });
   } catch (error) {
     console.error("Verify QR error:", error);
-    return res.status(500).json({ success: false, message: "QR verification failed",error:error });
+    return res.status(500).json({
+      success: false,
+      message: "QR verification failed",
+      error: error.message,
+    });
   }
 };
+
 
 
 export const getAttendanceDetails = async (req, res) => {
