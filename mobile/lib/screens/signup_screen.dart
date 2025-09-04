@@ -67,9 +67,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String _semester = 'I';
   bool _hasMinorSubject = false;
   List<String> _selectedMinorSubjects = [];
-  List<Subject> _allSubjects = []; // Store all subjects fetched once
+  List<Subject> _allSubjects = [];
   bool _isLoadingSubjects = false;
-  bool _subjectsFetched = false; // Track if subjects have been fetched
+  bool _subjectsFetched = false;
 
   final _formKeys = [
     GlobalKey<FormState>(),
@@ -96,10 +96,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   void _nextPage() async {
     if (_currentPage < 2) {
       if (_formKeys[_currentPage].currentState!.validate()) {
-        // If moving from page 1 to page 2 (OTP verification), send OTP
         if (_currentPage == 0) {
           try {
-            // Show loading state
             setState(() {
               _currentPage++;
             });
@@ -108,7 +106,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
               curve: Curves.easeInOut,
             );
 
-            // Send OTP to user's email
             await AuthService.sendOTP(email: _emailController.text.trim());
 
             if (mounted) {
@@ -122,7 +119,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
               );
             }
           } catch (e) {
-            // If OTP sending fails, go back to previous page
             setState(() {
               _currentPage--;
             });
@@ -142,7 +138,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
             }
           }
         } else {
-          // For other page transitions, just move to next page
           setState(() {
             _currentPage++;
           });
@@ -151,7 +146,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
             curve: Curves.easeInOut,
           );
 
-          // Fetch subjects when moving to page 3 (student details page)
           if (_currentPage == 2) {
             _fetchSubjects();
           }
@@ -161,13 +155,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<Position> _getCurrentLocation() async {
-    // Check if location services are enabled
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      throw Exception('Location services are disabled.');
-    }
+    if (!serviceEnabled) throw Exception('Location services are disabled.');
 
-    // Check location permissions
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
@@ -175,7 +165,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
         throw Exception('Location permissions are denied');
       }
     }
-
     if (permission == LocationPermission.deniedForever) {
       throw Exception('Location permissions are permanently denied');
     }
@@ -184,12 +173,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> _fetchSubjects() async {
-    // Only fetch once
     if (_subjectsFetched || _isLoadingSubjects) return;
 
-    setState(() {
-      _isLoadingSubjects = true;
-    });
+    setState(() => _isLoadingSubjects = true);
 
     try {
       final response = await http.get(
@@ -210,7 +196,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
           setState(() {
             _allSubjects = subjects;
             _subjectsFetched = true;
-            // Reset selected minor subjects when new data is loaded
             _selectedMinorSubjects.clear();
           });
         }
@@ -226,13 +211,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
         );
       }
     } finally {
-      setState(() {
-        _isLoadingSubjects = false;
-      });
+      setState(() => _isLoadingSubjects = false);
     }
   }
 
-  // Get filtered minor subjects based on current semester and branch
   List<Subject> get _availableMinorSubjects {
     return _allSubjects
         .where(
@@ -245,7 +227,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> _handleRegistration() async {
-    // Custom validation for minor subjects
     if (_hasMinorSubject && _selectedMinorSubjects.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -263,11 +244,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       authProvider.setLoading(true);
 
       try {
-        // Get device ID and location
         final String deviceId = await DeviceIdHelper.getDeviceId();
         final Position position = await _getCurrentLocation();
 
-        // Create user data object
         final userData = {
           'firstName': _firstNameController.text.trim(),
           'lastName': _lastNameController.text.trim(),
@@ -288,7 +267,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
         log('Signup: User data to be sent: $userData');
 
-        // Call signup service
         await AuthService.signup(
           email: userData['email'] as String,
           password: userData['password'] as String,
@@ -310,11 +288,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
               .toList(),
         );
 
-        // Clear any existing auth data
         await authProvider.logout();
 
         if (mounted) {
-          // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text(
@@ -324,13 +300,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ),
           );
 
-          // Redirect to login screen
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const LoginScreen()),
           );
         }
       } catch (e) {
-        // Extract clean error message
         String errorMessage = _extractCleanErrorMessage(e.toString());
         authProvider.setError(errorMessage);
       } finally {
@@ -341,44 +315,57 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_getPageTitle()),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: Colors.deepPurple,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Progress Indicator
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: Row(
-                children: List.generate(3, (index) {
-                  return Expanded(
-                    child: Container(
-                      height: 4,
-                      margin: EdgeInsets.only(right: index < 2 ? 8 : 0),
-                      decoration: BoxDecoration(
-                        color: index <= _currentPage
-                            ? Colors.deepPurple
-                            : Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2),
+    return WillPopScope(
+      onWillPop: () async {
+        if (_currentPage > 0) {
+          setState(() => _currentPage--);
+          _pageController.previousPage(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(_getPageTitle()),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          foregroundColor: Colors.deepPurple,
+        ),
+        body: SafeArea(
+          child: Column(
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                child: Row(
+                  children: List.generate(3, (index) {
+                    return Expanded(
+                      child: Container(
+                        height: 4,
+                        margin: EdgeInsets.only(right: index < 2 ? 8 : 0),
+                        decoration: BoxDecoration(
+                          color: index <= _currentPage
+                              ? Colors.deepPurple
+                              : Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  }),
+                ),
               ),
-            ),
-            Expanded(
-              child: PageView(
-                controller: _pageController,
-                physics: const NeverScrollableScrollPhysics(),
-                children: [_buildPage1(), _buildPage2(), _buildPage3()],
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [_buildPage1(), _buildPage2(), _buildPage3()],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -397,7 +384,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  Widget _buildPage1() {
+  // === KEEP YOUR ORIGINAL PAGES ===
+Widget _buildPage1() {
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 400),
@@ -767,7 +755,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ),
     );
   }
-
+  
   Widget _buildPage3() {
     return Center(
       child: ConstrainedBox(
@@ -1143,12 +1131,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   String _extractCleanErrorMessage(String errorString) {
-    // Remove "Exception: " prefix if present
     if (errorString.startsWith('Exception: ')) {
       errorString = errorString.substring(11);
     }
-
-    // Extract clean error messages for common cases
     if (errorString.contains('Device already assigned to other')) {
       return 'Device already assigned to other';
     }
@@ -1163,13 +1148,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (errorString.contains('Network') || errorString.contains('connection')) {
       return 'Network error. Please check your connection';
     }
-
-    // For other errors, try to extract the main message before any status code
     final parts = errorString.split('(Status:');
     if (parts.isNotEmpty) {
       return parts[0].trim();
     }
-
     return errorString;
   }
 }

@@ -169,7 +169,7 @@ class AuthService {
         );
       }
     } catch (e) {
-      throw Exception('An error occurred during login: $e');
+      throw Exception('An error occurred during login check internet.');
     }
   }
 
@@ -339,21 +339,18 @@ class AuthService {
 
   static Future<Map<String, dynamic>> generateQRToken(
     String subjectCode,
-    String token,
-  ) async {
+    String token, ) async {
     if (_backendUrl == null) {
       throw Exception("BACKEND_URL is not set in the .env file");
     }
 
     final qrTokenUrl = Uri.parse('$_backendUrl/api/v1/subject/qrcode');
 
-    final Map<String, String> body = {"subjectCode": subjectCode};
+    final Map<String, dynamic> body = {
+      "subjectCode": subjectCode,
+    };
 
     try {
-      AppLogger.auth(
-        'Attempting to generate QR token for subject: $subjectCode',
-      );
-
       final headers = {
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $token',
@@ -379,7 +376,7 @@ class AuthService {
         final responseData = jsonDecode(response.body);
         print('Debug: QR Token API Response: $responseData');
         AppLogger.success(
-          'QR token generated successfully for subject: $subjectCode',
+          'QR token generated successfully for subject: $subjectCode ',
         );
         return responseData;
       } else {
@@ -397,6 +394,64 @@ class AuthService {
     } catch (e) {
       AppLogger.error('Error occurred during QR token generation', e);
       throw Exception('An error occurred during QR token generation: $e');
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> fetchAllSubjects(
+    String token,
+  ) async {
+    if (_backendUrl == null) {
+      throw Exception("BACKEND_URL is not set in the .env file");
+    }
+
+    final fetchSubjectsUrl = Uri.parse(
+      '$_backendUrl/api/v1/subject/fetch-subjects',
+    );
+
+    try {
+      AppLogger.auth('Attempting to fetch all subjects');
+
+      final headers = {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      };
+
+      NetworkLogger.logRequest(
+        method: 'GET',
+        url: fetchSubjectsUrl,
+        headers: headers,
+      );
+
+      final start = DateTime.now();
+      final response = await http.get(fetchSubjectsUrl, headers: headers);
+
+      NetworkLogger.logResponse(
+        response: response,
+        duration: DateTime.now().difference(start),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        print('Debug: Fetch Subjects API Response: $responseData');
+
+        if (responseData['success'] == true && responseData['data'] != null) {
+          AppLogger.success('Successfully fetched all subjects');
+          return List<Map<String, dynamic>>.from(responseData['data']);
+        } else {
+          throw Exception('Invalid response format');
+        }
+      } else {
+        print(
+          'Debug: Fetch Subjects API Error - Status: ${response.statusCode}, Body: ${response.body}',
+        );
+        final errorData = jsonDecode(response.body);
+        final errorMessage = errorData['message'] ?? 'Unknown error';
+        AppLogger.error('Failed to fetch subjects', errorMessage);
+        throw Exception('Failed to fetch subjects: $errorMessage');
+      }
+    } catch (e) {
+      AppLogger.error('Error occurred during subjects fetch', e);
+      throw Exception('An error occurred during subjects fetch: $e');
     }
   }
 
