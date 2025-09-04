@@ -5,6 +5,7 @@ import Attendence from "../models/Attendence.js";
 import Subject from "../models/Subject.js";
 import crypto from "crypto";
 import Token from "../models/Token.js";
+import Student from "../models/Student.js";
 
 dotenv.config();
 
@@ -60,8 +61,8 @@ export const generateQr = async (req, res) => {
       success: true,
       token: shortId,
       attendenceId: attendence._id,
-      subjectName: subjectDetails.subjectName, // ✅ frontend ke liye bhej diya
-      subjectCode: subjectDetails.subjectCode, // optional
+      subjectName: subjectDetails.subjectName, 
+      subjectCode: subjectDetails.subjectCode, 
       message: "QR token generated successfully."
     });
   } catch (error) {
@@ -84,6 +85,7 @@ export const verifyQrCode = async (req, res) => {
       return res.status(401).json({ success: false, message: "Invalid or expired QR code" });
     }
 
+    // 2️⃣ decode jwt
     let decoded;
     try {
       decoded = jwt.verify(tokenDoc.jwt, process.env.JWT_SECRET);
@@ -93,27 +95,50 @@ export const verifyQrCode = async (req, res) => {
 
     const { attendenceId } = decoded;
 
-    const attendance = await Attendence.findById(attendenceId);
+    // 3️⃣ get attendance
+    const attendance = await Attendence.findById(attendenceId).populate("subject");
     if (!attendance) {
       return res.status(404).json({ success: false, message: "Attendance not found" });
     }
 
+    const subject = await Subject.findById(attendance.subject._id).populate("students");
+
+    // 4️⃣ check if subject contains this student
+    const isInSubject = subject.students.some(
+      (stu) => stu._id.toString() === userId.toString()
+    );
+    if (!isInSubject) {
+      return res.status(403).json({ success: false, message: "You are not eligible for this subject (not in subject list)" });
+    }
+
+    // 5️⃣ check if student has this subject in User model
+    const userDetails = await Student.findById({userId:userId}).populate("subjects");
+    const isEligible = userDetails.subjects.some(
+      (subj) => subj._id.toString() === subject._id.toString()
+    );
+    if (!isEligible) {
+      return res.status(403).json({ success: false, message: "You are not eligible for this subject (not in user subjects)" });
+    }
+
+    // 6️⃣ already marked?
     if (attendance.presentStudent.includes(userId)) {
       return res.status(400).json({ success: false, message: "Already marked present" });
     }
 
+    // 7️⃣ mark attendance
     attendance.presentStudent.push(userId);
     await attendance.save();
 
     return res.status(200).json({
       success: true,
-      message: `Attendance marked successfully`,
+      message: "Attendance marked successfully",
     });
   } catch (error) {
     console.error("Verify QR error:", error);
     return res.status(500).json({ success: false, message: "QR verification failed" });
   }
 };
+
 
 export const getAttendanceDetails = async (req, res) => {
   try {
