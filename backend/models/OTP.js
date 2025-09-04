@@ -9,13 +9,13 @@ const OTPSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    Default: Date.now(),
-    expires: 300,
+    default: Date.now,   
+    expires: 300,       
   },
   otp: {
     type: String,
     required: true,
-  },
+  }
 });
 
 async function sendVerificationEmail(email, otp) {

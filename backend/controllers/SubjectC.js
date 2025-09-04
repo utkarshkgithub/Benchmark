@@ -24,14 +24,20 @@ export const createSubject = async (req, res) => {
     }
 
     // check subject already exists in semester
-    const existSubject = await Subject.findOne({ semester, subjectCode });
+    const existSubject = await Subject.findOne({
+      semester,
+      subjectCode,
+      branches: { $in: branches },   // ✅ check if any branch overlaps
+    });
+
     if (existSubject) {
       return res.status(409).json({
         success: false,
         message:
-          "This code is already assigned to another subject in this semester.",
+          "This subject code is already assigned to one of the selected branches in this semester.",
       });
     }
+    
 
     // check instructor
     const userDetails = await User.findById(instructor);
@@ -40,7 +46,7 @@ export const createSubject = async (req, res) => {
         .status(404)
         .json({ success: false, message: "User not found." });
     }
-    
+
     // Find instructor details where userId matches
     const instructorDetails = await Instructor.findOne({ userId: userDetails._id });
     if (!instructorDetails) {
@@ -53,7 +59,7 @@ export const createSubject = async (req, res) => {
     const newSubject = await Subject.create({
       subjectName,
       subjectCode,
-      instructor: userDetails._id,  
+      instructor: userDetails._id,
       semester,
       branches,
       isMinor,
@@ -74,8 +80,8 @@ export const createSubject = async (req, res) => {
     const instructorSubjects = await Subject.find({
       instructor: userDetails._id
     })
-    .select("subjectName subjectCode semester branch")
-    .lean();
+      .select("subjectName subjectCode semester branch")
+      .lean();
 
     populatedSubject.instructor.subjects = instructorSubjects;
 
@@ -94,10 +100,10 @@ export const createSubject = async (req, res) => {
 
 
 
-export const fetchInstructor = async (req,res) => {
+export const fetchInstructor = async (req, res) => {
   try {
-    const users = await User.find({accountType:"Instructor"}, { firstName: 1 , lastName:1, email:1}).lean();
-    
+    const users = await User.find({ accountType: "Instructor" }, { firstName: 1, lastName: 1, email: 1 }).lean();
+
     return res.status(200).json({
       success: true,
       message: "All Instructor fetched successfully",
@@ -107,7 +113,7 @@ export const fetchInstructor = async (req,res) => {
     console.error("Error fetching Instructor:", error);
     return s500(res, error.message);
   }
-    
+
 }
 
 export const fetchSubjects = async (req, res) => {

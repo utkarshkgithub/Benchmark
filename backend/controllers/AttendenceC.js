@@ -12,7 +12,7 @@ export const generateQr = async (req, res) => {
   try {
     const userId = req.user.id;
     const { subjectCode } = req.body;
-
+    
     const userDetails = await User.findById(userId);
     if (!userDetails) {
       return res.status(404).json({ success: false, message: "User not found" });
