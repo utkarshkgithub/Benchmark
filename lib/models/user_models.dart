@@ -5,7 +5,7 @@ class SubjectInfo {
   final String subjectName;
   final String subjectCode;
   final String semester;
-  final String branch;
+  final List<String> branches; // Changed from String to List<String>
   final String instructor;
   final List<dynamic> students;
   final int version;
@@ -15,19 +15,35 @@ class SubjectInfo {
     required this.subjectName,
     required this.subjectCode,
     required this.semester,
-    required this.branch,
+    required this.branches,
     required this.instructor,
     required this.students,
     required this.version,
   });
 
   factory SubjectInfo.fromJson(Map<String, dynamic> json) {
+    // Handle both single branch (old format) and multiple branches (new format)
+    List<String> branches = [];
+
+    try {
+      if (json['branches'] != null && json['branches'] is List) {
+        branches = List<String>.from(json['branches']);
+      } else if (json['branch'] != null &&
+          json['branch'].toString().isNotEmpty) {
+        // Fallback for old format
+        branches = [json['branch'].toString()];
+      }
+    } catch (e) {
+      print('SubjectInfo.fromJson - Error parsing branches: $e');
+      branches = [];
+    }
+
     return SubjectInfo(
       id: json['_id']?.toString() ?? '',
       subjectName: json['subjectName']?.toString() ?? '',
       subjectCode: json['subjectCode']?.toString() ?? '',
       semester: json['semester']?.toString() ?? '',
-      branch: json['branch']?.toString() ?? '',
+      branches: branches,
       instructor: json['instructor']?.toString() ?? '',
       students: json['students'] ?? [],
       version: json['__v'] ?? 0,
@@ -40,12 +56,15 @@ class SubjectInfo {
       'subjectName': subjectName,
       'subjectCode': subjectCode,
       'semester': semester,
-      'branch': branch,
+      'branches': branches,
       'instructor': instructor,
       'students': students,
       '__v': version,
     };
   }
+
+  // Helper getter for backward compatibility
+  String get branch => branches.isNotEmpty ? branches.first : '';
 }
 
 class LoginResponse {
@@ -140,7 +159,11 @@ class User {
     if (json['subjectsTaught'] != null && json['subjectsTaught'] is List) {
       for (var subject in json['subjectsTaught']) {
         if (subject is Map<String, dynamic>) {
-          subjectsTaught.add(SubjectInfo.fromJson(subject));
+          try {
+            subjectsTaught.add(SubjectInfo.fromJson(subject));
+          } catch (e) {
+            print('User.fromJson - Error parsing subject: $e');
+          }
         }
       }
     }

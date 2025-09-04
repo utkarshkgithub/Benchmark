@@ -20,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   static const double targetLongitude = 87.040193;
   // static const double targetLongitude = 87.039935;  //lib
   // static const double targetLongitude = 87.03284;  //ranitalab
-  static const double maxDistanceAllowed = 400.0; // 60 meters
+  static const double maxDistanceAllowed = 4200.0; // 60 meters
 
   @override
   void initState() {
@@ -63,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _handleQRScan() async {
-  // Show loading indicator
+    // Show loading indicator
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -72,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       bool isWithinRange = await _checkLocationDistance();
-      
+
       // Get the distance for the message (even if not within range)
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
@@ -144,239 +144,242 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, child) {
-        // Get user data
-        final user = authProvider.user;
-        String userName = 'Student';
+    return PopScope(
+      canPop: true, // Allow app to close from home screen
+      child: Consumer<AuthProvider>(
+        builder: (context, authProvider, child) {
+          // Get user data
+          final user = authProvider.user;
+          String userName = 'Student';
 
-        if (user != null) {
-          final firstName = user['firstName'] ?? '';
-          final lastName = user['lastName'] ?? '';
-          if (firstName.isNotEmpty || lastName.isNotEmpty) {
-            userName = '$firstName $lastName'.trim();
+          if (user != null) {
+            final firstName = user['firstName'] ?? '';
+            final lastName = user['lastName'] ?? '';
+            if (firstName.isNotEmpty || lastName.isNotEmpty) {
+              userName = '$firstName $lastName'.trim();
+            }
           }
-        }
 
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Student Dashboard'),
-            backgroundColor: Colors.deepPurple,
-            foregroundColor: Colors.white,
-            automaticallyImplyLeading: false,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.logout),
-                onPressed: () => _handleLogout(context),
-                tooltip: 'Logout',
-              ),
-            ],
-          ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                const Icon(Icons.school, size: 80, color: Colors.deepPurple),
-                const SizedBox(height: 24),
-                Text(
-                  'Welcome $userName',
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.deepPurple,
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Student Dashboard'),
+              backgroundColor: Colors.deepPurple,
+              foregroundColor: Colors.white,
+              automaticallyImplyLeading: false,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.logout),
+                  onPressed: () => _handleLogout(context),
+                  tooltip: 'Logout',
+                ),
+              ],
+            ),
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  const Icon(Icons.school, size: 80, color: Colors.deepPurple),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Welcome $userName',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.deepPurple,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Student Dashboard',
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 32),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Student Dashboard',
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 32),
 
-                // Location and Distance Card - Commented out for production
-                // Card(
-                //   elevation: 4,
-                //   child: Padding(
-                //     padding: const EdgeInsets.all(16.0),
-                //     child: Column(
-                //       crossAxisAlignment: CrossAxisAlignment.start,
-                //       children: [
-                //         Row(
-                //           children: [
-                //             const Icon(
-                //               Icons.location_on,
-                //               color: Colors.deepPurple,
-                //             ),
-                //             const SizedBox(width: 8),
-                //             Text(
-                //               'Location & Distance',
-                //               style: Theme.of(context).textTheme.titleLarge
-                //                   ?.copyWith(
-                //                     fontWeight: FontWeight.bold,
-                //                     color: Colors.deepPurple,
-                //                   ),
-                //             ),
-                //           ],
-                //         ),
-                //         const Divider(),
-                //         const SizedBox(height: 8),
-                //
-                //         if (_isLocationLoading)
-                //           const Center(child: CircularProgressIndicator())
-                //         else ...[
-                //           _buildInfoRow('Current Location', _currentLocation),
-                //           _buildInfoRow(
-                //             'Target Location',
-                //             '${targetLatitude.toStringAsFixed(6)}, ${targetLongitude.toStringAsFixed(6)}',
-                //           ),
-                //           _buildInfoRow(
-                //             'Distance from Target',
-                //             _distanceFromTarget,
-                //           ),
-                //         ],
-                //
-                //         const SizedBox(height: 16),
-                //         Center(
-                //           child: ElevatedButton.icon(
-                //             onPressed: _loadLocationAndDistance,
-                //             icon: const Icon(Icons.my_location),
-                //             label: const Text('Update Location'),
-                //             style: ElevatedButton.styleFrom(
-                //               backgroundColor: Colors.deepPurple,
-                //               foregroundColor: Colors.white,
-                //             ),
-                //           ),
-                //         ),
-                //       ],
-                //     ),
-                //   ),
-                // ),
+                  // Location and Distance Card - Commented out for production
+                  // Card(
+                  //   elevation: 4,
+                  //   child: Padding(
+                  //     padding: const EdgeInsets.all(16.0),
+                  //     child: Column(
+                  //       crossAxisAlignment: CrossAxisAlignment.start,
+                  //       children: [
+                  //         Row(
+                  //           children: [
+                  //             const Icon(
+                  //               Icons.location_on,
+                  //               color: Colors.deepPurple,
+                  //             ),
+                  //             const SizedBox(width: 8),
+                  //             Text(
+                  //               'Location & Distance',
+                  //               style: Theme.of(context).textTheme.titleLarge
+                  //                   ?.copyWith(
+                  //                     fontWeight: FontWeight.bold,
+                  //                     color: Colors.deepPurple,
+                  //                   ),
+                  //             ),
+                  //           ],
+                  //         ),
+                  //         const Divider(),
+                  //         const SizedBox(height: 8),
+                  //
+                  //         if (_isLocationLoading)
+                  //           const Center(child: CircularProgressIndicator())
+                  //         else ...[
+                  //           _buildInfoRow('Current Location', _currentLocation),
+                  //           _buildInfoRow(
+                  //             'Target Location',
+                  //             '${targetLatitude.toStringAsFixed(6)}, ${targetLongitude.toStringAsFixed(6)}',
+                  //           ),
+                  //           _buildInfoRow(
+                  //             'Distance from Target',
+                  //             _distanceFromTarget,
+                  //           ),
+                  //         ],
+                  //
+                  //         const SizedBox(height: 16),
+                  //         Center(
+                  //           child: ElevatedButton.icon(
+                  //             onPressed: _loadLocationAndDistance,
+                  //             icon: const Icon(Icons.my_location),
+                  //             label: const Text('Update Location'),
+                  //             style: ElevatedButton.styleFrom(
+                  //               backgroundColor: Colors.deepPurple,
+                  //               foregroundColor: Colors.white,
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
 
-                // const SizedBox(height: 16),
+                  // const SizedBox(height: 16),
 
-                // Device Information Card - Commented out for production
-                // Card(
-                //   elevation: 4,
-                //   child: Padding(
-                //     padding: const EdgeInsets.all(16.0),
-                //     child: Column(
-                //       crossAxisAlignment: CrossAxisAlignment.start,
-                //       children: [
-                //         Row(
-                //           children: [
-                //             const Icon(
-                //               Icons.phone_android,
-                //               color: Colors.deepPurple,
-                //             ),
-                //             const SizedBox(width: 8),
-                //             Text(
-                //               'Device Information',
-                //               style: Theme.of(context).textTheme.titleLarge
-                //                   ?.copyWith(
-                //                     fontWeight: FontWeight.bold,
-                //                     color: Colors.deepPurple,
-                //                   ),
-                //             ),
-                //           ],
-                //         ),
-                //         const Divider(),
-                //         const SizedBox(height: 8),
-                //
-                //         if (_isLoading)
-                //           const Center(child: CircularProgressIndicator())
-                //         else ...[
-                //           _buildInfoRow('Device ID', _deviceId),
-                //           if (_deviceInfo != null) ...[
-                //             _buildInfoRow(
-                //               'Platform',
-                //               _deviceInfo!['platform'] ?? 'Unknown',
-                //             ),
-                //             _buildInfoRow(
-                //               'Model',
-                //               _deviceInfo!['model'] ?? 'Unknown',
-                //             ),
-                //             if (_deviceInfo!['brand'] != null)
-                //               _buildInfoRow('Brand', _deviceInfo!['brand']),
-                //             if (_deviceInfo!['version'] != null)
-                //               _buildInfoRow('Version', _deviceInfo!['version']),
-                //             if (_deviceInfo!['error'] != null)
-                //               _buildErrorRow('Error', _deviceInfo!['error']),
-                //           ],
-                //         ],
-                //
-                //         const SizedBox(height: 16),
-                //         Center(
-                //           child: ElevatedButton.icon(
-                //             onPressed: _loadDeviceInfo,
-                //             icon: const Icon(Icons.refresh),
-                //             label: const Text('Refresh Device Info'),
-                //             style: ElevatedButton.styleFrom(
-                //               backgroundColor: Colors.deepPurple,
-                //               foregroundColor: Colors.white,
-                //             ),
-                //           ),
-                //         ),
-                //       ],
-                //     ),
-                //   ),
-                // ),
-                const SizedBox(height: 16),
+                  // Device Information Card - Commented out for production
+                  // Card(
+                  //   elevation: 4,
+                  //   child: Padding(
+                  //     padding: const EdgeInsets.all(16.0),
+                  //     child: Column(
+                  //       crossAxisAlignment: CrossAxisAlignment.start,
+                  //       children: [
+                  //         Row(
+                  //           children: [
+                  //             const Icon(
+                  //               Icons.phone_android,
+                  //               color: Colors.deepPurple,
+                  //             ),
+                  //             const SizedBox(width: 8),
+                  //             Text(
+                  //               'Device Information',
+                  //               style: Theme.of(context).textTheme.titleLarge
+                  //                   ?.copyWith(
+                  //                     fontWeight: FontWeight.bold,
+                  //                     color: Colors.deepPurple,
+                  //                   ),
+                  //             ),
+                  //           ],
+                  //         ),
+                  //         const Divider(),
+                  //         const SizedBox(height: 8),
+                  //
+                  //         if (_isLoading)
+                  //           const Center(child: CircularProgressIndicator())
+                  //         else ...[
+                  //           _buildInfoRow('Device ID', _deviceId),
+                  //           if (_deviceInfo != null) ...[
+                  //             _buildInfoRow(
+                  //               'Platform',
+                  //               _deviceInfo!['platform'] ?? 'Unknown',
+                  //             ),
+                  //             _buildInfoRow(
+                  //               'Model',
+                  //               _deviceInfo!['model'] ?? 'Unknown',
+                  //             ),
+                  //             if (_deviceInfo!['brand'] != null)
+                  //               _buildInfoRow('Brand', _deviceInfo!['brand']),
+                  //             if (_deviceInfo!['version'] != null)
+                  //               _buildInfoRow('Version', _deviceInfo!['version']),
+                  //             if (_deviceInfo!['error'] != null)
+                  //               _buildErrorRow('Error', _deviceInfo!['error']),
+                  //           ],
+                  //         ],
+                  //
+                  //         const SizedBox(height: 16),
+                  //         Center(
+                  //           child: ElevatedButton.icon(
+                  //             onPressed: _loadDeviceInfo,
+                  //             icon: const Icon(Icons.refresh),
+                  //             label: const Text('Refresh Device Info'),
+                  //             style: ElevatedButton.styleFrom(
+                  //               backgroundColor: Colors.deepPurple,
+                  //               foregroundColor: Colors.white,
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
+                  const SizedBox(height: 16),
 
-                // QR Scanner Button
-                SizedBox(
-                  width: double.infinity,
-                  child: Card(
-                    elevation: 4,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          const Icon(
-                            Icons.qr_code_scanner,
-                            size: 48,
-                            color: Colors.deepPurple,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'QR Code Scanner',
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.deepPurple,
+                  // QR Scanner Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: Card(
+                      elevation: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            const Icon(
+                              Icons.qr_code_scanner,
+                              size: 48,
+                              color: Colors.deepPurple,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'QR Code Scanner',
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.deepPurple,
+                                  ),
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Scan QR codes to mark attendance',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton.icon(
+                              onPressed: _handleQRScan,
+                              icon: const Icon(Icons.qr_code_scanner),
+                              label: const Text('Scan QR Code'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.deepPurple,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 12,
                                 ),
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'Scan QR codes to mark attendance',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton.icon(
-                            onPressed: _handleQRScan,
-                            icon: const Icon(Icons.qr_code_scanner),
-                            label: const Text('Scan QR Code'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.deepPurple,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 12,
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                )
-              ],
+                ],
+              ),
             ),
-          ),
-        );
-      },
-    );
+          ); // Scaffold end
+        }, // Consumer end
+      ),
+    ); // PopScope end
   }
 }
