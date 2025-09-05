@@ -275,10 +275,13 @@ export const getInstructorAttendanceSummary = async (req, res) => {
           }
         });
 
+        const email = `${student.email}`;
+        const roll = email.match(/\d{9}/)[0];
+        // console.log(roll)
         studentData.push({
           studentId: student._id,
           name: student.firstName + " " + student.lastName,
-          rollNumber: student.rollNumber || "N/A",
+          rollNumber: roll || "N/A",
           present: presentCount,
           total: totalClasses,
           percentage: totalClasses > 0 ? ((presentCount / totalClasses) * 100).toFixed(2) : "0.00",

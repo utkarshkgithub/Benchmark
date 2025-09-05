@@ -11,7 +11,7 @@ import {
 } from "../../../../services/opretions/Subject";
 import { Link } from "react-router-dom";
 
-const TWO_MIN = 5;
+const TWO_MIN = 120;
 
 const InstructorQR = () => {
     const { token, user } = useSelector((s) => s.auth);
@@ -216,7 +216,7 @@ const InstructorQR = () => {
     };
 
     return (
-        <div className="p-6 w-[calc(100vw-100px)] mx-auto space-y-8">
+        <div className="p-6 sm:w-[calc(100vw-30px)] mx-auto space-y-8">
             {/* Banners */}
             {error && (
                 <div className="rounded-lg p-4 shadow text-sm font-medium bg-red-50 text-red-800 border border-red-200">
@@ -288,36 +288,45 @@ const InstructorQR = () => {
             )}
 
             {/* QR Modal */}
+
             {viewMode === "qr" && (
-                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 ">
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 space-y-1 text-center">
-                        <h3 className="text-2xl font-bold text-gray-800">
-                            {selectedSubject?.subjectName}
-                        </h3>
-                        <p className="text-gray-500">{selectedSubject?.subjectCode}</p>
+  <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md md:max-w-xl lg:max-w-2xl p-2 sm:p-2 space-y-4 text-center">
+      <h3 className="text-xl md:text-2xl font-bold text-gray-800">
+        {selectedSubject?.subjectName}
+      </h3>
+      <p className="text-sm md:text-base text-gray-500">
+        {selectedSubject?.subjectCode}
+      </p>
 
-                        <div
-                            className={`inline-flex items-center px-4 rounded-full border-2 ${getTimerColor()}`}
-                        >
-                            <span className="font-bold">{timeLabel}</span>
-                        </div>
+      <div
+        className={`inline-flex items-center px-3 md:px-4 py-1 rounded-full border-2 ${getTimerColor()}`}
+      >
+        <span className="font-bold text-sm md:text-base">{timeLabel}</span>
+      </div>
 
-                        <div className="bg-gray-50 rounded-xl p-6">
-                            <QRCodeCanvas value={qrData} size={420} />
-                        </div>
+      <div className="bg-gray-50 rounded-xl p-2 sm:p-6 flex justify-center">
+        <div className="w-full max-w-[380px] sm:max-w-[550px] ">
+          <QRCodeCanvas
+            value={qrData}
+            size={256} // default, auto scales with wrapper div
+            style={{ width: "100%", height: "auto" }}
+          />
+        </div>
+      </div>
 
-                        <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3">
+        <button
+          onClick={resetToInitial}
+          className="w-full py-2 rounded-xl border text-gray-600 hover:bg-gray-50"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
-                            <button
-                                onClick={resetToInitial}
-                                className="w-full py-2 rounded-xl border text-gray-600 hover:bg-gray-50"
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* Attendance Review */}
             {viewMode === "list" && (

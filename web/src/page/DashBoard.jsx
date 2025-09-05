@@ -19,16 +19,16 @@ function DashBoard() {
     )
   }
   return (
-    <div className=' flex gap-2 box-border'>
-      <div className='w-[50px] bg-white p-4  flex flex-col'>
+    <div className=' flex box-border items-center justify-center'>
+      <div className='w-[0px] bg-white flex flex-col '>
         
-        <div className='w-[50px]'>
+        <div className='w-[0]'>
           <Sidebar />
         </div>
       </div>
 
 
-      <div className='bg-white'>
+      <div className='bg-white min-w-[calc(100vw-100px)]'>
 
         <Outlet></Outlet>
 

@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { fetchStudentAttendance } from "../../../../services/opretions/Subject";
 
 const Student = () => {
-  const { user, token } = useSelector((state) => state.auth); // logged-in student
+  const { user, token } = useSelector((state) => state.auth);
   const [attendance, setAttendance] = useState([]);
   const [filteredAttendance, setFilteredAttendance] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -15,7 +15,7 @@ const Student = () => {
     setLoading(true);
     try {
       const res = await fetchStudentAttendance(token);
-      setAttendance(res?.data?.attendance || []); // ✅ correct key from API
+      setAttendance(res?.data?.attendance || []);
     } catch (err) {
       console.error("Error fetching attendance:", err);
       setError("Failed to fetch attendance");
@@ -51,7 +51,7 @@ const Student = () => {
   }
 
   return (
-    <div className="max-h-[calc(100vh-70px)] w-[calc(100vw-100px)] overflow-hidden">
+    <div className="max-h-[calc(100vh-70px)] w-[calc(100vw-30px)] overflow-hidden mt-4">
       <div className="overflow-scroll max-h-[calc(100vh-70px)]">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-800">
@@ -60,7 +60,7 @@ const Student = () => {
         </div>
 
         {/* Search bar */}
-        <div className="mb-4 ml-1">
+        <div className="mb-6 ml-1">
           <div className="relative">
             <input
               type="text"
@@ -86,63 +86,47 @@ const Student = () => {
           </div>
         </div>
 
-        {/* Attendance Table */}
-        <div className="bg-white rounded-lg shadow-md overflow-scroll">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Subject
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total Classes
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Present Count
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Percentage
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredAttendance.length > 0 ? (
-                filteredAttendance.map((record, index) => (
-                  <tr key={index}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-bold">
-                      {record.subjectName}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {record.totalClasses}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {record.presentCount}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <span
-                        className={`px-3 py-1 rounded-lg font-semibold ${
-                          parseFloat(record.percentage) >= 75
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
-                      >
-                        {record.percentage}%
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="4"
-                    className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500"
-                  >
-                    No attendance data available
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        {/* Attendance Cards */}
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredAttendance.length > 0 ? (
+            filteredAttendance.map((record, index) => (
+              <div
+                key={index}
+                className="bg-gray-200 rounded-2xl shadow-lg p-6 flex flex-col items-start transition hover:shadow-xl"
+              >
+                <h2 className="text-lg font-bold text-gray-800 mb-1">
+                  {record.subjectName}
+                </h2>
+                <p className="text-sm text-gray-500 mb-4">
+                  Total Classes: {record.totalClasses}
+                </p>
+
+                <div className="w-full flex justify-between items-center">
+                  <div>
+                    <p className="text-gray-600 text-sm">Present</p>
+                    <p className="text-lg font-semibold">{record.presentCount}</p>
+                  </div>
+
+                  <div>
+                    <p className="text-gray-600 text-sm">Attendance</p>
+                    <span
+                      className={`px-3 py-1 rounded-lg font-semibold text-sm ${
+                        parseFloat(record.percentage) >= 75
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {record.percentage}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="col-span-full text-center text-gray-500">
+              No attendance data available
+            </div>
+          )}
         </div>
       </div>
     </div>

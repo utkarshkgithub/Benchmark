@@ -9,7 +9,7 @@ function MyProfile() {
 
   return (
     <div className='flex justify-end items-center'>
-      <div className="p-5 flex flex-col gap-6 w-11/12">
+      <div className=" flex flex-col gap-6 w-11/12">
         <h1 className="font-extrabold text-4xl">My Profile</h1>
 
         {/* section-1 (Image + Name + Email) */}
