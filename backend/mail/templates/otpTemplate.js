@@ -21,7 +21,7 @@ export const otpTemplate = (otp) => {
       <p>This OTP is valid for 5 minutes.</p>
       <div class="support">
         If you did not request this, ignore this email.<br/>
-        Need help? Contact <a href="mailto:info@benchmark.com">info@benchmark.com</a>.
+        Need help? Contact <a href="mailto:iiitbhbenchmark@gmail.com">iiitbhbenchmark@gmail.com</a>.
       </div>
     </div>
   </body>

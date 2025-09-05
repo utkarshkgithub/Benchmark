@@ -202,13 +202,14 @@ export function login(email, password, navigate) {
 
 export function getPasswordResetToken(email, setEmailSent) {
   return async (dispatch) => {
+    console.log("email1:- ",email);
     const toastId = toast.loading("Loading...")
     dispatch(setLoading(true))
     try {
       const response = await apiConnector("POST", endpoints.RESETPASSTOKEN_API, {
         email,
       });
-      // console.log("RESETPASSTOKEN RESPONSE............", response)
+      console.log("RESETPASSTOKEN RESPONSE............", response)
 
       if (!response.data.success) {
         throw new Error(response.data.message)
