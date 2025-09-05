@@ -24,7 +24,7 @@ export const createSubject = async (req, res) => {
     // check subject already exists in semester
     const existSubject = await Subject.findOne({
       semester,
-      subjectCode,
+      subjectName,
       branches: { $in: branches },   // ✅ check if any branch overlaps
     });
 
