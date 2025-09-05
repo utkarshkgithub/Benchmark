@@ -11,7 +11,7 @@ export default function ChangeProfilePicture() {
   const { token } = useSelector((state) => state.auth)
   const { user } = useSelector((state) => state.auth)
   const dispatch = useDispatch()
-  console.log("11>>11:-",user);
+  // console.log("11>>11:-",user);
   const [loading, setLoading] = useState(false)
   const [imageFile, setImageFile] = useState(null)
   const [previewSource, setPreviewSource] = useState(null)

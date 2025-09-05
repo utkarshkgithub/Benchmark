@@ -103,7 +103,7 @@ export const generateQr = async (token, formData) => {
             }
         );
 
-        console.log("GENRATE QR TOKEN API RESPONSE:", response);
+        // console.log("GENRATE QR TOKEN API RESPONSE:", response);
 
         if (!response.data.success) {
             throw new Error(response.data.message);
