@@ -179,7 +179,7 @@ export const signUp = async (req, res) => {
       accountType,
       approved: accountType === "Instructor" ? false : true,
       active: true,
-      image: `https://api.dicebear.com/5.x/initials/svg?seed=${firstName}%20${lastName}`,
+      image: `https://api.dicebear.com/5.x/initials/png?seed=${firstName}%20${lastName}`,
     });
 
     let user = "";

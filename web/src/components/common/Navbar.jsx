@@ -10,7 +10,7 @@ function Navbar() {
 
   // console.log(token)
   return (
-    <nav className="w-full flex justify-center items-center p-2 bg-black/5 backdrop-blur-md border-b border-b-black/20">
+    <nav className="w-full flex justify-center items-center p-2 bg-black/5 backdrop-blur-md border-b border-b-black/20 z-10">
       {/* Brand */}
       <div className='flex justify-between items-center gap-2 md:w-[75%] w-[90%]'>
         <Link to="/">

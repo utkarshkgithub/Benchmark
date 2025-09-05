@@ -15,9 +15,9 @@ export function sendOtp(email, navigate) {
         email,
         checkUserPresent: true,
       })
-      console.log("SENDOTP API RESPONSE............", response)
+      // console.log("SENDOTP API RESPONSE............", response)
 
-      console.log(response.data.success)
+      // console.log(response.data.success)
 
       if (!response.data.success) {
         throw new Error(response.data.message)
@@ -77,29 +77,29 @@ export function signUp(
       };
 
       // Log all data being sent
-      console.log("🚀 SIGNUP REQUEST DATA:");
-      console.log("----------------------------------------");
-      console.log("👤 Basic Info:");
-      console.log("   First Name:", firstName);
-      console.log("   Last Name:", lastName);
-      console.log("   Email:", email);
-      console.log("   Account Type:", accountType);
-      console.log("   OTP:", otp);
-      console.log("----------------------------------------");
+      // console.log("🚀 SIGNUP REQUEST DATA:");
+      // console.log("----------------------------------------");
+      // console.log("👤 Basic Info:");
+      // console.log("   First Name:", firstName);
+      // console.log("   Last Name:", lastName);
+      // console.log("   Email:", email);
+      // console.log("   Account Type:", accountType);
+      // console.log("   OTP:", otp);
+      // console.log("----------------------------------------");
       
-      if (accountType === "Student") {
-        console.log("📚 Student Specific Data:");
-        console.log("   Device ID:", deviceId);
-        console.log("   Roll Number:", rollNumber);
-        console.log("   Branch:", branch);
-        console.log("   Semester:", semester);
-        console.log("   Is Minor Opted:", isMinor);
-        console.log("   Selected Subjects:", selectedSubjects);
-      } else {
-        console.log("👨‍🏫 Instructor Specific Data:");
-        console.log("   Department:", department);
-      }
-      console.log("----------------------------------------");
+      // if (accountType === "Student") {
+        // console.log("📚 Student Specific Data:");
+        // console.log("   Device ID:", deviceId);
+        // console.log("   Roll Number:", rollNumber);
+        // console.log("   Branch:", branch);
+        // console.log("   Semester:", semester);
+        // console.log("   Is Minor Opted:", isMinor);
+        // console.log("   Selected Subjects:", selectedSubjects);
+      // } else {
+      //   console.log("👨‍🏫 Instructor Specific Data:");
+      //   console.log("   Department:", department);
+      // }
+      // console.log("----------------------------------------");
 
       const response = await apiConnector("POST", endpoints.SIGNUP_API, {
         accountType,
@@ -118,14 +118,14 @@ export function signUp(
       });
 
 
-      console.log("🔄 SIGNUP API RESPONSE:");
-      console.log("----------------------------------------");
-      console.log("Status:", response.status);
-      console.log("Success:", response.data.success);
-      console.log("Message:", response.data.message);
-      console.log("User Details:", response.data.userDetails);
-      console.log("Additional Data:", response.data.user);
-      console.log("----------------------------------------");
+      // console.log("🔄 SIGNUP API RESPONSE:");
+      // console.log("----------------------------------------");
+      // console.log("Status:", response.status);
+      // console.log("Success:", response.data.success);
+      // console.log("Message:", response.data.message);
+      // console.log("User Details:", response.data.userDetails);
+      // console.log("Additional Data:", response.data.user);
+      // console.log("----------------------------------------");
 
       if (!response.data.success) {
         throw new Error(response.data.message);
@@ -149,15 +149,15 @@ export function login(email, password, navigate) {
   return async (dispatch) => {
     const toastId = toast.loading("Loading...");
     dispatch(setLoading(true));
-    console.log("email1:-", email)
-    console.log("password:-", password)
+    // console.log("email1:-", email)
+    // console.log("password:-", password)
     try {
       const response = await apiConnector("POST", endpoints.LOGIN_API, {
         email,
         password,
       });
 
-      console.log("LOGIN API RESPONSE............", response);
+      // console.log("LOGIN API RESPONSE............", response);
 
       if (!response.data.success) {
         throw new Error(response.data.message);
@@ -181,7 +181,7 @@ export function login(email, password, navigate) {
       // Persist token and user in local storage
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify({ ...user, image: userImage }));
-      console.log(user.accountType)
+      // console.log(user.accountType)
       // Navigate to dashboard based on account type
       const dashboardPath = user.accountType === "Admin"
         ? "/dashboard/admin"
@@ -208,7 +208,7 @@ export function getPasswordResetToken(email, setEmailSent) {
       const response = await apiConnector("POST", endpoints.RESETPASSTOKEN_API, {
         email,
       });
-      console.log("RESETPASSTOKEN RESPONSE............", response)
+      // console.log("RESETPASSTOKEN RESPONSE............", response)
 
       if (!response.data.success) {
         throw new Error(response.data.message)
@@ -236,7 +236,7 @@ export function resetPassword(password, confirmPassword, token, navigate) {
         token,
       })
 
-      console.log("RESETPASSWORD RESPONSE............", response)
+      ("RESETPASSWORD RESPONSE............", response)
 
       if (!response.data.success) {
         throw new Error(response.data.message)

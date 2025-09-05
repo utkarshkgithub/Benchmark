@@ -36,8 +36,8 @@ export const sidebarLinks = [
   },
   {
     id: 4,
-    name: "Take Attendence",
-    path: "/dashboard/take-attendence",
+    name: "Take Attendance",
+    path: "/dashboard/take-attendance",
     type: ACCOUNT_TYPE.INSTRUCTOR,
     icon: "VscAdd",
   },

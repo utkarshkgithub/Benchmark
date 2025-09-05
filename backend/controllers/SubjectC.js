@@ -1,10 +1,8 @@
 import Instructor from "../models/Instructor.js";
 import User from "../models/User.js";
-import Attendence from "../models/Attendence.js";
 import Subject from "../models/Subject.js";
 import Student from "../models/Student.js";
-// controllers/attendanceController.js
-
+import Attendance from "../models/Attendence.js";
 
 export const createSubject = async (req, res) => {
   try {
@@ -182,7 +180,7 @@ export const fetchAttendanceBySubject = async (req, res) => {
     }
 
     // ✅ get attendance records
-    const attendance = await Attendence.find({ subject: subjectId })
+    const attendance = await Attendance.find({ subject: subjectId })
       .populate("presentStudent", "firstName lastName email")
       .sort({ createdAt: -1 });
 

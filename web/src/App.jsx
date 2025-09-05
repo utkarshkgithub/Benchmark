@@ -21,6 +21,8 @@ import Student from './components/core/dashboard/Student/Student.jsx'
 import ContectUs from './components/core/outside/ContectUs.jsx'
 import PersonalDetails from './page/PersonalDetails.jsx'
 import InstructorQR from './components/core/dashboard/Instructor/InstructorQR.jsx'
+import InstructorSummary from './components/core/dashboard/Instructor/InstructorSummary.jsx'
+import Error from './components/common/Error.jsx'
 
 function App() {
 
@@ -56,6 +58,7 @@ const { user } = useSelector((state) => state.auth);
               <>
                 <Route path="dashboard/instructor" element={<ProtectedRoute><Instructor/></ProtectedRoute>} />
                 <Route path="dashboard/genrate-qr" element={<ProtectedRoute><InstructorQR/></ProtectedRoute>} />
+                <Route path="dashboard/attendence-summary" element={<ProtectedRoute><InstructorSummary/></ProtectedRoute>} />
 
               </>
             )
@@ -69,7 +72,10 @@ const { user } = useSelector((state) => state.auth);
             )
           }
         </Route>
+        <Route path='*' element={<Error/>}></Route>
         </Routes>
+
+        
       {/* <PWABadge /> */}
       {/* <BackgroundBeams/> */}
     </div>

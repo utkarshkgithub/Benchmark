@@ -1,6 +1,5 @@
-import Attendence from "../models/Attendence.js";
 import Student from "../models/Student.js";
-
+import Attendance from "../models/Attendence.js";
 export const fetchStudentAttendance = async (req, res) => {
   try {
     // ✅ Get logged-in user id from req.user (auth middleware must set this)
@@ -13,7 +12,7 @@ export const fetchStudentAttendance = async (req, res) => {
     }
 
     // ✅ Fetch attendance records for student's subjects
-    const attendanceRecords = await Attendence.find({
+    const attendanceRecords = await Attendance.find({
       subject: { $in: student.subjects },
     })
       .populate("subject", "subjectName subjectCode")

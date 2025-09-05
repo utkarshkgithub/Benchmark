@@ -29,15 +29,14 @@ const SignIn = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 font-sans">
+    <div className="flex items-center justify-center bg-gray-100 font-sans">
       <div className="w-full max-w-md p-8 space-y-6">
         {/* Header Section */}
-        <div className="text-center">
-          <FaGraduationCap className="mx-auto h-12 w-12 text-teal-600" />
-          <h1 className="text-4xl font-bold mt-4 text-gray-800">Welcome Back</h1>
-          <p className="mt-2 text-lg text-gray-600">Sign in to your account to continue</p>
+        <div>
+ <h1 className="text-4xl text-center font-bold  text-gray-800">Welcome Back</h1>
+          <p className="text-lg text-center text-gray-600">Sign in to your account to continue</p>
         </div>
-
+       
         {/* Form Container */}
         <div className="bg-white p-8 rounded-lg shadow-lg border border-gray-200">
           <h2 className="text-2xl font-semibold">Sign In</h2>

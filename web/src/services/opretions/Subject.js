@@ -12,7 +12,7 @@ export const fetchAllSubjects = async (navigate) => {
             subjectEndPoints.FETCH_ALL_SUBJECTS_API,
             null
         );
-        console.log("fetch subject API RESPONSE............", response);
+        // console.log("fetch subject API RESPONSE............", response);
 
         if (!response.data.success) {
             throw new Error(response.data.message);
@@ -41,7 +41,7 @@ export const addSubject = async (formData, token, navigate) => {
                 Authorization: `Bearer ${token}`,
             }
         );
-        console.log("Add subject API RESPONSE............", response);
+        // console.log("Add subject API RESPONSE............", response);
 
         if (!response.data.success) {
             throw new Error(response.data.message);
@@ -63,7 +63,7 @@ export const fetchStudentAttendance = async (token) => {
     try {
         const response = await apiConnector(
             "GET",
-            
+
             subjectEndPoints.FETCH_STUDENT_ATTENDANCE_API,
             null,
             {
@@ -71,7 +71,7 @@ export const fetchStudentAttendance = async (token) => {
             }
         );
 
-        console.log("Attendance API RESPONSE:", response);
+        // console.log("Attendance API RESPONSE:", response);
 
         if (!response.data.success) {
             throw new Error(response.data.message);
@@ -89,7 +89,7 @@ export const fetchStudentAttendance = async (token) => {
 
 
 
-export const generateQr = async (token,formData) => {
+export const generateQr = async (token, formData) => {
     // console.log("subjectCode",subjectCode)
     const toastId = toast.loading("Loading...");
     try {
@@ -103,7 +103,7 @@ export const generateQr = async (token,formData) => {
             }
         );
 
-        console.log("GENRATE QR TOKEN API RESPONSE:", response);
+        // console.log("GENRATE QR TOKEN API RESPONSE:", response);
 
         if (!response.data.success) {
             throw new Error(response.data.message);
@@ -121,12 +121,12 @@ export const generateQr = async (token,formData) => {
 
 
 
-export const fetchInstructorSubjects = async (token) =>{
+export const fetchInstructorSubjects = async (token) => {
     const toastId = toast.loading("Loading ...");
     try {
         const response = await apiConnector(
             "GET",
-            
+
             subjectEndPoints.FETCH_SUBJECTS_BY_INSTRUCTOR,
             null,
             {
@@ -134,7 +134,7 @@ export const fetchInstructorSubjects = async (token) =>{
             }
         );
 
-        console.log("FETCH SUBJECTS BY INSTRUCTOR API RESPONSE:", response);
+        // console.log("FETCH SUBJECTS BY INSTRUCTOR API RESPONSE:", response);
 
         if (!response.data.success) {
             throw new Error(response.data.message);
@@ -217,6 +217,36 @@ export const updateAttendance = async (token, attendanceId, updatedStudents) => 
     } catch (error) {
         console.error("UPDATE_ATTENDANCE_API API ERROR............", error);
         toast.error("Failed to update attendance");
+    } finally {
+        toast.dismiss(toastId);
+    }
+};
+
+
+
+export const getInstructorSummary = async (token) => {
+    const toastId = toast.loading("Loading summary...");
+    try {
+        const response = await apiConnector(
+            "GET",
+            subjectEndPoints.INSTRUCTOR_SUMMARY_API,
+            null,
+            {
+                Authorization: `Bearer ${token}`,
+            }
+        );
+
+        // console.log("INSTRUCTOR SUMMARY API RESPONSE:", response);
+
+        if (!response.data.success) {
+            throw new Error(response.data.message);
+        }
+
+        toast.success("Summary loaded");
+        return response;
+    } catch (error) {
+        console.error("INSTRUCTOR SUMMARY API ERROR:", error);
+        toast.error(error.message || "Failed to fetch summary");
     } finally {
         toast.dismiss(toastId);
     }

@@ -10,7 +10,7 @@ function DashBoard() {
   const { loading: authLoading } = useSelector((state) => state.auth);
   const { loading: profileLoading } = useSelector((state) => state.profile);
   const { user } = useSelector((state) => state.auth)
-  console.log(user)
+  // console.log(user)
   if (authLoading || profileLoading) {
     return (
       <div className='mt-20 dark:text-white text-black'>

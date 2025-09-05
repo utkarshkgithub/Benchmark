@@ -52,10 +52,9 @@ const Signup = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 font-sans">
-      <div className="w-full max-w-2xl p-8 space-y-6">
+    <div className="flex items-center justify-center  bg-gray-100 font-sans">
+      <div className="w-full max-w-2xl space-y-6">
         <div className="text-center">
-          <FaGraduationCap className="mx-auto h-12 w-12 text-teal-600" />
           <h1 className="text-4xl font-bold mt-4 text-gray-800">Create Account</h1>
           <p className="mt-2 text-lg text-gray-600">Join IIITBGP attendance management platform</p>
         </div>
@@ -104,8 +103,8 @@ const Signup = () => {
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
               />
             </div>
-
-            <div className="relative">
+<div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative w-full">
               <label className="block text-sm font-medium text-gray-700">Password</label>
               <input
                 type={showPassword ? "text" : "password"}
@@ -125,7 +124,7 @@ const Signup = () => {
               </button>
             </div>
 
-            <div className="relative">
+            <div className="relative w-full">
               <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
               <input
                 type={showConfirmPassword ? "text" : "password"}
@@ -144,7 +143,7 @@ const Signup = () => {
                 {showConfirmPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
               </button>
             </div>
-
+</div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Account Type</label>
               <select

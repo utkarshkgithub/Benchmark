@@ -38,6 +38,7 @@ const Instructor = () => {
           null,
           { Authorization: `Bearer ${token}` }
         );
+        // console.log("res:--",res)
         setAttendanceRecords(res.data.attendance || []);
         setFilteredRecords(res.data.attendance || []);
       } catch (err) {

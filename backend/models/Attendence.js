@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 
-const attendenceSchema = new mongoose.Schema(
+const attendanceSchema = new mongoose.Schema(
     {
         date: {
             type:String,
@@ -21,6 +21,6 @@ const attendenceSchema = new mongoose.Schema(
 );
 
 
-const Attendence = mongoose.model("Attendence", attendenceSchema);
-export default Attendence;
+const Attendance = mongoose.model("Attendance", attendanceSchema);
+export default Attendance;
 

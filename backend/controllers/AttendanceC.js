@@ -1,7 +1,7 @@
 import User from "../models/User.js";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
-import Attendence from "../models/Attendence.js";
+import Attendance from "../models/Attendence.js";
 import Subject from "../models/Subject.js";
 import crypto from "crypto";
 import Token from "../models/Token.js";
@@ -24,16 +24,17 @@ export const generateQr = async (req, res) => {
       return res.status(404).json({ success: false, message: "Subject not found" });
     }
 
-    // ✅ check if attendance already created in last 5 min
+    // ✅ 5 min ke andar agar same instructor + subject par attendance already hai to wahi use karo
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-    let attendence = await Attendence.findOne({
+    let attendance = await Attendance.findOne({
       subject: subjectDetails._id,
       instructor: userDetails._id,
       createdAt: { $gte: fiveMinutesAgo }
     });
 
-    if (!attendence) {
-      attendence = await Attendence.create({
+    // agar nahi hai to naya create karo
+    if (!attendance) {
+      attendance = await Attendance.create({
         date: new Date().toISOString(),
         subject: subjectDetails._id,
         instructor: userDetails._id,
@@ -41,14 +42,15 @@ export const generateQr = async (req, res) => {
       });
     }
 
-    // ✅ payload me ab subjectId dalenge
+    // ✅ payload me subjectId + attendanceId bhejenge
     const payload = {
-      id: userDetails._id,
+      instructorId: userDetails._id.toString(),
       subjectId: subjectDetails._id.toString(),
-      attendenceId: attendence._id.toString(),
+      attendanceId: attendance._id.toString(),
     };
     const jwtToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "2m" });
 
+    // shortId generate karo
     const shortId = crypto.randomBytes(4).toString("hex").slice(0, 7);
 
     await Token.create({
@@ -60,9 +62,10 @@ export const generateQr = async (req, res) => {
     return res.status(200).json({
       success: true,
       token: shortId,
-      attendenceId: attendence._id,
-      subjectName: subjectDetails.subjectName, 
-      subjectCode: subjectDetails.subjectCode, 
+      attendanceId: attendance._id,
+      subjectName: subjectDetails.subjectName,
+      subjectCode: subjectDetails.subjectCode,
+      presentStudents: attendance.presentStudent, // ✅ purane students bhi bhej diye
       message: "QR token generated successfully."
     });
   } catch (error) {
@@ -70,6 +73,7 @@ export const generateQr = async (req, res) => {
     return res.status(500).json({ success: false, message: "Token generation failed" });
   }
 };
+
 
 export const verifyQrCode = async (req, res) => {
   try {
@@ -94,10 +98,10 @@ export const verifyQrCode = async (req, res) => {
       return res.status(401).json({ success: false, message: "Expired or invalid token" });
     }
 
-    const { attendenceId } = decoded;
+    const { attendanceId } = decoded;
 
     // 3️⃣ Get attendance
-    const attendance = await Attendence.findById(attendenceId).populate("subject");
+    const attendance = await Attendance.findById(attendanceId).populate("subject");
     if (!attendance) {
       return res.status(404).json({ success: false, message: "Attendance not found" });
     }
@@ -167,7 +171,7 @@ export const getAttendanceDetails = async (req, res) => {
   try {
     const { attendanceId } = req.body;
 
-    const attendance = await Attendence.findById(attendanceId);
+    const attendance = await Attendance.findById(attendanceId);
     if (!attendance) {
       return res.status(404).json({ success: false, message: "Attendance not found" });
     }
@@ -211,7 +215,7 @@ export const updateAttendance = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid request" });
     }
 
-    const attendance = await Attendence.findById(attendanceId);
+    const attendance = await Attendance.findById(attendanceId);
     if (!attendance) {
       return res.status(404).json({ success: false, message: "Attendance not found" });
     }
@@ -235,5 +239,67 @@ export const updateAttendance = async (req, res) => {
   } catch (error) {
     console.error("Update attendance error:", error);
     return res.status(500).json({ success: false, message: "Attendance update failed" });
+  }
+};
+
+
+export const getInstructorAttendanceSummary = async (req, res) => {
+  try {
+    const instructorId = req.user.id;
+
+    // ✅ Get subjects taught by instructor
+    const subjects = await Subject.find({ instructor: instructorId }).populate("students");
+
+    if (!subjects || subjects.length === 0) {
+      return res.status(404).json({ success: false, message: "No subjects found" });
+    }
+
+    let summary = [];
+
+    for (const subject of subjects) {
+      // ✅ All attendance records for this subject
+      const attendanceRecords = await Attendance.find({ subject: subject._id });
+
+      const totalClasses = attendanceRecords.length;
+
+      // Prepare each student data
+      let studentData = [];
+
+      for (const student of subject.students) {
+        let presentCount = 0;
+
+        // ✅ Count present occurrences for this student
+        attendanceRecords.forEach(record => {
+          if (record.presentStudent.includes(student._id.toString())) {
+            presentCount++;
+          }
+        });
+
+        studentData.push({
+          studentId: student._id,
+          name: student.firstName + " " + student.lastName,
+          rollNumber: student.rollNumber || "N/A",
+          present: presentCount,
+          total: totalClasses,
+          percentage: totalClasses > 0 ? ((presentCount / totalClasses) * 100).toFixed(2) : "0.00",
+        });
+      }
+
+      summary.push({
+        subjectId: subject._id,
+        subjectName: subject.subjectName,
+        subjectCode: subject.subjectCode,
+        totalClasses,
+        students: studentData,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      summary,
+    });
+  } catch (error) {
+    console.error("Error fetching instructor summary:", error);
+    return res.status(500).json({ success: false, message: "Failed to fetch attendance summary" });
   }
 };
