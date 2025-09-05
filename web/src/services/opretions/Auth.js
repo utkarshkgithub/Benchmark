@@ -237,7 +237,7 @@ export function resetPassword(password, confirmPassword, token, navigate) {
         token,
       })
 
-      ("RESETPASSWORD RESPONSE............", response)
+      // console.log("RESETPASSWORD RESPONSE............", response)
 
       if (!response.data.success) {
         throw new Error(response.data.message)

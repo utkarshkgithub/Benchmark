@@ -29,7 +29,7 @@ const SignIn = () => {
   };
 
   return (
-    <div className="flex items-center justify-center bg-gray-100 font-sans">
+    <div className="flex items-center justify-center bg-gray-100 font-sans h-[calc(100vh-100px)]">
       <div className="w-full max-w-md p-8 space-y-6">
         {/* Header Section */}
         <div>

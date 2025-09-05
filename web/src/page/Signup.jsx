@@ -14,7 +14,7 @@ const Signup = () => {
   const dispatch = useDispatch();
 
   const [formData, setFormData] = useState({
-    accountType: "",
+    accountType: "Instructor",
     firstName: "",
     lastName: "",
     email: "",
@@ -52,10 +52,10 @@ const Signup = () => {
   };
 
   return (
-    <div className="flex items-center justify-center  bg-gray-100 font-sans">
+    <div className="flex items-center justify-center  bg-gray-100 font-sans h-[calc(100vh-100px)]">
       <div className="w-full max-w-2xl space-y-6">
         <div className="text-center">
-          <h1 className="text-4xl font-bold mt-4 text-gray-800">Create Account</h1>
+          <h1 className="text-4xl font-bold mt-4 text-gray-800">Create Faculty Account</h1>
           <p className="mt-2 text-lg text-gray-600">Join IIITBGP attendance management platform</p>
         </div>
 
@@ -144,7 +144,7 @@ const Signup = () => {
               </button>
             </div>
 </div>
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium text-gray-700">Account Type</label>
               <select
                 name="accountType"
@@ -158,7 +158,7 @@ const Signup = () => {
                 <option value="Instructor">Instructor</option>
                 <option value="Admin">Administrator</option>
               </select>
-            </div>
+            </div> */}
 
             <button
               type="submit"
