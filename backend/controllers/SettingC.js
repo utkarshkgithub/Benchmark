@@ -43,7 +43,8 @@ export const updateDisplayPicture = async (req, res) => {
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: "Failed to upload file"
+            message: "Failed to upload file",
+            error:error
         })
     }
 
