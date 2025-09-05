@@ -3,6 +3,8 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { getInstructorSummary } from "../../../../services/opretions/Subject";
 import { ChevronUp, ChevronDown } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const InstructorSummary = () => {
   const { token } = useSelector((state) => state.auth);
@@ -76,6 +78,36 @@ const InstructorSummary = () => {
     }));
   };
 
+  const exportToPDF = () => {
+    const subject = summary.find((s) => s.subjectId === selectedSubject);
+    if (!subject) return;
+
+    const doc = new jsPDF();
+    const tableColumn = ["Roll No", "Name", "Present", "Total", "Percentage"];
+    const tableRows = [];
+
+    processedStudents.forEach(student => {
+        const studentData = [
+            student.rollNumber,
+            student.name,
+            student.present,
+            student.total,
+            `${student.percentage}%`
+        ];
+        tableRows.push(studentData);
+    });
+
+    autoTable(doc, { 
+      head: [tableColumn], 
+      body: tableRows, 
+      startY: 20 
+    });
+    const date = new Date();
+    const dateStr = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+    doc.text(`Overall Attendance Report - ${subject.subjectName} (${subject.subjectCode}) - ${dateStr}`, 14, 15);
+    doc.save(`Overall_Attendance_${subject.subjectCode}_${dateStr}.pdf`);
+  }
+
   const getAttendanceColor = (percentage) => {
     const percent = parseFloat(percentage);
     if (percent >= 85) return "text-green-600";
@@ -122,9 +154,9 @@ const InstructorSummary = () => {
         </select>
       </div>
 
-      {/* Search */}
+      {/* Search and Export */}
       {selectedSubject && (
-        <div className="bg-white shadow-md rounded-xl p-4 border border-gray-100">
+        <div className="bg-white shadow-md rounded-xl p-4 border border-gray-100 flex justify-between items-center">
           <input
             type="text"
             placeholder="🔍 Search students..."
@@ -132,6 +164,12 @@ const InstructorSummary = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full md:w-1/2 border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 transition"
           />
+          <button
+            onClick={exportToPDF}
+            className="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-50"
+          >
+            Export to PDF
+          </button>
         </div>
       )}
 

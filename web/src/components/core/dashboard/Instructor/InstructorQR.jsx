@@ -2,6 +2,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { QRCodeCanvas } from "qrcode.react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import {
     generateQr,
     fetchInstructorSubjects,
@@ -11,7 +13,7 @@ import {
 } from "../../../../services/opretions/Subject";
 import { Link } from "react-router-dom";
 
-const TWO_MIN = 120;
+const TWO_MIN = 119;
 
 const InstructorQR = () => {
     const { token, user } = useSelector((s) => s.auth);
@@ -162,6 +164,31 @@ const InstructorQR = () => {
         // TODO: Navigate to the attendance history page for the subject
         resetToInitial();
     };
+
+    const exportToPDF = () => {
+        const doc = new jsPDF();
+        const tableColumn = ["Name", "Roll Number", "Status"];
+        const tableRows = [];
+
+        filteredStudents.forEach(student => {
+            const studentData = [
+                `${student.firstName} ${student.lastName}`,
+                student.rollNumber,
+                attendance[student._id] ? "Present" : "Absent"
+            ];
+            tableRows.push(studentData);
+        });
+
+        autoTable(doc, {
+            head: [tableColumn],
+            body: tableRows,
+            startY: 20,
+        });
+        const date = new Date();
+        const dateStr = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+        doc.text(`Attendance Report - ${selectedSubject.subjectName} (${selectedSubject.subjectCode}) - ${dateStr}`, 14, 15);
+        doc.save(`Attendance_${selectedSubject.subjectCode}_${dateStr}.pdf`);
+    }
 
     const resetToInitial = () => {
         setViewMode("initial");
@@ -314,7 +341,11 @@ const InstructorQR = () => {
         </div>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex gap-3">
+        <button onClick={closeQR}
+            className="w-full py-2 rounded-xl border text-gray-100 bg-blue-500">
+                view Attendance
+        </button>
         <button
           onClick={resetToInitial}
           className="w-full py-2 rounded-xl border text-gray-600 hover:bg-gray-50"
@@ -420,6 +451,13 @@ const InstructorQR = () => {
                             className="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-50"
                         >
                             Back
+                        </button>
+
+                        <button
+                            onClick={exportToPDF}
+                            className="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-50"
+                        >
+                            Export to PDF
                         </button>
 
                         <button
