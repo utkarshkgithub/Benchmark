@@ -21,7 +21,7 @@
             password:{
                 type:String,
                 required:true,
-                trim:true,
+                
             },
             accountType:{
                 type:String,

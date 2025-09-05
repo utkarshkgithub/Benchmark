@@ -186,48 +186,49 @@ export const signUp = async (req, res) => {
     });
 
     let user = "";
-
-    if (accountType === "Student") {
-      // Create composite device ID
-      const compositeDeviceId = `${firstName.toLowerCase()}_${lastName.toLowerCase()}_${rollNumber}_${deviceId}`;
-      
-      // ✅ पहले frontend से आए हुए subjects
-      let finalSubjects = [...subjects];
-
-      // ✅ अब DB से branch + semester match वाले सारे subjects निकालो
-      const branchSemesterSubjects = await Subject.find({
-        branch: branch,
-        semester: semester,
-      }).select("_id");
-
-      // ✅ extra subjects को भी final list में add कर दो
-      const extraSubjectIds = branchSemesterSubjects.map((sub) => sub._id.toString());
-
-      // ✅ दोनों arrays को merge करके unique बना दो
-      finalSubjects = [...new Set([...finalSubjects, ...extraSubjectIds])];
-
-      // ✅ अब student create करो
-      user = await Student.create({
-        userId: userDetails._id,
-        deviceId: compositeDeviceId, // Use composite device ID
-        rollNumber,
-        branch,
-        semester,
-        subjects: finalSubjects, // ✅ सारे subjects (frontend वाले + auto added)
-      });
-
-      // ✅ सारे subjects में student को भी add करो
-      await Subject.updateMany(
-        { _id: { $in: finalSubjects } },
-        { $addToSet: { students: userDetails._id } }
-      );
-    } else if (accountType === "Instructor") {
-      user = await Instructor.create({
-        userId: userDetails._id,
-        department,
+    try {
+      if (accountType === "Student") {
+        const compositeDeviceId = `${firstName.toLowerCase()}_${lastName.toLowerCase()}_${rollNumber}_${deviceId}`;
+        
+        let finalSubjects = [...subjects];
+  
+        const branchSemesterSubjects = await Subject.find({
+          branches: branch,
+          semester: semester,
+        }).select("_id");
+  
+        const extraSubjectIds = branchSemesterSubjects.map((sub) => sub._id.toString());
+  
+        finalSubjects = [...new Set([...finalSubjects, ...extraSubjectIds])];
+  
+        user = await Student.create({
+          userId: userDetails._id,
+          deviceId: compositeDeviceId,
+          rollNumber,
+          branch,
+          semester,
+          subjects: finalSubjects,
+        });
+  
+        await Subject.updateMany(
+          { _id: { $in: finalSubjects } },
+          { $addToSet: { students: user._id } }
+        );
+      } else if (accountType === "Instructor") {
+        user = await Instructor.create({
+          userId: userDetails._id,
+          department,
+        });
+      }
+    } catch (error) {
+      await User.findByIdAndDelete(userDetails._id);
+      console.error("Error during student/instructor creation:", error);
+      return res.status(500).json({
+        success: false,
+        message: "User could not be registered, please try again.",
       });
     }
-
+  
     return res.status(200).json({
       success: true,
       user,
