@@ -75,7 +75,7 @@ app.use(express.json())
 app.use(cookieParser()); 
 app.use(
 	cors({
-		origin:["https://benchmark-official.vercel.app","http://localhost:5173"],
+		origin:["https://benchmarkofficial.vercel.app","http://localhost:5173"],
 		credentials:true,
 		methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     	allowedHeaders: ["Content-Type", "Authorization"],
