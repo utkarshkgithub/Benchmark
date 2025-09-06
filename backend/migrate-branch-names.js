@@ -6,8 +6,9 @@
 import mongoose from 'mongoose';
 import Student from './models/Student.js';
 import Subject from './models/Subject.js';
-
-const MONGODB_URL = process.env.MONGODB_URL || 'mongodb://localhost:27017/your-database-name';
+import dotenv from 'dotenv'
+dotenv.config();
+const MONGODB_URL = process.env.MONGODB_URL;
 
 async function migrateBranchNames() {
   try {
