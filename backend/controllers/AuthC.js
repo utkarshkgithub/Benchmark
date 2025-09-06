@@ -9,6 +9,7 @@ import Student from "../models/Student.js";
 import Instructor from "../models/Instructor.js"
 import { passwordUpdated } from "../mail/templates/passwordUpdate.js";
 import Subject from "../models/Subject.js";
+import { normalizeBranchName } from "../utils/branchUtils.js";
 dotenv.config();
 
 //send otp
@@ -135,9 +136,8 @@ export const signUp = async (req, res) => {
     }
 
     if (accountType === "Student") {
-      if(branch == "Mechatornics" || branch == "MAE"){
-        branch="MAE"
-      }
+      // Normalize branch name
+      branch = normalizeBranchName(branch);
       // Create composite device ID
       const compositeDeviceId = `${firstName.toLowerCase()}_${lastName.toLowerCase()}_${rollNumber}_${deviceId}`;
       

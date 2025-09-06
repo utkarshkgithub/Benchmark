@@ -3,10 +3,11 @@ import User from "../models/User.js";
 import Subject from "../models/Subject.js";
 import Student from "../models/Student.js";
 import Attendance from "../models/Attendence.js";
+import { normalizeBranchNames } from "../utils/branchUtils.js";
 
 export const createSubject = async (req, res) => {
   try {
-    const {
+    let {
       instructor = "",
       branches = [],
       semester = "",
@@ -14,6 +15,9 @@ export const createSubject = async (req, res) => {
       subjectName = "",
       isMinor = false,
     } = req.body;
+
+    // Normalize branch names - convert Mechatronics to MAE
+    branches = normalizeBranchNames(branches);
 
     if (!instructor || !branches.length || !semester || !subjectCode || !subjectName) {
       return res

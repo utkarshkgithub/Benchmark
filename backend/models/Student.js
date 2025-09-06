@@ -19,7 +19,7 @@
             branch: {
                 type: String,
                 required: true,
-                enum: ["CSE", "ECE", "MAE", "MNC","Mechatronics"],
+                enum: ["CSE", "ECE", "MAE", "MNC"],
             },
             semester: {
                 type: String,
