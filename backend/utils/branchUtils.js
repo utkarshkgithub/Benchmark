@@ -15,18 +15,25 @@ export const normalizeBranchName = (branch) => {
 };
 
 /**
- * Normalizes an array of branch names
- * @param {string[]} branches - Array of branch names to normalize
+ * Normalizes branch names (string or array)
+ * @param {string|string[]} branches - Branch name(s) to normalize
  * @returns {string[]} - Array of normalized branch names
  */
 export const normalizeBranchNames = (branches) => {
+  if (!branches) return [];
+
+  // If a single branch string is passed, wrap it in an array
+  if (!Array.isArray(branches)) {
+    return [normalizeBranchName(branches)];
+  }
+
   return branches.map(branch => normalizeBranchName(branch));
 };
 
 /**
  * Valid branch names after normalization
  */
-export const VALID_BRANCHES = ["CSE", "ECE", "MAE", "MNC"];
+export const VALID_BRANCHES = ["CSE", "ECE", "MAE", "MNC", "PG"];
 
 /**
  * Legacy branch name mappings

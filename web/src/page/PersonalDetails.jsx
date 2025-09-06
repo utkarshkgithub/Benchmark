@@ -182,6 +182,7 @@ function PersonalDetails() {
                 <option value="ECE">ECE</option>
                 <option value="MAE">MAE</option>
                 <option value="MNC">MNC</option>
+                <option value="PG">PG</option>
               </select>
 
               <select

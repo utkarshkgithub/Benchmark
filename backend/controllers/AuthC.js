@@ -93,7 +93,6 @@ export const signUp = async (req, res) => {
       password,
       otp,
       rollNumber = "",
-      
       semester = "",
       deviceId = "",
       department = "",

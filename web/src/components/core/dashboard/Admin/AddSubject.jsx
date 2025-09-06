@@ -12,7 +12,7 @@ const AddSubject = () => {
   const { register, handleSubmit, reset } = useForm();
   const { token } = useSelector((state) => state.auth);
   const navigate = useNavigate();
-  const [loading,setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const fetchInstructor = async () => {
     try {
@@ -28,15 +28,15 @@ const AddSubject = () => {
   }, []);
 
   const onSubmit = async (data) => {
-    // console.log("data:-", data);
     const formData = new FormData();
     formData.append("subjectName", data.subjectName);
     formData.append("subjectCode", data.subjectCode);
     formData.append("instructor", data.instructor);
     formData.append("semester", data.semester);
 
-    // Handle multiple branches
-    data.branches.forEach(branch => {
+    // ✅ Ensure branches is always an array
+    const branches = Array.isArray(data.branches) ? data.branches : [data.branches];
+    branches.forEach(branch => {
       formData.append("branches", branch);
     });
 
@@ -128,7 +128,7 @@ const AddSubject = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Branches</label>
               <div className="space-y-2 mt-1">
-                {["CSE", "ECE", "MNC", "MAE"].map((branch) => (
+                {["CSE", "ECE", "MNC", "MAE", "PG"].map((branch) => (
                   <label key={branch} className="flex items-center space-x-2">
                     <input
                       type="checkbox"
@@ -166,9 +166,10 @@ const AddSubject = () => {
             </button>
             <button
               type="submit"
+              disabled={loading}
               className="px-4 py-2 rounded-md shadow-sm text-white bg-blue-600 font-medium hover:bg-blue-700"
             >
-              Save Subject
+              {loading ? "Saving..." : "Save Subject"}
             </button>
           </div>
         </form>

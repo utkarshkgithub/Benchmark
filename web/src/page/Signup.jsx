@@ -103,7 +103,7 @@ const Signup = () => {
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
               />
             </div>
-<div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative w-full">
               <label className="block text-sm font-medium text-gray-700">Password</label>
               <input
