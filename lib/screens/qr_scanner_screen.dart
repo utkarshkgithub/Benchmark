@@ -1,6 +1,7 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'dart:async';
+import '../utils/network_logger.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:http/http.dart' as http;
@@ -112,8 +113,20 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       AppLogger.error('Error sending QR data to endpoint', e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3),
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
         );
+
+        // Restart camera for another scan attempt
+        cameraController.start();
       }
     } finally {
       await Future.delayed(const Duration(seconds: 2));
@@ -124,28 +137,73 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   }
 
   void _showResponseDialog(http.Response response) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: Text('Response (${response.statusCode})'),
-        content: SingleChildScrollView(
-          child: SelectableText(
-            'Status: ${response.statusCode}\n\n${response.body}',
-            style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              cameraController.start();
-            },
-            child: const Text('Scan Again'),
-          ),
-        ],
-      ),
+    // ✅ Add logging before showing the dialog
+    NetworkLogger.logResponse(
+      response: response,
+      duration: Duration.zero, // You can't measure duration here, so just set 0
     );
+
+    try {
+      // Parse the response
+      final responseData = jsonDecode(response.body);
+      final bool isSuccess = responseData['success'] ?? false;
+      final String message = responseData['message'] ?? 'Unknown response';
+
+      if (isSuccess) {
+        // Show green success toast
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3), //toast duration
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        );
+
+        // Navigate back to home page after a short delay
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted) {
+            Navigator.of(context).pop(); // Go back to home screen
+          }
+        });
+      } else {
+        // Show red error toast for failed responses
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3),
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        );
+
+        // Restart camera for another scan attempt
+        cameraController.start();
+      }
+    } catch (e) {
+      // Handle JSON parsing errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error parsing response: ${response.body}'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      );
+
+      // Restart camera for another scan attempt
+      cameraController.start();
+    }
   }
 
   @override
@@ -191,7 +249,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                 width: 60,
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.6),
+                  color: Colors.black.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: Column(
@@ -225,7 +283,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               padding: const EdgeInsets.all(16),
               margin: const EdgeInsets.symmetric(horizontal: 24),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.7),
+                color: Colors.black.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(

@@ -34,7 +34,7 @@ class SubjectInfo {
         branches = [json['branch'].toString()];
       }
     } catch (e) {
-      print('SubjectInfo.fromJson - Error parsing branches: $e');
+      // print('SubjectInfo.fromJson - Error parsing branches: $e');
       branches = [];
     }
 
@@ -152,7 +152,7 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     // Debug logging
-    print('User.fromJson - Raw JSON: $json');
+    // print('User.fromJson - Raw JSON: $json');
 
     // Handle subjectsTaught field for instructors
     List<SubjectInfo> subjectsTaught = [];
@@ -162,7 +162,7 @@ class User {
           try {
             subjectsTaught.add(SubjectInfo.fromJson(subject));
           } catch (e) {
-            print('User.fromJson - Error parsing subject: $e');
+            // print('User.fromJson - Error parsing subject: $e');
           }
         }
       }
@@ -190,7 +190,7 @@ class User {
         createdAt = DateTime.parse(json['createdAt'].toString());
       }
     } catch (e) {
-      print('Error parsing createdAt: $e');
+      // print('Error parsing createdAt: $e');
     }
 
     try {

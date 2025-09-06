@@ -59,6 +59,14 @@ class AuthService {
 
     try {
       AppLogger.auth('Attempting to register user: $email');
+
+      // Add debug logging
+      print('DEBUG: Signup attempt for email: $email');
+      print('DEBUG: Device ID: $deviceId');
+      print('DEBUG: Roll Number: $rollNumber');
+      print('DEBUG: Branch: $branch, Semester: $semester');
+      print('DEBUG: Signup request body: $body');
+
       final headers = {'Content-Type': 'application/json; charset=UTF-8'};
       NetworkLogger.logRequest(
         method: 'POST',
@@ -72,6 +80,10 @@ class AuthService {
         headers: headers,
         body: jsonEncode(body),
       );
+
+      print('DEBUG: Signup response status: ${response.statusCode}');
+      print('DEBUG: Signup response body: ${response.body}');
+
       NetworkLogger.logResponse(
         response: response,
         duration: DateTime.now().difference(start),
@@ -79,7 +91,33 @@ class AuthService {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
+
+        // Validate that user data is properly returned
+        if (responseData['user'] == null) {
+          print('DEBUG: Registration succeeded but user data is missing');
+          throw Exception(
+            'Registration succeeded but user data is missing. Please contact support.',
+          );
+        }
+
         final signupResponse = SignupResponse.fromJson(responseData);
+
+        // // Additional validation
+        // if (signupResponse.user.email != email) {
+        //   print(
+        //     'DEBUG: Registration data mismatch - requested: $email, received: ${signupResponse.user.email}',
+        //   );
+        //   throw Exception(
+        //     'Registration data mismatch. Please try again or contact support.',
+        //   );
+        // }
+
+        print(
+          'DEBUG: Signup successful for user: ${signupResponse.user.email}',
+        );
+        print('DEBUG: User ID: ${signupResponse.user.userId}');
+        print('DEBUG: Roll Number: ${signupResponse.user.rollNumber}');
+        print('DEBUG: Device ID in response: ${signupResponse.user.deviceId}');
 
         AppLogger.success(
           'User registered successfully: ${signupResponse.userDetails.fullName}',
@@ -98,13 +136,48 @@ class AuthService {
 
         final errorData = jsonDecode(response.body);
         final errorMessage = errorData['message'] ?? 'Unknown error';
-        AppLogger.error('Failed to sign up user: $email', errorMessage);
-        throw Exception(
-          'Failed to sign up: $errorMessage (Status: ${response.statusCode})',
+
+        print(
+          'DEBUG: Signup failed - Status: ${response.statusCode}, Message: $errorMessage',
         );
+
+        // Better error handling for specific cases
+        if (errorMessage.toLowerCase().contains('device') &&
+            errorMessage.toLowerCase().contains('assigned')) {
+          print('DEBUG: Device ID conflict detected');
+          throw Exception(
+            'This device is already registered with another account. Each device can only be used for one account.',
+          );
+        }
+
+        if (errorMessage.toLowerCase().contains('email') &&
+            errorMessage.toLowerCase().contains('exists')) {
+          print('DEBUG: Email already exists');
+          throw Exception(
+            'An account with this email already exists. Please use the login page instead.',
+          );
+        }
+
+        AppLogger.error('Failed to sign up user: $email', errorMessage);
+        throw Exception(errorMessage);
       }
     } catch (e) {
+      print('DEBUG: Signup exception: $e');
       AppLogger.error('Error occurred during signup', e);
+
+      if (e.toString().contains('ClientException') ||
+          e.toString().contains('SocketException') ||
+          e.toString().contains('Failed host lookup')) {
+        throw Exception(
+          'No internet connection. Please check your network and try again.',
+        );
+      }
+
+      // Re-throw the original exception if it's already formatted
+      if (e.toString().startsWith('Exception: ')) {
+        rethrow;
+      }
+
       throw Exception('An error occurred during signup: $e');
     }
   }
@@ -164,12 +237,34 @@ class AuthService {
         return loginResponse;
       } else {
         final errorData = jsonDecode(response.body);
-        throw Exception(
-          'Failed to log in: ${errorData['message'] ?? 'Unknown error'}',
+        final errorMessage = errorData['message'] ?? 'Unknown error';
+        AppLogger.error(
+          'Login failed with status code: ${response.statusCode}',
         );
+        AppLogger.error('Login error message: $errorMessage');
+        throw Exception(errorMessage);
       }
     } catch (e) {
-      throw Exception('An error occurred during login check internet.');
+      // Handle specific network exceptions
+      if (e.toString().contains('ClientException') ||
+          e.toString().contains('SocketException') ||
+          e.toString().contains('Failed host lookup')) {
+        AppLogger.error('Network connectivity error during login', e);
+        throw Exception(
+          'No internet connection. Please check your network and try again.',
+        );
+      }
+
+      // If it's already a formatted error message from the API, throw it as is
+      if (e.toString().contains('Exception: ') &&
+          !e.toString().contains('An error occurred during login') &&
+          !e.toString().contains('Network error:')) {
+        rethrow;
+      }
+
+      // Otherwise, it's a parsing or other error
+      AppLogger.error('Unexpected error during login', e);
+      throw Exception('Something went wrong. Please try again.');
     }
   }
 
@@ -240,14 +335,22 @@ class AuthService {
     }
   }
 
-  static Future<String> sendOTP({required String email}) async {
+  static Future<String> sendOTP({
+    required String email,
+    bool isForgotPassword = false,
+  }) async {
     if (_backendUrl == null) {
       throw Exception("BACKEND_URL is not set in the .env file");
     }
 
     final sendOTPUrl = Uri.parse('$_backendUrl/api/v1/auth/sendOTP');
 
-    final Map<String, String> body = {"email": email};
+    final Map<String, dynamic> body = {"email": email};
+
+    // Add message field for forgot password context
+    if (isForgotPassword) {
+      body["message"] = "forgot password";
+    }
 
     try {
       AppLogger.auth('Attempting to send OTP to email: $email');
@@ -286,30 +389,31 @@ class AuthService {
     }
   }
 
-  static Future<String> forgotPassword({required String email}) async {
+  static Future<String> verifyOTP({
+    required String email,
+    required String otp,
+  }) async {
     if (_backendUrl == null) {
       throw Exception("BACKEND_URL is not set in the .env file");
     }
 
-    final forgotPasswordUrl = Uri.parse(
-      '$_backendUrl/api/v1/auth/reset-password-token',
-    );
+    final verifyOTPUrl = Uri.parse('$_backendUrl/api/v1/auth/verifyotp');
 
-    final Map<String, String> body = {"email": email};
+    final Map<String, dynamic> body = {"email": email, "otp": otp};
 
     try {
-      AppLogger.auth('Attempting to send magic link for email: $email');
+      AppLogger.auth('Attempting to verify OTP for email: $email');
 
       final headers = {'Content-Type': 'application/json; charset=UTF-8'};
       NetworkLogger.logRequest(
         method: 'POST',
-        url: forgotPasswordUrl,
+        url: verifyOTPUrl,
         headers: headers,
         body: jsonEncode(body),
       );
       final start = DateTime.now();
       final response = await http.post(
-        forgotPasswordUrl,
+        verifyOTPUrl,
         headers: headers,
         body: jsonEncode(body),
       );
@@ -320,35 +424,31 @@ class AuthService {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
-        AppLogger.success('Magic link sent successfully for email: $email');
-        return responseData['message'] ?? 'Magic link sent successfully';
+        AppLogger.success('OTP verified successfully for email: $email');
+        return responseData['message'] ?? 'OTP verified successfully';
       } else {
         final errorData = jsonDecode(response.body);
         final errorMessage = errorData['message'] ?? 'Unknown error';
-        AppLogger.error(
-          'Failed to send magic link for email: $email',
-          errorMessage,
-        );
-        throw Exception('Failed to send magic link: $errorMessage');
+        AppLogger.error('Failed to verify OTP for email: $email', errorMessage);
+        throw Exception('Failed to verify OTP: $errorMessage');
       }
     } catch (e) {
-      AppLogger.error('Error occurred during magic link sending', e);
-      throw Exception('An error occurred during magic link sending: $e');
+      AppLogger.error('Error occurred while verifying OTP', e);
+      throw Exception('An error occurred while verifying OTP: $e');
     }
   }
 
   static Future<Map<String, dynamic>> generateQRToken(
-    String subjectCode,
-    String token, ) async {
+    String subjectId,
+    String token,
+  ) async {
     if (_backendUrl == null) {
       throw Exception("BACKEND_URL is not set in the .env file");
     }
 
     final qrTokenUrl = Uri.parse('$_backendUrl/api/v1/subject/qrcode');
 
-    final Map<String, dynamic> body = {
-      "subjectCode": subjectCode,
-    };
+    final Map<String, dynamic> body = {"subjectId": subjectId};
 
     try {
       final headers = {
@@ -376,7 +476,7 @@ class AuthService {
         final responseData = jsonDecode(response.body);
         print('Debug: QR Token API Response: $responseData');
         AppLogger.success(
-          'QR token generated successfully for subject: $subjectCode ',
+          'QR token generated successfully for subject: $subjectId ',
         );
         return responseData;
       } else {
@@ -386,7 +486,7 @@ class AuthService {
         final errorData = jsonDecode(response.body);
         final errorMessage = errorData['message'] ?? 'Unknown error';
         AppLogger.error(
-          'Failed to generate QR token for subject: $subjectCode',
+          'Failed to generate QR token for subject: $subjectId',
           errorMessage,
         );
         throw Exception('Failed to generate QR token: $errorMessage');

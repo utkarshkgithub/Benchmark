@@ -82,6 +82,13 @@ class _LoginScreenState extends State<LoginScreen> {
         // Extract clean error message
         String errorMessage = _extractCleanErrorMessage(e.toString());
         authProvider.setError(errorMessage);
+
+        // Auto-clear error after 4 seconds
+        Future.delayed(const Duration(seconds: 4), () {
+          if (mounted) {
+            authProvider.clearError();
+          }
+        });
       } finally {
         authProvider.setLoading(false);
       }

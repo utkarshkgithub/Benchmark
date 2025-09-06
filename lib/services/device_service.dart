@@ -222,8 +222,10 @@ class DeviceService {
       await checkLocationPermissions();
 
       return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 10),
+        locationSettings: LocationSettings(
+        accuracy: LocationAccuracy.high,
+        timeLimit: Duration(seconds: 10),
+      ),
       );
     } catch (e) {
       throw Exception('Failed to get current location: $e');
@@ -239,8 +241,10 @@ class DeviceService {
       await checkLocationPermissions();
 
       return await Geolocator.getCurrentPosition(
-        desiredAccuracy: accuracy,
-        timeLimit: timeLimit ?? const Duration(seconds: 15),
+        locationSettings: LocationSettings(
+        accuracy: LocationAccuracy.high,
+        timeLimit: Duration(seconds: 10),
+      ),
       );
     } catch (e) {
       throw Exception('Failed to get location: $e');

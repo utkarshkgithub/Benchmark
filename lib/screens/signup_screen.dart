@@ -94,19 +94,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void _nextPage() async {
+    // Add bounds checking
+    if (_currentPage < 0) _currentPage = 0;
+    if (_currentPage >= 3) _currentPage = 2;
+
     if (_currentPage < 2) {
       if (_formKeys[_currentPage].currentState!.validate()) {
         if (_currentPage == 0) {
           try {
-            setState(() {
-              _currentPage++;
+            // Use post-frame callback to avoid animation conflicts
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                setState(() {
+                  _currentPage++;
+                });
+                _pageController.nextPage(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
+              }
             });
-            _pageController.nextPage(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-            );
 
-            await AuthService.sendOTP(email: _emailController.text.trim());
+            await AuthService.sendOTP(
+              email: _emailController.text.trim(),
+              isForgotPassword: false,
+            );
 
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -119,13 +131,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
               );
             }
           } catch (e) {
-            setState(() {
-              _currentPage--;
+            // Use post-frame callback for error handling too
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                setState(() {
+                  _currentPage--;
+                  // Ensure page doesn't go below 0
+                  if (_currentPage < 0) _currentPage = 0;
+                });
+                _pageController.previousPage(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
+              }
             });
-            _pageController.previousPage(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-            );
 
             if (mounted) {
               String errorMessage = _extractCleanErrorMessage(e.toString());
@@ -138,17 +157,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
             }
           }
         } else {
-          setState(() {
-            _currentPage++;
-          });
-          _pageController.nextPage(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
+          // Use post-frame callback for other page transitions too
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() {
+                _currentPage++;
+              });
+              _pageController.nextPage(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
 
-          if (_currentPage == 2) {
-            _fetchSubjects();
-          }
+              if (_currentPage == 2) {
+                _fetchSubjects();
+              }
+            }
+          });
         }
       }
     }
@@ -244,8 +268,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
       authProvider.setLoading(true);
 
       try {
+        // Get device ID with better error handling and debugging
         final String deviceId = await DeviceIdHelper.getDeviceId();
+        print('DEBUG: Generated Device ID: $deviceId'); // Debug log
+
+        // Check if device ID is properly generated
+        if (deviceId.isEmpty || deviceId == 'unknown') {
+          throw Exception(
+            'Failed to generate device ID. Please restart the app and try again.',
+          );
+        }
+
         final Position position = await _getCurrentLocation();
+        print(
+          'DEBUG: Location obtained: ${position.latitude}, ${position.longitude}',
+        ); // Debug log
 
         final userData = {
           'firstName': _firstNameController.text.trim(),
@@ -265,9 +302,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
           'minorSubjectIds': _hasMinorSubject ? _selectedMinorSubjects : [],
         };
 
+        print('DEBUG: Signup data prepared for email: ${userData['email']}');
+        print('DEBUG: Device ID: ${userData['deviceId']}');
+        print('DEBUG: Roll Number: ${userData['rollNumber']}');
+        print(
+          'DEBUG: Branch: ${userData['branch']}, Semester: ${userData['semester']}',
+        );
+
         log('Signup: User data to be sent: $userData');
 
-        await AuthService.signup(
+        print('DEBUG: Calling AuthService.signup...');
+        final signupResponse = await AuthService.signup(
           email: userData['email'] as String,
           password: userData['password'] as String,
           firstName: userData['firstName'] as String,
@@ -288,13 +333,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
               .toList(),
         );
 
+        print(
+          'DEBUG: Signup successful! Response user ID: ${signupResponse.user.userId}',
+        );
+        print('DEBUG: Response user email: ${signupResponse.user.email}');
+        print(
+          'DEBUG: Response user roll number: ${signupResponse.user.rollNumber}',
+        );
+
         await authProvider.logout();
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text(
-                'Registration successful! Please login to continue.',
+                'Registration successful for ${signupResponse.user.email}! Please login to continue.',
               ),
               backgroundColor: Colors.green,
             ),
@@ -305,8 +358,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
           );
         }
       } catch (e) {
+        print('DEBUG: Signup error occurred: $e');
         String errorMessage = _extractCleanErrorMessage(e.toString());
-        authProvider.setError(errorMessage);
+
+        // Show detailed error dialog for device ID and registration issues
+        if (errorMessage.toLowerCase().contains('device') &&
+            errorMessage.toLowerCase().contains('assigned')) {
+          _showHelpDialog(errorMessage);
+        } else if (errorMessage.toLowerCase().contains('student') &&
+            errorMessage.toLowerCase().contains('not found')) {
+          _showHelpDialog(errorMessage);
+        } else {
+          authProvider.setError(errorMessage);
+        }
       } finally {
         authProvider.setLoading(false);
       }
@@ -315,17 +379,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, Object? result) {
+        if (didPop) return;
         if (_currentPage > 0) {
-          setState(() => _currentPage--);
-          _pageController.previousPage(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
-          return false;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() {
+                _currentPage--;
+                if (_currentPage < 0) _currentPage = 0;
+              });
+              _pageController.previousPage(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
+            }
+          });
+        } else {
+          Navigator.of(context).pop();
         }
-        return true;
       },
       child: Scaffold(
         appBar: AppBar(
@@ -338,8 +411,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
           child: Column(
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
                 child: Row(
                   children: List.generate(3, (index) {
                     return Expanded(
@@ -385,7 +460,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   // === KEEP YOUR ORIGINAL PAGES ===
-Widget _buildPage1() {
+  Widget _buildPage1() {
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 400),
@@ -455,18 +530,22 @@ Widget _buildPage1() {
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         decoration: const InputDecoration(
-                          labelText: 'Email ID *',
+                          labelText: 'College Email ID *',
                           prefixIcon: Icon(Icons.email),
                           border: OutlineInputBorder(),
+                          // helperText: 'Use your college email (@iiitbh.ac.in)',
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Email is required';
+                            return 'College email is required';
                           }
                           if (!RegExp(
                             r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                           ).hasMatch(value)) {
-                            return 'Please enter a valid email';
+                            return 'Please enter a valid email format';
+                          }
+                          if (!value.toLowerCase().endsWith('@iiitbh.ac.in')) {
+                            return 'Please use college email ID (@iiitbh.ac.in)';
                           }
                           return null;
                         },
@@ -541,34 +620,34 @@ Widget _buildPage1() {
                       const SizedBox(height: 16),
 
                       // Account Type Field
-                      DropdownButtonFormField<String>(
-                        initialValue: _accountType,
-                        decoration: const InputDecoration(
-                          labelText: 'Account Type',
-                          prefixIcon: Icon(Icons.account_circle),
-                          border: OutlineInputBorder(),
-                        ),
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'Student',
-                            child: Text('Student'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'Faculty',
-                            child: Text('Faculty'),
-                          ),
-                          // DropdownMenuItem(
-                          //   value: 'Admin',
-                          //   child: Text('Admin'),
-                          // ),
-                        ],
-                        onChanged: (value) {
-                          setState(() {
-                            _accountType = value!;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 32),
+                      // DropdownButtonFormField<String>(
+                      //   initialValue: _accountType,
+                      //   decoration: const InputDecoration(
+                      //     labelText: 'Account Type',
+                      //     prefixIcon: Icon(Icons.account_circle),
+                      //     border: OutlineInputBorder(),
+                      //   ),
+                      //   items: const [
+                      //     DropdownMenuItem(
+                      //       value: 'Student',
+                      //       child: Text('Student'),
+                      //     ),
+                      //     DropdownMenuItem(
+                      //       value: 'Faculty',
+                      //       child: Text('Faculty'),
+                      //     ),
+                      //     // DropdownMenuItem(
+                      //     //   value: 'Admin',
+                      //     //   child: Text('Admin'),
+                      //     // ),
+                      //   ],
+                      //   onChanged: (value) {
+                      //     setState(() {
+                      //       _accountType = value!;
+                      //     });
+                      //   },
+                      // ),
+                      // const SizedBox(height: 32),
 
                       // Error Message
                       if (authProvider.error != null)
@@ -724,6 +803,7 @@ Widget _buildPage1() {
                       try {
                         await AuthService.sendOTP(
                           email: _emailController.text.trim(),
+                          isForgotPassword: false,
                         );
 
                         if (mounted) {
@@ -755,7 +835,7 @@ Widget _buildPage1() {
       ),
     );
   }
-  
+
   Widget _buildPage3() {
     return Center(
       child: ConstrainedBox(
@@ -836,9 +916,16 @@ Widget _buildPage1() {
                             ),
                           ),
                           DropdownMenuItem(
-                            value: 'Mechatronics',
+                            value: 'MAE',
                             child: Text(
-                              'Mechatronics Engineering',
+                              'Mechatronics and Automation Engineering (MAE)',
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'PG',
+                            child: Text(
+                              'PG (Post Graduation)',
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -1153,5 +1240,50 @@ Widget _buildPage1() {
       return parts[0].trim();
     }
     return errorString;
+  }
+
+  void _showHelpDialog(String error) {
+    String title;
+    String content;
+
+    if (error.toLowerCase().contains('device') &&
+        error.toLowerCase().contains('assigned')) {
+      title = 'Device Already Registered';
+      content =
+          'This device appears to be already registered with another account. '
+          'Each device can only be used for one student account.\n\n'
+          'If this is your first time registering:\n'
+          '• Try restarting the app\n'
+          '• Clear app data if the problem persists\n'
+          '• Contact support if you believe this is an error\n\n'
+          'Device ID: ${error.contains('ID:') ? error.split('ID:').last.trim() : 'Not available'}';
+    } else if (error.toLowerCase().contains('student') &&
+        error.toLowerCase().contains('not found')) {
+      title = 'Registration Issue';
+      content =
+          'Your registration was completed but there was an issue retrieving your details.\n\n'
+          'Please try:\n'
+          '• Wait a few minutes and try logging in\n'
+          '• Check your internet connection\n'
+          '• Contact support if the problem continues\n\n'
+          'Error: $error';
+    } else {
+      title = 'Registration Error';
+      content = error;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: SingleChildScrollView(child: Text(content)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 }
