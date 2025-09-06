@@ -61,7 +61,7 @@ function VerifyEmail() {
               numInputs={6}
               renderSeparator={<span>-</span>}
               renderInput={(props) => (
-                <input {...props} className="text-center border-2 mx-2 rounded-md text-black" />
+                <input {...props} className="text-center border-2 mx-2 rounded-md text-white" />
               )}
             />
             <button

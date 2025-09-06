@@ -13,7 +13,7 @@ dotenv.config();
 
 //send otp
 export const sendOTP = async (req, res) => {
-    console.log("2:---")
+    // console.log("2:---")
     try {
         // fetch email from request ki body
         const { email } = req.body;
@@ -92,13 +92,13 @@ export const signUp = async (req, res) => {
       password,
       otp,
       rollNumber = "",
-      branch = "",
+      
       semester = "",
       deviceId = "",
       department = "",
       subjects = [],   // ✅ frontend will send selected subject IDs
     } = req.body;
-
+    let {branch = ""} = req.body;
     // ✅ validate required fields
     if (!firstName || !lastName || !email || !password || !accountType || !otp) {
       return res.status(403).json({

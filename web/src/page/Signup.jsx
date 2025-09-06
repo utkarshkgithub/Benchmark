@@ -14,7 +14,7 @@ const Signup = () => {
   const dispatch = useDispatch();
 
   const [formData, setFormData] = useState({
-    accountType: "Instructor",
+    accountType: "",
     firstName: "",
     lastName: "",
     email: "",
@@ -144,7 +144,7 @@ const Signup = () => {
               </button>
             </div>
 </div>
-            {/* <div>
+             <div>
               <label className="block text-sm font-medium text-gray-700">Account Type</label>
               <select
                 name="accountType"
@@ -158,7 +158,7 @@ const Signup = () => {
                 <option value="Instructor">Instructor</option>
                 <option value="Admin">Administrator</option>
               </select>
-            </div> */}
+            </div> 
 
             <button
               type="submit"
