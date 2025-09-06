@@ -20,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   static const double targetLongitude = 87.040193;
   // static const double targetLongitude = 87.039935;  //lib
   // static const double targetLongitude = 87.03284;  //ranitalab
-  static const double maxDistanceAllowed = 4200.0; // 60 meters
+  static const double maxDistanceAllowed = 58.0; // 60 meters
 
   @override
   void initState() {
@@ -44,8 +44,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
       // Get current position
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+      locationSettings: LocationSettings(
+        accuracy: LocationAccuracy.high,
+        timeLimit: Duration(seconds: 10), // prevents hanging forever
+      ),
+    );
 
       // Calculate distance to target coordinates
       double distanceInMeters = Geolocator.distanceBetween(
@@ -75,7 +78,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
       // Get the distance for the message (even if not within range)
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+        locationSettings: LocationSettings(
+        accuracy: LocationAccuracy.high,
+        timeLimit: Duration(seconds: 10), // prevents hanging forever
+      ),
       );
       double distanceInMeters = Geolocator.distanceBetween(
         position.latitude,
@@ -102,8 +108,8 @@ class _HomeScreenState extends State<HomeScreen> {
             builder: (context) => AlertDialog(
               title: const Text('You are too far'),
               content: Text(
-                'You are ${distanceInMeters.toStringAsFixed(0)} meters away. '
-                'Please come within $maxDistanceAllowed meters of the class premises to mark attendance.',
+                // 'You are ${distanceInMeters.toStringAsFixed(0)} meters away. '
+                'Please come within the class premises to mark attendance.',
               ),
               actions: [
                 TextButton(
@@ -178,7 +184,98 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  const Icon(Icons.school, size: 80, color: Colors.deepPurple),
+                  // User Profile Image - Circular Design
+                  Builder(
+                    builder: (context) {
+                      final imageUrl = user?['image']?.toString() ?? '';
+                      print('Debug: Home Screen - Image URL: "$imageUrl"');
+
+                      return Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.grey[200],
+                          border: Border.all(
+                            color: Colors.deepPurple.withValues(alpha: 0.3),
+                            width: 3,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.15),
+                              spreadRadius: 1,
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(50),
+                          child: imageUrl.isNotEmpty
+                              ? Image.network(
+                                  imageUrl,
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                  headers: const {
+                                    'User-Agent':
+                                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                                    'Accept':
+                                        'image/svg+xml,image/png,image/jpeg,image/gif,image/*,*/*;q=0.8',
+                                  },
+                                  loadingBuilder: (context, child, loadingProgress) {
+                                    if (loadingProgress == null) {
+                                      print(
+                                        'Debug: Home Screen - Image loaded successfully',
+                                      );
+                                      return child;
+                                    }
+                                    print(
+                                      'Debug: Home Screen - Loading image...',
+                                    );
+                                    return const Center(
+                                      child: CircularProgressIndicator(
+                                        color: Colors.deepPurple,
+                                        strokeWidth: 2.0,
+                                      ),
+                                    );
+                                  },
+                                  errorBuilder: (context, error, stackTrace) {
+                                    print(
+                                      'Debug: Home Screen - Failed to load image: $error',
+                                    );
+                                    return Container(
+                                      width: 100,
+                                      height: 100,
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.deepPurple,
+                                      ),
+                                      child: const Icon(
+                                        Icons.person,
+                                        size: 50,
+                                        color: Colors.white,
+                                      ),
+                                    );
+                                  },
+                                )
+                              : Container(
+                                  width: 100,
+                                  height: 100,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.deepPurple,
+                                  ),
+                                  child: const Icon(
+                                    Icons.person,
+                                    size: 50,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
+                      );
+                    },
+                  ),
                   const SizedBox(height: 24),
                   Text(
                     'Welcome $userName',
@@ -377,7 +474,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-          ); // Scaffold end
+          );
         }, // Consumer end
       ),
     ); // PopScope end

@@ -10,65 +10,56 @@ import '../providers/auth_provider.dart';
 import 'login_screen.dart';
 
 // Attendance data models
-class PresentStudent {
-  final String id;
-  final String firstName;
-  final String lastName;
+class AttendanceStudent {
+  final String studentId;
+  final String name;
   final String email;
+  final String status;
   final String? rollNumber;
 
-  PresentStudent({
-    required this.id,
-    required this.firstName,
-    required this.lastName,
+  AttendanceStudent({
+    required this.studentId,
+    required this.name,
     required this.email,
+    required this.status,
     this.rollNumber,
   });
 
-  factory PresentStudent.fromJson(Map<String, dynamic> json) {
+  factory AttendanceStudent.fromJson(Map<String, dynamic> json) {
     String email = json['email'] ?? '';
     String rollNumber = '';
     if (email.contains('.') && email.contains('@')) {
       rollNumber = email.split('@').first.split('.').last;
     }
-    return PresentStudent(
-      id: json['_id'] ?? '',
-      firstName: json['firstName'] ?? '',
-      lastName: json['lastName'] ?? '',
+    return AttendanceStudent(
+      studentId: json['student'] ?? '',
+      name: json['name'] ?? '',
       email: json['email'] ?? '',
+      status: json['status'] ?? 'Absent',
       rollNumber: rollNumber,
     );
   }
 
-  String get fullName => '$firstName $lastName';
+  bool get isPresent => status.toLowerCase() == 'present';
 }
 
-class AttendanceRecord {
+class AttendanceDetails {
   final String id;
-  final DateTime date;
-  final String branch;
-  final int totalStudents;
-  final List<PresentStudent> presentStudents;
+  final List<AttendanceStudent> students;
 
-  AttendanceRecord({
-    required this.id,
-    required this.date,
-    required this.branch,
-    required this.totalStudents,
-    required this.presentStudents,
-  });
+  AttendanceDetails({required this.id, required this.students});
 
-  factory AttendanceRecord.fromJson(Map<String, dynamic> json) {
-    return AttendanceRecord(
+  factory AttendanceDetails.fromJson(Map<String, dynamic> json) {
+    return AttendanceDetails(
       id: json['_id'] ?? '',
-      date: DateTime.parse(json['date'] ?? DateTime.now().toIso8601String()),
-      branch: json['branch'] ?? '',
-      totalStudents: json['totalStudents'] ?? 0,
-      presentStudents: (json['presentStudent'] as List<dynamic>? ?? [])
-          .map((student) => PresentStudent.fromJson(student))
+      students: (json['students'] as List<dynamic>? ?? [])
+          .map((student) => AttendanceStudent.fromJson(student))
           .toList(),
     );
   }
+
+  List<AttendanceStudent> get presentStudents =>
+      students.where((student) => student.isPresent).toList();
 }
 
 class InstructorPage extends StatefulWidget {
@@ -83,13 +74,15 @@ class InstructorPage extends StatefulWidget {
 class _InstructorPageState extends State<InstructorPage> {
   bool _isLoading = false;
   String? _qrToken;
+  String? _attendanceId; // Store attendance ID from QR generation
   bool _showQr = false;
+  bool _activeQr = false; // Track if QR is currently active
   SubjectInfo? _selectedSubject; // Changed to SubjectInfo object
   List<SubjectInfo> _subjects = []; // Changed to SubjectInfo list
   Timer? _countdownTimer;
   int _remainingSeconds = 120; // 2 minutes countdown
   bool _showAttendance = false;
-  List<AttendanceRecord> _attendanceData = [];
+  AttendanceDetails? _attendanceData;
   bool _isLoadingAttendance = false;
 
   // Branch selection state - removed since branch selection was disabled
@@ -148,7 +141,9 @@ class _InstructorPageState extends State<InstructorPage> {
           if (selectedSubjectId != null) {
             _selectedSubject = updatedSubjects.firstWhere(
               (subject) => subject.id == selectedSubjectId,
-              orElse: () => updatedSubjects.isNotEmpty ? updatedSubjects.first : _selectedSubject!,
+              orElse: () => updatedSubjects.isNotEmpty
+                  ? updatedSubjects.first
+                  : _selectedSubject!,
             );
           }
         });
@@ -172,6 +167,15 @@ class _InstructorPageState extends State<InstructorPage> {
       return;
     }
 
+    // If QR is already active, just show it instead of generating new one
+    if (_activeQr && _qrToken != null && _remainingSeconds > 0) {
+      setState(() {
+        _showQr = true;
+      });
+      // Don't restart the countdown timer - it should already be running
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
@@ -187,12 +191,14 @@ class _InstructorPageState extends State<InstructorPage> {
 
       // Call the AuthService to generate QR token with selected subject code, branches, and token
       final response = await AuthService.generateQRToken(
-        _selectedSubject!.subjectCode,
+        _selectedSubject!.id,
         token,
       );
 
       // Check different possible response keys
       String? qrToken;
+      String? attendanceId;
+
       if (response['qrtoken'] != null) {
         qrToken = response['qrtoken'].toString();
       } else if (response['token'] != null) {
@@ -202,7 +208,15 @@ class _InstructorPageState extends State<InstructorPage> {
         qrToken = response['data']['qrtoken'].toString();
       }
 
+      // Extract attendance ID
+      if (response['attendenceId'] != null) {
+        attendanceId = response['attendenceId'].toString();
+      } else if (response['attendanceId'] != null) {
+        attendanceId = response['attendanceId'].toString();
+      }
+
       print('Debug: Extracted QR Token: $qrToken');
+      print('Debug: Extracted Attendance ID: $attendanceId');
 
       if (qrToken == null || qrToken.isEmpty) {
         throw Exception(
@@ -212,6 +226,8 @@ class _InstructorPageState extends State<InstructorPage> {
 
       setState(() {
         _qrToken = qrToken;
+        _attendanceId = attendanceId; // Store attendance ID
+        _activeQr = true; // Mark QR as active
         _showQr = true;
         _remainingSeconds = 120; // Reset to 2 minutes
       });
@@ -241,7 +257,12 @@ class _InstructorPageState extends State<InstructorPage> {
         if (_remainingSeconds > 0) {
           _remainingSeconds--;
         } else {
-          _closeQR();
+          // When timer expires, only reset QR-related state
+          // Keep attendance ID so the attendance button stays enabled
+          _showQr = false;
+          _qrToken = null;
+          _activeQr = false;
+          _remainingSeconds = 120;
           timer.cancel();
         }
       });
@@ -255,18 +276,30 @@ class _InstructorPageState extends State<InstructorPage> {
   }
 
   void _closeQR() {
-    _countdownTimer?.cancel();
+    // Don't cancel the countdown timer - let it continue running in background
+    // because the QR expires on the backend in 2 minutes regardless of UI state
     setState(() {
       _showQr = false;
-      _qrToken = null;
-      _remainingSeconds = 120;
+      // Keep all QR data and timer running until it naturally expires
     });
   }
 
-  Future<void> _fetchAttendanceData() async {
-    if (_selectedSubject == null) {
+  void _showAttendanceOptions() {
+    if (_attendanceId != null) {
+      _fetchAttendanceData(_attendanceId!);
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a subject first')),
+        const SnackBar(content: Text('No attendance data available')),
+      );
+    }
+  }
+
+  Future<void> _fetchAttendanceData([String? specificAttendanceId]) async {
+    final targetAttendanceId = specificAttendanceId ?? _attendanceId;
+
+    if (targetAttendanceId == null || targetAttendanceId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No attendance data available')),
       );
       return;
     }
@@ -284,41 +317,40 @@ class _InstructorPageState extends State<InstructorPage> {
       }
 
       final url =
-          'https://benchmark-official.onrender.com/api/v1/subject/fetch-by-subject/${_selectedSubject!.id}';
+          'https://benchmark-official.onrender.com/api/v1/subject/getAttendanceDetails';
 
-      final response = await http.get(
+      final response = await http.post(
         Uri.parse(url),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
+        body: json.encode({'attendanceId': targetAttendanceId}),
       );
+
+      print('Debug: Attendance API Response: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        if (data['success'] == true) {
-          final attendanceList = data['attendance'] as List<dynamic>? ?? [];
-          final records = attendanceList
-              .map((record) => AttendanceRecord.fromJson(record))
-              .toList();
-
-          // Sort by date and keep only the latest record
-          records.sort((a, b) => b.date.compareTo(a.date));
-          final latestRecord = records.isNotEmpty
-              ? [records.first]
-              : <AttendanceRecord>[];
+        if (data['success'] == true && data['attendance'] != null) {
+          final attendanceDetails = AttendanceDetails.fromJson(
+            data['attendance'],
+          );
 
           setState(() {
-            _attendanceData = latestRecord;
+            _attendanceData = attendanceDetails;
             _showAttendance = true;
           });
         } else {
-          throw Exception('Failed to fetch attendance data');
+          throw Exception(
+            'Failed to fetch attendance data: ${data['message'] ?? 'Unknown error'}',
+          );
         }
       } else {
         throw Exception('HTTP ${response.statusCode}: ${response.body}');
       }
     } catch (e) {
+      print('Debug: Error fetching attendance: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to fetch attendance: $e')),
@@ -359,7 +391,7 @@ class _InstructorPageState extends State<InstructorPage> {
     return PopScope(
       canPop:
           !_showQr && !_showAttendance, // Only allow pop when on main screen
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         if (!didPop) {
           // Handle back gesture when pop is prevented
           if (_showQr) {
@@ -367,7 +399,7 @@ class _InstructorPageState extends State<InstructorPage> {
           } else if (_showAttendance) {
             setState(() {
               _showAttendance = false;
-              _attendanceData.clear();
+              _attendanceData = null;
             });
           }
         }
@@ -393,7 +425,7 @@ class _InstructorPageState extends State<InstructorPage> {
                         onPressed: () {
                           setState(() {
                             _showAttendance = false;
-                            _attendanceData.clear();
+                            _attendanceData = null;
                           });
                         },
                       )
@@ -438,12 +470,71 @@ class _InstructorPageState extends State<InstructorPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Logo/Title
-              const Icon(
-                Icons.account_circle,
-                size: 80,
-                color: Colors.deepPurple,
+              // Logo/Title - User Profile Image
+              // User Profile Image - Circular Design
+              // User Profile Image - Perfect Circle Design
+              // User Profile Image - Perfect Circle Design
+              // User Profile Image - Perfect Circle
+              CircleAvatar(
+                radius: 75, // This creates a perfect circle with diameter 150
+                backgroundColor: Colors.grey[200],
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.deepPurple.withValues(alpha: 0.3),
+                      width: 3,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.15),
+                        spreadRadius: 1,
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: widget.user.image.isNotEmpty
+                      ? ClipOval(
+                          child: Image.network(
+                            widget.user.image,
+                            width: 150,
+                            height: 150,
+                            fit: BoxFit.cover,
+                            headers: const {
+                              'User-Agent':
+                                  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                              'Accept':
+                                  'image/svg+xml,image/png,image/jpeg,image/gif,image/*,*/*;q=0.8',
+                            },
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) {
+                                return child;
+                              }
+                              return const Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.deepPurple,
+                                  strokeWidth: 2.0,
+                                ),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(
+                                Icons.person,
+                                size: 60,
+                                color: Colors.deepPurple,
+                              );
+                            },
+                          ),
+                        )
+                      : const Icon(
+                          Icons.person,
+                          size: 60,
+                          color: Colors.deepPurple,
+                        ),
+                ),
               ),
+
               const SizedBox(height: 24),
               Text(
                 'Welcome ${widget.user.firstName} ${widget.user.lastName}',
@@ -498,106 +589,6 @@ class _InstructorPageState extends State<InstructorPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-
-                // // Branch selection
-                // if (_selectedSubject != null) ...[
-                //   if (_selectedSubject!.branches.isNotEmpty) ...[
-                //     Text(
-                //       'Select Branches:',
-                //       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                //         fontWeight: FontWeight.w600,
-                //       ),
-                //     ),
-                //     const SizedBox(height: 8),
-                //     Container(
-                //       padding: const EdgeInsets.all(12),
-                //       decoration: BoxDecoration(
-                //         border: Border.all(color: Colors.grey[400]!),
-                //         borderRadius: BorderRadius.circular(8),
-                //       ),
-                //       child: Column(
-                //         children: [
-                //           for (String branch in _selectedSubject!.branches)
-                //             CheckboxListTile(
-                //               title: Text(
-                //                 branch,
-                //                 style: const TextStyle(fontSize: 16),
-                //               ),
-                //               value: _selectedBranches[branch] ?? false,
-                //               onChanged: (bool? value) {
-                //                 setState(() {
-                //                   _selectedBranches[branch] = value ?? false;
-
-                //                   // Ensure at least one branch is selected
-                //                   if (!_selectedBranches.values.any(
-                //                     (selected) => selected,
-                //                   )) {
-                //                     // If trying to uncheck the last selected branch, prevent it
-                //                     _selectedBranches[branch] = true;
-                //                     ScaffoldMessenger.of(context).showSnackBar(
-                //                       const SnackBar(
-                //                         content: Text(
-                //                           'At least one branch must be selected',
-                //                         ),
-                //                         duration: Duration(seconds: 2),
-                //                       ),
-                //                     );
-                //                   }
-                //                 });
-                //               },
-                //               controlAffinity: ListTileControlAffinity.leading,
-                //               dense: true,
-                //               activeColor: Colors.deepPurple,
-                //               contentPadding: EdgeInsets.zero,
-                //             ),
-                //         ],
-                //       ),
-                //     ),
-                //     const SizedBox(height: 8),
-                //     Text(
-                //       '${_getSelectedBranches.length} of ${_selectedSubject!.branches.length} branches selected',
-                //       style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                //     ),
-                //     const SizedBox(height: 24),
-                //   ] else ...[
-                //     // Show loading or message when branches are not available
-                //     Container(
-                //       padding: const EdgeInsets.all(16),
-                //       decoration: BoxDecoration(
-                //         color: Colors.orange[50],
-                //         border: Border.all(color: Colors.orange[200]!),
-                //         borderRadius: BorderRadius.circular(8),
-                //       ),
-                //       child: Row(
-                //         children: [
-                //           const SizedBox(
-                //             width: 16,
-                //             height: 16,
-                //             child: CircularProgressIndicator(
-                //               strokeWidth: 2,
-                //               valueColor: AlwaysStoppedAnimation<Color>(
-                //                 Colors.orange,
-                //               ),
-                //             ),
-                //           ),
-                //           const SizedBox(width: 12),
-                //           Expanded(
-                //             child: Text(
-                //               'Loading branch information...',
-                //               style: TextStyle(
-                //                 color: Colors.orange[700],
-                //                 fontSize: 14,
-                //               ),
-                //             ),
-                //           ),
-                //         ],
-                //       ),
-                //     ),
-                //     const SizedBox(height: 24),
-                //   ],
-                // ] else ...[
-                //   const SizedBox(height: 24),
-                // ],
               ] else ...[
                 Text(
                   'No subjects assigned',
@@ -629,15 +620,59 @@ class _InstructorPageState extends State<InstructorPage> {
                           ),
                         ),
                       )
-                    : const Text('Generate QR Code'),
+                    : Text(
+                        _activeQr && _remainingSeconds > 0
+                            ? 'Show QR Code'
+                            : 'Generate QR Code',
+                      ),
               ),
+
+              // Show active QR status when QR is generated but not displayed
+              if (_activeQr && !_showQr && _remainingSeconds > 0) ...[
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.green[50],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.green[200]!),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.qr_code, color: Colors.green),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'QR Code Active',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green,
+                              ),
+                            ),
+                            Text(
+                              'Time remaining: ${_formatTime(_remainingSeconds)}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.green[700],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 16),
 
               // Show Present Students Button
               ElevatedButton(
-                onPressed: _isLoadingAttendance || _selectedSubject == null
+                onPressed: _isLoadingAttendance || _attendanceId == null
                     ? null
-                    : _fetchAttendanceData,
+                    : _showAttendanceOptions,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepPurple[400],
                   foregroundColor: Colors.white,
@@ -654,7 +689,11 @@ class _InstructorPageState extends State<InstructorPage> {
                           ),
                         ),
                       )
-                    : const Text('Show Present Students'),
+                    : Text(
+                        _attendanceId == null
+                            ? 'Generate QR First'
+                            : 'Show Attendance Records',
+                      ),
               ),
             ],
           ),
@@ -664,7 +703,7 @@ class _InstructorPageState extends State<InstructorPage> {
   }
 
   Widget _buildAttendanceContent() {
-    return _attendanceData.isEmpty
+    return _attendanceData == null
         ? const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -680,14 +719,14 @@ class _InstructorPageState extends State<InstructorPage> {
           )
         : SingleChildScrollView(
             padding: const EdgeInsets.all(16),
-            child: _buildAttendanceCard(_attendanceData.first),
+            child: _buildAttendanceCard(_attendanceData!),
           );
   }
 
-  Widget _buildAttendanceCard(AttendanceRecord record) {
-    // Sort students by roll number
-    final sortedStudents = List<PresentStudent>.from(record.presentStudents);
-    sortedStudents.sort((a, b) {
+  Widget _buildAttendanceCard(AttendanceDetails attendanceDetails) {
+    // Get present students and sort by roll number
+    final presentStudents = attendanceDetails.presentStudents;
+    presentStudents.sort((a, b) {
       final rollA = a.rollNumber ?? '';
       final rollB = b.rollNumber ?? '';
       return rollA.compareTo(rollB);
@@ -700,7 +739,7 @@ class _InstructorPageState extends State<InstructorPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Date and Summary Info
+            // Summary Info
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -710,14 +749,14 @@ class _InstructorPageState extends State<InstructorPage> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.calendar_today, color: Colors.deepPurple),
+                  const Icon(Icons.people, color: Colors.deepPurple),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Latest Attendance',
+                          'Attendance Details',
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -726,19 +765,41 @@ class _InstructorPageState extends State<InstructorPage> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          _formatDate(record.date),
+                          'Subject: ${_selectedSubject?.subjectName ?? 'Unknown'}',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         Text(
-                          'Branch: ${record.branch}',
+                          'Total Students: ${attendanceDetails.students.length}',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey[600],
                           ),
                         ),
+                        // Show session type - only current session
+                        if (_attendanceId != null &&
+                            attendanceDetails.id == _attendanceId)
+                          Container(
+                            margin: const EdgeInsets.only(top: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.green[100],
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              'Latest Session',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green[700],
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -752,7 +813,7 @@ class _InstructorPageState extends State<InstructorPage> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
-                      '${record.presentStudents.length} Present',
+                      '${presentStudents.length} Present',
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -798,18 +859,30 @@ class _InstructorPageState extends State<InstructorPage> {
                       textAlign: TextAlign.center,
                     ),
                   ),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      'Status',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.deepPurple,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: 8),
 
             // Students List
-            if (sortedStudents.isEmpty)
+            if (attendanceDetails.students.isEmpty)
               Container(
                 padding: const EdgeInsets.all(32),
                 child: const Center(
                   child: Text(
-                    'No students marked present',
+                    'No students found',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey,
@@ -822,13 +895,15 @@ class _InstructorPageState extends State<InstructorPage> {
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: sortedStudents.length,
+                itemCount: attendanceDetails.students.length,
                 itemBuilder: (context, studentIndex) {
-                  final student = sortedStudents[studentIndex];
+                  final student = attendanceDetails.students[studentIndex];
+                  final isPresent = student.isPresent;
+
                   return Container(
                     margin: const EdgeInsets.only(bottom: 2),
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
+                      horizontal: 14,
                       vertical: 12,
                     ),
                     decoration: BoxDecoration(
@@ -848,7 +923,7 @@ class _InstructorPageState extends State<InstructorPage> {
                           child: Text(
                             student.rollNumber ?? 'N/A',
                             style: const TextStyle(
-                              fontSize: 14,
+                              fontSize: 13,
                               fontWeight: FontWeight.w600,
                             ),
                             textAlign: TextAlign.center,
@@ -857,9 +932,35 @@ class _InstructorPageState extends State<InstructorPage> {
                         Expanded(
                           flex: 2,
                           child: Text(
-                            student.fullName,
+                            student.name,
                             style: const TextStyle(fontSize: 14),
                             textAlign: TextAlign.center,
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isPresent
+                                  ? Colors.green[100]
+                                  : Colors.red[100],
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              student.status,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: isPresent
+                                    ? Colors.green[700]
+                                    : Colors.red[700],
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
                       ],
@@ -871,24 +972,6 @@ class _InstructorPageState extends State<InstructorPage> {
         ),
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    final months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${date.day} ${months[date.month - 1]} ${date.year} at ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 
   Widget _buildQrScreen() {

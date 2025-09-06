@@ -15,13 +15,45 @@ class DeviceIdHelper {
         log('DeviceIdHelper: Getting Android device info...');
         final AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
         final deviceId = androidInfo.id;
+
+        // Additional debugging for Android
+        print('DEBUG: Android Device Details:');
+        print('DEBUG: - Device ID: $deviceId');
+        print('DEBUG: - Model: ${androidInfo.model}');
+        print('DEBUG: - Brand: ${androidInfo.brand}');
+        print('DEBUG: - Manufacturer: ${androidInfo.manufacturer}');
+        print('DEBUG: - Product: ${androidInfo.product}');
+        print('DEBUG: - Serial: ${androidInfo.serialNumber}');
+        print('DEBUG: - Hardware: ${androidInfo.hardware}');
+
         log('DeviceIdHelper: Android device ID: $deviceId');
+
+        // Validate device ID
+        if (deviceId.isEmpty || deviceId == 'unknown') {
+          throw Exception('Android device ID is empty or unknown');
+        }
+
         return deviceId;
       } else if (Platform.isIOS) {
         log('DeviceIdHelper: Getting iOS device info...');
         final IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
         final deviceId = iosInfo.identifierForVendor ?? 'unknown-ios-device';
+
+        // Additional debugging for iOS
+        print('DEBUG: iOS Device Details:');
+        print('DEBUG: - Device ID: $deviceId');
+        print('DEBUG: - Model: ${iosInfo.model}');
+        print('DEBUG: - Name: ${iosInfo.name}');
+        print('DEBUG: - System Version: ${iosInfo.systemVersion}');
+        print('DEBUG: - Localized Model: ${iosInfo.localizedModel}');
+
         log('DeviceIdHelper: iOS device ID: $deviceId');
+
+        // Validate device ID
+        if (deviceId == 'unknown-ios-device' || deviceId.isEmpty) {
+          throw Exception('iOS device ID is not available or unknown');
+        }
+
         return deviceId;
       } else if (Platform.isLinux) {
         log('DeviceIdHelper: Getting Linux device info...');
