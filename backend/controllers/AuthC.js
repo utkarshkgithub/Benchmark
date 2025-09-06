@@ -107,6 +107,7 @@ export const signUp = async (req, res) => {
       });
       
     }
+    
 
     // For Student account, extra fields are required
     if (
@@ -134,6 +135,9 @@ export const signUp = async (req, res) => {
     }
 
     if (accountType === "Student") {
+      if(branch == "Mechatornics" || branch == "MAE"){
+        branch="MAE"
+      }
       // Create composite device ID
       const compositeDeviceId = `${firstName.toLowerCase()}_${lastName.toLowerCase()}_${rollNumber}_${deviceId}`;
       

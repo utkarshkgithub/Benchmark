@@ -231,6 +231,7 @@ export const getAttendanceDetails = async (req, res) => {
 export const updateAttendance = async (req, res) => {
   try {
     const { attendanceId, updatedStudents } = req.body;
+    // console.log("Received updatedStudents:", updatedStudents);
 
     if (!attendanceId || !updatedStudents) {
       return res.status(400).json({ success: false, message: "Invalid request" });
@@ -246,18 +247,22 @@ export const updateAttendance = async (req, res) => {
       return res.status(403).json({ success: false, message: "Attendance can no longer be modified." });
     }
 
-    // ✅ Collect only present student IDs
-    const newPresentStudentList = Object.keys(updatedStudents).filter(
+    // ✅ Collect only present student IDs from the request body
+    const presentStudentIds = Object.keys(updatedStudents).filter(
       (studentId) => updatedStudents[studentId] === true
     );
 
-    attendance.presentStudent = newPresentStudentList;
+    // ✅ Find the corresponding Student documents to get their User IDs
+    const students = await Student.find({ '_id': { $in: presentStudentIds } });
+    const presentUserIds = students.map(student => student.userId);
+
+    attendance.presentStudent = presentUserIds;
     await attendance.save();
 
     return res.status(200).json({
       success: true,
       message: "Attendance updated successfully",
-      presentStudentCount: newPresentStudentList.length,
+      presentStudentCount: presentUserIds.length,
     });
   } catch (error) {
     console.error("Update attendance error:", error);

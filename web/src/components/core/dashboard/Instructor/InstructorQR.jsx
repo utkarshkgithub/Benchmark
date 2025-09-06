@@ -136,12 +136,7 @@ export default function InstructorQR() {
         setSuccessMessage(null);
 
         try {
-            const finalAttendance = Object.keys(attendance).reduce((acc, studentId) => {
-                acc[studentId] = attendance[studentId] ? "Present" : "Absent";
-                return acc;
-            }, {});
-
-            await updateAttendance(token, currentAttendanceId, finalAttendance);
+            await updateAttendance(token, currentAttendanceId, attendance);
             setViewMode("submitted");
             setSuccessMessage("Attendance updated successfully!");
         } catch (e) {
