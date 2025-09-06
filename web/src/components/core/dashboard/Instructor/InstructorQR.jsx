@@ -15,7 +15,7 @@ import { Link } from "react-router-dom";
 
 const TWO_MIN = 119;
 
-const InstructorQR = () => {
+export default function InstructorQR(){
     const { token, user } = useSelector((s) => s.auth);
 
     const [subjects, setSubjects] = useState([]);
@@ -48,7 +48,6 @@ const InstructorQR = () => {
                 setError("Failed to load subjects. Please refresh the page.");
             }
         };
-
         fetchSubjects();
     }, [token]);
 
@@ -103,12 +102,8 @@ const InstructorQR = () => {
 
         try {
             const studentRes = await getSubjectStudents(token, selectedSubject._id);
-            setStudents(studentRes?.data?.subject?.students || []);
-
-            const attendanceRes = await getAttendanceDetails(
-                token,
-                currentAttendanceId
-            );
+            setStudents(studentRes?.data?.students || []);
+            const attendanceRes = await getAttendanceDetails(token, currentAttendanceId);
             const attendanceRecord = attendanceRes?.data?.attendance;
 
             if (attendanceRecord) {
@@ -140,16 +135,12 @@ const InstructorQR = () => {
         setSuccessMessage(null);
 
         try {
-            const finalAttendance = Object.keys(attendance).reduce(
-                (acc, studentId) => {
-                    acc[studentId] = attendance[studentId] ? "Present" : "Absent";
-                    return acc;
-                },
-                {}
-            );
+            const finalAttendance = Object.keys(attendance).reduce((acc, studentId) => {
+                acc[studentId] = attendance[studentId] ? "Present" : "Absent";
+                return acc;
+            }, {});
 
             await updateAttendance(token, currentAttendanceId, finalAttendance);
-
             setViewMode("submitted");
             setSuccessMessage("Attendance updated successfully!");
         } catch (e) {
@@ -161,7 +152,6 @@ const InstructorQR = () => {
     };
 
     const handleViewAttendance = () => {
-        // TODO: Navigate to the attendance history page for the subject
         resetToInitial();
     };
 
@@ -170,11 +160,11 @@ const InstructorQR = () => {
         const tableColumn = ["Name", "Roll Number", "Status"];
         const tableRows = [];
 
-        filteredStudents.forEach(student => {
+        filteredStudents.forEach((student) => {
             const studentData = [
-                `${student.firstName} ${student.lastName}`,
+                `${student.userId.firstName} ${student.userId.lastName}`,
                 student.rollNumber,
-                attendance[student._id] ? "Present" : "Absent"
+                attendance[student._id] ? "Present" : "Absent",
             ];
             tableRows.push(studentData);
         });
@@ -186,9 +176,13 @@ const InstructorQR = () => {
         });
         const date = new Date();
         const dateStr = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-        doc.text(`Attendance Report - ${selectedSubject.subjectName} (${selectedSubject.subjectCode}) - ${dateStr}`, 14, 15);
+        doc.text(
+            `Attendance Report - ${selectedSubject.subjectName} (${selectedSubject.subjectCode}) - ${dateStr}`,
+            14,
+            15
+        );
         doc.save(`Attendance_${selectedSubject.subjectCode}_${dateStr}.pdf`);
-    }
+    };
 
     const resetToInitial = () => {
         setViewMode("initial");
@@ -217,7 +211,7 @@ const InstructorQR = () => {
     const filteredStudents = useMemo(() => {
         return students.filter(
             (student) =>
-                `${student.firstName} ${student.lastName}`
+                `${student.userId.firstName} ${student.userId.lastName}`
                     .toLowerCase()
                     .includes(searchTerm.toLowerCase()) ||
                 student.rollNumber?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -229,10 +223,7 @@ const InstructorQR = () => {
         const presentCount = Object.values(attendance).filter(Boolean).length;
         const absentCount = totalStudents - presentCount;
         const attendanceRate =
-            totalStudents > 0
-                ? ((presentCount / totalStudents) * 100).toFixed(1)
-                : 0;
-
+            totalStudents > 0 ? ((presentCount / totalStudents) * 100).toFixed(1) : 0;
         return { totalStudents, presentCount, absentCount, attendanceRate };
     }, [students, attendance]);
 
@@ -269,12 +260,12 @@ const InstructorQR = () => {
                             Manage your classes and attendance here.
                         </p>
                         <div className="h-20 flex items-center justify-center">
-                            <Link to='/dashboard/attendence-summary' className="bg-white p-2 rounded-xl text-xl text-black">
-                                <button>
-                                    View Summary
-                                </button>
+                            <Link
+                                to="/dashboard/attendence-summary"
+                                className="bg-white p-2 rounded-xl text-xl text-black"
+                            >
+                                <button>View Summary</button>
                             </Link>
-
                         </div>
                     </div>
 
@@ -302,61 +293,58 @@ const InstructorQR = () => {
                         <button
                             onClick={onGenerate}
                             disabled={!selectedSubject || loading}
-                            className={`mt-6 w-full py-3 rounded-xl font-medium text-white transition-all ${!selectedSubject || loading
-                                ? "bg-gray-400 cursor-not-allowed"
-                                : "bg-indigo-600 hover:bg-indigo-700 shadow-md hover:shadow-lg"
-                                }`}
+                            className={`mt-6 w-full py-3 rounded-xl font-medium text-white transition-all ${
+                                !selectedSubject || loading
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-indigo-600 hover:bg-indigo-700 shadow-md hover:shadow-lg"
+                            }`}
                         >
                             {loading ? "Generating QR..." : "Generate QR Code"}
                         </button>
                     </div>
-
                 </div>
             )}
 
-
+            {/* QR View */}
             {viewMode === "qr" && (
-  <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md md:max-w-xl lg:max-w-2xl p-2 sm:p-2 space-y-4 text-center">
-      <h3 className="text-xl md:text-2xl font-bold text-gray-800">
-        {selectedSubject?.subjectName}
-      </h3>
-      <p className="text-sm md:text-base text-gray-500">
-        {selectedSubject?.subjectCode}
-      </p>
+                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md md:max-w-xl lg:max-w-2xl p-2 sm:p-2 space-y-4 text-center">
+                        <h3 className="text-xl md:text-2xl font-bold text-gray-800">
+                            {selectedSubject?.subjectName}
+                        </h3>
+                        <p className="text-sm md:text-base text-gray-500">
+                            {selectedSubject?.subjectCode}
+                        </p>
 
-      <div
-        className={`inline-flex items-center px-3 md:px-4 py-1 rounded-full border-2 ${getTimerColor()}`}
-      >
-        <span className="font-bold text-sm md:text-base">{timeLabel}</span>
-      </div>
+                        <div
+                            className={`inline-flex items-center px-3 md:px-4 py-1 rounded-full border-2 ${getTimerColor()}`}
+                        >
+                            <span className="font-bold text-sm md:text-base">{timeLabel}</span>
+                        </div>
 
-      <div className="bg-gray-50 rounded-xl p-2 sm:p-6 flex justify-center">
-        <div className="w-full max-w-[380px] sm:max-w-[550px] ">
-          <QRCodeCanvas
-            value={qrData}
-            size={256} // default, auto scales with wrapper div
-            style={{ width: "100%", height: "auto" }}
-          />
-        </div>
-      </div>
+                        <div className="bg-gray-50 rounded-xl p-2 sm:p-6 flex justify-center">
+                            <div className="w-full max-w-[380px] sm:max-w-[550px]">
+                                <QRCodeCanvas value={qrData} size={256} style={{ width: "100%", height: "auto" }} />
+                            </div>
+                        </div>
 
-      <div className="flex gap-3">
-        <button onClick={closeQR}
-            className="w-full py-2 rounded-xl border text-gray-100 bg-blue-500">
-                view Attendance
-        </button>
-        <button
-          onClick={resetToInitial}
-          className="w-full py-2 rounded-xl border text-gray-600 hover:bg-gray-50"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
+                        <div className="flex gap-3">
+                            <button
+                                onClick={closeQR}
+                                className="w-full py-2 rounded-xl border text-gray-100 bg-blue-500"
+                            >
+                                View Attendance
+                            </button>
+                            <button
+                                onClick={resetToInitial}
+                                className="w-full py-2 rounded-xl border text-gray-600 hover:bg-gray-50"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Attendance Review */}
             {viewMode === "list" && (
@@ -393,9 +381,7 @@ const InstructorQR = () => {
                     {/* Students Table */}
                     <div className="bg-white border rounded-xl shadow-sm overflow-hidden">
                         {filteredStudents.length === 0 ? (
-                            <p className="p-6 text-center text-gray-500">
-                                No students found.
-                            </p>
+                            <p className="p-6 text-center text-gray-500">No students found.</p>
                         ) : (
                             <table className="w-full text-sm">
                                 <thead className="bg-gray-50 border-b">
@@ -410,19 +396,15 @@ const InstructorQR = () => {
                                     {filteredStudents.map((s, i) => (
                                         <tr
                                             key={s._id}
-                                            className={`hover:bg-gray-50 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/50"
-                                                }`}
+                                            className={`hover:bg-gray-50 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}
                                         >
-                                            <td className="p-3">
-                                                {s.firstName} {s.lastName}
-                                            </td>
+                                            <td className="p-3">{s.userId.firstName} {s.userId.lastName}</td>
                                             <td className="p-3">{s.rollNumber}</td>
                                             <td className="p-3 text-center">
                                                 <span
-                                                    className={`px-3 py-1 rounded-full text-xs font-semibold ${attendance[s._id]
-                                                        ? "bg-green-100 text-green-800"
-                                                        : "bg-red-100 text-red-800"
-                                                        }`}
+                                                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                                        attendance[s._id] ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                                                    }`}
                                                 >
                                                     {attendance[s._id] ? "Present" : "Absent"}
                                                 </span>
@@ -431,9 +413,7 @@ const InstructorQR = () => {
                                                 <input
                                                     type="checkbox"
                                                     checked={!!attendance[s._id]}
-                                                    onChange={(e) =>
-                                                        handleCheckboxChange(s._id, e.target.checked)
-                                                    }
+                                                    onChange={(e) => handleCheckboxChange(s._id, e.target.checked)}
                                                     className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500"
                                                 />
                                             </td>
@@ -445,21 +425,18 @@ const InstructorQR = () => {
                     </div>
 
                     <div className="flex justify-end gap-3">
-
                         <button
                             onClick={resetToInitial}
                             className="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-50"
                         >
                             Back
                         </button>
-
                         <button
                             onClick={exportToPDF}
                             className="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-50"
                         >
                             Export to PDF
                         </button>
-
                         <button
                             onClick={handleSubmitAttendance}
                             disabled={loading}
@@ -470,6 +447,7 @@ const InstructorQR = () => {
                     </div>
                 </div>
             )}
+
             {/* Submitted View */}
             {viewMode === "submitted" && (
                 <div className="bg-white border rounded-2xl shadow-sm p-8 text-center space-y-6">
@@ -493,9 +471,8 @@ const InstructorQR = () => {
                     </div>
                 </div>
             )}
-
         </div>
     );
 };
 
-export default InstructorQR;
+

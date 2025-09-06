@@ -225,8 +225,9 @@ export const updateAttendance = async (req, res) => {
       return res.status(403).json({ success: false, message: "Attendance can no longer be modified." });
     }
 
+    // ✅ Collect only present student IDs
     const newPresentStudentList = Object.keys(updatedStudents).filter(
-      (studentId) => updatedStudents[studentId] === "Present"
+      (studentId) => updatedStudents[studentId] === true
     );
 
     attendance.presentStudent = newPresentStudentList;
@@ -235,12 +236,14 @@ export const updateAttendance = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Attendance updated successfully",
+      presentStudentCount: newPresentStudentList.length,
     });
   } catch (error) {
     console.error("Update attendance error:", error);
     return res.status(500).json({ success: false, message: "Attendance update failed" });
   }
 };
+
 
 
 export const getInstructorAttendanceSummary = async (req, res) => {
