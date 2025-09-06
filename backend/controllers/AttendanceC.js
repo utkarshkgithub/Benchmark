@@ -277,8 +277,7 @@ export const getInstructorAttendanceSummary = async (req, res) => {
     const instructorId = req.user.id;
 
     // ✅ Get subjects taught by instructor
-    const subjects = await Subject.find({ instructor: instructorId }).populate("students");
-
+    const subjects = await Subject.find({ instructor: instructorId });
     if (!subjects || subjects.length === 0) {
       return res.status(404).json({ success: false, message: "No subjects found" });
     }
@@ -288,32 +287,41 @@ export const getInstructorAttendanceSummary = async (req, res) => {
     for (const subject of subjects) {
       // ✅ All attendance records for this subject
       const attendanceRecords = await Attendance.find({ subject: subject._id });
-
       const totalClasses = attendanceRecords.length;
 
-      // Prepare each student data
+      // ✅ Get students enrolled in this subject
+      const students = await Student.find({ subjects: subject._id })
+        .populate("userId", "firstName lastName email")
+        .lean();
+
       let studentData = [];
 
-      for (const student of subject.students) {
+      for (const student of students) {
         let presentCount = 0;
 
         // ✅ Count present occurrences for this student
-        attendanceRecords.forEach(record => {
-          if (record.presentStudent.includes(student._id.toString())) {
+        attendanceRecords.forEach((record) => {
+          if (record.presentStudent.map(id => id.toString()).includes(student.userId._id.toString())) {
             presentCount++;
           }
         });
 
-        const email = `${student.email}`;
-        const roll = email.match(/\d{9}/)[0];
-        // console.log(roll)
+        const email = student.userId?.email || "";
+        const roll = email.match(/\d{9}/)?.[0] || student.rollNumber || "N/A";
+
         studentData.push({
           studentId: student._id,
-          name: student.firstName + " " + student.lastName,
-          rollNumber: roll || "N/A",
+          name: `${student.userId.firstName} ${student.userId.lastName}`,
+          rollNumber: roll,
+          branch: student.branch,
+          semester: student.semester,
+          email: student.userId.email,
           present: presentCount,
           total: totalClasses,
-          percentage: totalClasses > 0 ? ((presentCount / totalClasses) * 100).toFixed(2) : "0.00",
+          percentage:
+            totalClasses > 0
+              ? ((presentCount / totalClasses) * 100).toFixed(2)
+              : "0.00",
         });
       }
 

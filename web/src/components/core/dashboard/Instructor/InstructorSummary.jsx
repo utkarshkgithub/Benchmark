@@ -5,6 +5,7 @@ import { getInstructorSummary } from "../../../../services/opretions/Subject";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import * as XLSX from 'xlsx';
 
 const InstructorSummary = () => {
   const { token } = useSelector((state) => state.auth);
@@ -108,6 +109,28 @@ const InstructorSummary = () => {
     doc.save(`Overall_Attendance_${subject.subjectCode}_${dateStr}.pdf`);
   }
 
+  const exportToExcel = () => {
+    const subject = summary.find((s) => s.subjectId === selectedSubject);
+    if (!subject) return;
+
+    const tableColumn = ["Roll No", "Name", "Present", "Total", "Percentage"];
+    const tableRows = processedStudents.map(student => ({
+      "Roll No": student.rollNumber,
+      "Name": student.name,
+      "Present": student.present,
+      "Total": student.total,
+      "Percentage": `${student.percentage}%`
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(tableRows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Attendance");
+
+    const date = new Date();
+    const dateStr = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+    XLSX.writeFile(wb, `Overall_Attendance_${subject.subjectCode}_${dateStr}.xlsx`);
+  }
+
   const getAttendanceColor = (percentage) => {
     const percent = parseFloat(percentage);
     if (percent >= 85) return "text-green-600";
@@ -164,12 +187,20 @@ const InstructorSummary = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full md:w-1/2 border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 transition"
           />
-          <button
-            onClick={exportToPDF}
-            className="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-50"
-          >
-            Export to PDF
-          </button>
+          <div className="flex gap-x-2">
+            <button
+              onClick={exportToPDF}
+              className="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-50"
+            >
+              Export to PDF
+            </button>
+            <button
+              onClick={exportToExcel}
+              className="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-50"
+            >
+              Export to Excel
+            </button>
+          </div>
         </div>
       )}
 
