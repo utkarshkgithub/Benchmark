@@ -197,7 +197,7 @@ export const signUp = async (req, res) => {
         let finalSubjects = [...subjects];
   
         const branchSemesterSubjects = await Subject.find({
-          branches: branch,
+          branches: { $in: [branch] },
           semester: semester,
         }).select("_id");
   
