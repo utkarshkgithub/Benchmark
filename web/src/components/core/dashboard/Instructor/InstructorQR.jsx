@@ -15,7 +15,7 @@ import { Link } from "react-router-dom";
 
 const TWO_MIN = 119;
 
-export default function InstructorQR(){
+export default function InstructorQR() {
     const { token, user } = useSelector((s) => s.auth);
 
     const [subjects, setSubjects] = useState([]);
@@ -34,6 +34,7 @@ export default function InstructorQR(){
     const [initialAttendance, setInitialAttendance] = useState({});
     const [viewMode, setViewMode] = useState("initial"); // "initial", "qr", "list", "submitted"
     const [searchTerm, setSearchTerm] = useState("");
+    const [sortBy, setSortBy] = useState("name"); // sorting option
 
     useEffect(() => {
         const fetchSubjects = async () => {
@@ -160,7 +161,7 @@ export default function InstructorQR(){
         const tableColumn = ["Name", "Roll Number", "Status"];
         const tableRows = [];
 
-        filteredStudents.forEach((student) => {
+        sortedStudents.forEach((student) => {
             const studentData = [
                 `${student.userId.firstName} ${student.userId.lastName}`,
                 student.rollNumber,
@@ -217,6 +218,27 @@ export default function InstructorQR(){
                 student.rollNumber?.toLowerCase().includes(searchTerm.toLowerCase())
         );
     }, [students, searchTerm]);
+
+    // sorted students
+    const sortedStudents = useMemo(() => {
+        const sorted = [...filteredStudents];
+        if (sortBy === "name") {
+            sorted.sort((a, b) =>
+                `${a.userId.firstName} ${a.userId.lastName}`.localeCompare(
+                    `${b.userId.firstName} ${b.userId.lastName}`
+                )
+            );
+        } else if (sortBy === "rollNumber") {
+            sorted.sort((a, b) => a.rollNumber.localeCompare(b.rollNumber));
+        } else if (sortBy === "status") {
+            sorted.sort((a, b) => {
+                const statusA = attendance[a._id] ? 1 : 0;
+                const statusB = attendance[b._id] ? 1 : 0;
+                return statusB - statusA; // Present first
+            });
+        }
+        return sorted;
+    }, [filteredStudents, sortBy, attendance]);
 
     const attendanceStats = useMemo(() => {
         const totalStudents = students.length;
@@ -369,18 +391,30 @@ export default function InstructorQR(){
                         </div>
                     </div>
 
-                    {/* Search Bar */}
-                    <input
-                        type="text"
-                        placeholder="Search students..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-indigo-500"
-                    />
+                    {/* Search + Sort */}
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <input
+                            type="text"
+                            placeholder="Search students..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full md:w-1/2 border rounded-lg p-3 focus:ring-2 focus:ring-indigo-500"
+                        />
+
+                        <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                            className="w-full md:w-1/4 border rounded-lg p-3 focus:ring-2 focus:ring-indigo-500"
+                        >
+                            <option value="name">Sort by Name</option>
+                            <option value="rollNumber">Sort by Roll Number</option>
+                            <option value="status">Sort by Status</option>
+                        </select>
+                    </div>
 
                     {/* Students Table */}
                     <div className="bg-white border rounded-xl shadow-sm overflow-hidden">
-                        {filteredStudents.length === 0 ? (
+                        {sortedStudents.length === 0 ? (
                             <p className="p-6 text-center text-gray-500">No students found.</p>
                         ) : (
                             <table className="w-full text-sm">
@@ -393,7 +427,7 @@ export default function InstructorQR(){
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredStudents.map((s, i) => (
+                                    {sortedStudents.map((s, i) => (
                                         <tr
                                             key={s._id}
                                             className={`hover:bg-gray-50 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}
@@ -433,14 +467,16 @@ export default function InstructorQR(){
                         </button>
                         <button
                             onClick={exportToPDF}
-                            className="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-50"
+                            className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-md"
                         >
-                            Export to PDF
+                            Export PDF
                         </button>
                         <button
                             onClick={handleSubmitAttendance}
                             disabled={loading}
-                            className="px-6 py-2 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 disabled:opacity-50"
+                            className={`px-4 py-2 rounded-lg font-medium text-white ${
+                                loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700 shadow-md"
+                            }`}
                         >
                             {loading ? "Submitting..." : "Submit"}
                         </button>
@@ -450,29 +486,17 @@ export default function InstructorQR(){
 
             {/* Submitted View */}
             {viewMode === "submitted" && (
-                <div className="bg-white border rounded-2xl shadow-sm p-8 text-center space-y-6">
-                    <h2 className="text-2xl font-bold text-gray-800">Attendance Submitted!</h2>
-                    <p className="text-gray-600">
-                        The attendance for <strong>{selectedSubject?.subjectName}</strong> has been recorded.
-                    </p>
-                    <div className="flex justify-center gap-4">
-                        <button
-                            onClick={handleViewAttendance}
-                            className="px-6 py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700"
-                        >
-                            View Attendance History
-                        </button>
-                        <button
-                            onClick={resetToInitial}
-                            className="px-6 py-3 rounded-xl border text-gray-600 hover:bg-gray-50"
-                        >
-                            Mark Another Attendance
-                        </button>
-                    </div>
+                <div className="text-center space-y-6">
+                    <h3 className="text-2xl font-bold text-green-700">Attendance Updated</h3>
+                    <p className="text-gray-600">Your changes have been successfully saved.</p>
+                    <button
+                        onClick={handleViewAttendance}
+                        className="px-6 py-3 rounded-xl bg-indigo-600 text-white font-medium hover:bg-indigo-700 shadow-md"
+                    >
+                        Back to Dashboard
+                    </button>
                 </div>
             )}
         </div>
     );
-};
-
-
+}

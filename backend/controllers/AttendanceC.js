@@ -170,42 +170,63 @@ export const verifyQrCode = async (req, res) => {
 export const getAttendanceDetails = async (req, res) => {
   try {
     const { attendanceId } = req.body;
+    // console.log("attendanceId :- ", attendanceId);
 
+    // 1️⃣ Find attendance
     const attendance = await Attendance.findById(attendanceId);
     if (!attendance) {
-      return res.status(404).json({ success: false, message: "Attendance not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Attendance not found" });
     }
 
-    const subject = await Subject.findById(attendance.subject).populate(
-      "students",
-      "firstName lastName email rollNumber"
-    );
+    // 2️⃣ Find subject
+    const subject = await Subject.findById(attendance.subject);
     if (!subject) {
-      return res.status(404).json({ success: false, message: "Subject not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Subject not found" });
     }
 
-    const presentStudentsSet = new Set(attendance.presentStudent.map((id) => id.toString()));
+    // 3️⃣ Get all students enrolled in this subject
+    const students = await Student.find({ subjects: subject._id })
+      .populate("userId", "firstName lastName email")
+      .lean();
 
-    const studentStatusList = subject.students.map((student) => ({
+    // 4️⃣ Build present/absent list
+    const presentStudentsSet = new Set(
+      attendance.presentStudent.map((id) => id.toString())
+    );
+
+    const studentStatusList = students.map((student) => ({
       student: student._id,
-      name: `${student.firstName} ${student.lastName}`,
+      name: `${student.userId.firstName} ${student.userId.lastName}`,
       rollNumber: student.rollNumber,
-      email: student.email,
-      status: presentStudentsSet.has(student._id.toString()) ? "Present" : "Absent",
+      branch: student.branch,
+      semester: student.semester,
+      email: student.userId.email,
+      status: presentStudentsSet.has(student.userId._id.toString())
+        ? "Present"
+        : "Absent",
     }));
 
+    // 5️⃣ Return response
     return res.status(200).json({
       success: true,
       attendance: {
         _id: attendance._id,
+        subject: subject.subjectName,
         students: studentStatusList,
       },
     });
   } catch (error) {
     console.error("Get attendance error:", error);
-    return res.status(500).json({ success: false, message: "Failed to get attendance" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to get attendance" });
   }
 };
+
 
 export const updateAttendance = async (req, res) => {
   try {
