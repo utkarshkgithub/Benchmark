@@ -103,6 +103,11 @@ class _InstructorPageState extends State<InstructorPage> {
     _fetchCompleteSubjectData();
   }
 
+  void safeSetState(VoidCallback fn) {
+    if (!mounted) return;
+    setState(fn);
+  }
+
   Future<void> _fetchCompleteSubjectData() async {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -135,7 +140,7 @@ class _InstructorPageState extends State<InstructorPage> {
       }
 
       if (mounted) {
-        setState(() {
+        safeSetState(() {
           _subjects = updatedSubjects;
           // Update selected subject by finding it with the same subject id
           if (selectedSubjectId != null) {
@@ -169,14 +174,14 @@ class _InstructorPageState extends State<InstructorPage> {
 
     // If QR is already active, just show it instead of generating new one
     if (_activeQr && _qrToken != null && _remainingSeconds > 0) {
-      setState(() {
+      safeSetState(() {
         _showQr = true;
       });
       // Don't restart the countdown timer - it should already be running
       return;
     }
 
-    setState(() {
+    safeSetState(() {
       _isLoading = true;
     });
 
@@ -224,7 +229,7 @@ class _InstructorPageState extends State<InstructorPage> {
         );
       }
 
-      setState(() {
+      safeSetState(() {
         _qrToken = qrToken;
         _attendanceId = attendanceId; // Store attendance ID
         _activeQr = true; // Mark QR as active
@@ -244,7 +249,7 @@ class _InstructorPageState extends State<InstructorPage> {
         );
       }
     } finally {
-      setState(() {
+      safeSetState(() {
         _isLoading = false;
       });
     }
@@ -253,7 +258,7 @@ class _InstructorPageState extends State<InstructorPage> {
   void _startCountdown() {
     _countdownTimer?.cancel();
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
+      safeSetState(() {
         if (_remainingSeconds > 0) {
           _remainingSeconds--;
         } else {
@@ -278,7 +283,7 @@ class _InstructorPageState extends State<InstructorPage> {
   void _closeQR() {
     // Don't cancel the countdown timer - let it continue running in background
     // because the QR expires on the backend in 2 minutes regardless of UI state
-    setState(() {
+    safeSetState(() {
       _showQr = false;
       // Keep all QR data and timer running until it naturally expires
     });
@@ -304,7 +309,7 @@ class _InstructorPageState extends State<InstructorPage> {
       return;
     }
 
-    setState(() {
+    safeSetState(() {
       _isLoadingAttendance = true;
     });
 
@@ -337,7 +342,7 @@ class _InstructorPageState extends State<InstructorPage> {
             data['attendance'],
           );
 
-          setState(() {
+          safeSetState(() {
             _attendanceData = attendanceDetails;
             _showAttendance = true;
           });
@@ -357,7 +362,7 @@ class _InstructorPageState extends State<InstructorPage> {
         );
       }
     } finally {
-      setState(() {
+      safeSetState(() {
         _isLoadingAttendance = false;
       });
     }
@@ -397,7 +402,7 @@ class _InstructorPageState extends State<InstructorPage> {
           if (_showQr) {
             _closeQR();
           } else if (_showAttendance) {
-            setState(() {
+            safeSetState(() {
               _showAttendance = false;
               _attendanceData = null;
             });
@@ -423,7 +428,7 @@ class _InstructorPageState extends State<InstructorPage> {
                     ? IconButton(
                         icon: const Icon(Icons.arrow_back, color: Colors.black),
                         onPressed: () {
-                          setState(() {
+                          safeSetState(() {
                             _showAttendance = false;
                             _attendanceData = null;
                           });
@@ -573,7 +578,7 @@ class _InstructorPageState extends State<InstructorPage> {
                     );
                   }).toList(),
                   onChanged: (String? newValue) {
-                    setState(() {
+                    safeSetState(() {
                       _selectedSubject = _subjects.firstWhere(
                         (subject) => subject.id == newValue,
                         orElse: () => _subjects.first,

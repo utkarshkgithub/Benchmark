@@ -25,6 +25,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     super.dispose();
   }
 
+
+  void safeSetState(VoidCallback fn) {
+    if (!mounted) return;
+    setState(fn);
+  }
+
   Future<void> _handleSendOTP() async {
     if (_formKeys[0].currentState!.validate()) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -39,7 +45,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           isForgotPassword: true,
         );
 
-        setState(() {
+        safeSetState(() {
           _currentPage = 1;
         });
 
@@ -100,7 +106,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   void _goBackToEmailPage() {
-    setState(() {
+    safeSetState(() {
       _currentPage = 0;
     });
     _pageController.previousPage(

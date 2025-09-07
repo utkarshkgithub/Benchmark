@@ -45,6 +45,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     super.dispose();
   }
 
+  void safeSetState(VoidCallback fn) {
+    if (!mounted) return;
+    setState(fn);
+  }
+  
   // CORRECTED: This listener now just checks if the camera is ready.
   void _onCameraStateChanged() {
     // FIXED: Type is non-nullable as per the warning.
@@ -53,7 +58,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     // Once the camera is running and we haven't initialized, show the slider.
     if (scannerState.isRunning && !_isZoomInitialized) {
       if (mounted) {
-        setState(() {
+        safeSetState(() {
           _isZoomInitialized = true;
         });
         // Important: Remove the listener after we're done to avoid unnecessary rebuilds.
@@ -64,7 +69,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
   void _updateZoom(double zoomValue) {
     if (!_isZoomInitialized) return;
-    setState(() {
+    safeSetState(() {
       _currentZoom = zoomValue;
     });
 
@@ -76,7 +81,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
   Future<void> _sendQRDataToEndpoint(String qrData) async {
     if (_isProcessing) return;
-    setState(() => _isProcessing = true);
+    safeSetState(() => _isProcessing = true);
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -131,7 +136,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     } finally {
       await Future.delayed(const Duration(seconds: 2));
       if (mounted) {
-        setState(() => _isProcessing = false);
+        safeSetState(() => _isProcessing = false);
       }
     }
   }

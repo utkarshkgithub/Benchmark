@@ -25,8 +25,14 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     _initializeDeviceInfo();
   }
 
+  /// Safe setState that checks if widget is still mounted before calling setState
+  void safeSetState(VoidCallback fn) {
+    if (!mounted) return;
+    setState(fn);
+  }
+
   Future<void> _initializeDeviceInfo() async {
-    setState(() {
+    safeSetState(() {
       _isLoading = true;
       _error = null;
     });
@@ -50,7 +56,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       // Get current location
       final location = await DeviceService.getCurrentLocation();
 
-      setState(() {
+      safeSetState(() {
         _isDeviceInitialized = isInitialized;
         _deviceId = deviceId;
         _legacyDeviceId = legacyDeviceId;
@@ -60,7 +66,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      setState(() {
+      safeSetState(() {
         _error = e.toString();
         _isLoading = false;
       });
@@ -68,7 +74,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   Future<void> _markAttendance() async {
-    setState(() {
+    safeSetState(() {
       _isLoading = true;
       _error = null;
     });
@@ -92,11 +98,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         }
       }
     } catch (e) {
-      setState(() {
+      safeSetState(() {
         _error = 'Failed to mark attendance: $e';
       });
     } finally {
-      setState(() {
+      safeSetState(() {
         _isLoading = false;
       });
     }
@@ -127,7 +133,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     );
 
     if (confirmed == true) {
-      setState(() {
+      safeSetState(() {
         _isLoading = true;
         _error = null;
       });
@@ -147,11 +153,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           );
         }
       } catch (e) {
-        setState(() {
+        safeSetState(() {
           _error = 'Failed to reset device ID: $e';
         });
       } finally {
-        setState(() {
+        safeSetState(() {
           _isLoading = false;
         });
       }
@@ -159,19 +165,19 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   Future<void> _refreshLocation() async {
-    setState(() {
+    safeSetState(() {
       _isLoading = true;
       _error = null;
     });
 
     try {
       final location = await DeviceService.getCurrentLocation();
-      setState(() {
+      safeSetState(() {
         _currentLocation = location;
         _isLoading = false;
       });
     } catch (e) {
-      setState(() {
+      safeSetState(() {
         _error = e.toString();
         _isLoading = false;
       });
