@@ -215,7 +215,7 @@ export const signUp = async (req, res) => {
   
         await Subject.updateMany(
           { _id: { $in: finalSubjects } },
-          { $addToSet: { students: user._id } }
+          { $addToSet: { students: user.userId._id } }
         );
       } else if (accountType === "Instructor") {
         user = await Instructor.create({

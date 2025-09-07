@@ -2,23 +2,19 @@ import Student from "../models/Student.js";
 import Attendance from "../models/Attendence.js";
 export const fetchStudentAttendance = async (req, res) => {
   try {
-    // ✅ Get logged-in user id from req.user (auth middleware must set this)
     const userId = req.user.id;
 
-    // ✅ Find student by userId
     const student = await Student.findOne({ userId }).populate("subjects");
     if (!student) {
       return res.status(404).json({ success: false, message: "Student not found" });
     }
 
-    // ✅ Fetch attendance records for student's subjects
     const attendanceRecords = await Attendance.find({
       subject: { $in: student.subjects },
     })
       .populate("subject", "subjectName subjectCode")
       .populate("presentStudent", "firstName lastName email");
 
-    // ✅ Calculate attendance summary
     const attendanceData = student.subjects.map((sub) => {
       const subjectAttendance = attendanceRecords.filter(
         (record) => record.subject._id.toString() === sub._id.toString()

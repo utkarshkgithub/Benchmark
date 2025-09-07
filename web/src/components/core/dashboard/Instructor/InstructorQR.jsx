@@ -58,36 +58,43 @@ export default function InstructorQR() {
         }
     }, [remaining, viewMode]);
 
-    const onGenerate = async () => {
-        if (!selectedSubject) return;
-        setLoading(true);
-        setError(null);
-        setSuccessMessage(null);
+const onGenerate = async () => {
+    if (!selectedSubject) return;
 
-        const formData = new FormData();
-        formData.append("subjectId", selectedSubject._id);
+    // If QR is active, just show the existing QR without regenerating
+    if (viewMode === "qr" && remaining > 0) {
+        return;
+    }
 
-        try {
-            const res = await generateQr(token, formData);
-            const code = res?.data?.token || "";
-            const attendanceId = res?.data?.attendanceId || null;
+    setLoading(true);
+    setError(null);
+    setSuccessMessage(null);
 
-            if (!code || !attendanceId) {
-                throw new Error("QR code or Attendance ID missing in response");
-            }
+    const formData = new FormData();
+    formData.append("subjectId", selectedSubject._id);
 
-            setQrData(code);
-            setCurrentAttendanceId(attendanceId);
-            setViewMode("qr");
-            setRemaining(TWO_MIN);
-            startCountdown();
-        } catch (e) {
-            console.error("Generate QR failed:", e);
-            setError("Failed to generate QR code. Please try again.");
-        } finally {
-            setLoading(false);
+    try {
+        const res = await generateQr(token, formData);
+        const code = res?.data?.token || "";
+        const attendanceId = res?.data?.attendanceId || null;
+
+        if (!code || !attendanceId) {
+            throw new Error("QR code or Attendance ID missing in response");
         }
-    };
+
+        setQrData(code);
+        setCurrentAttendanceId(attendanceId);
+        setViewMode("qr");
+        setRemaining(TWO_MIN);
+        startCountdown();
+    } catch (e) {
+        console.error("Generate QR failed:", e);
+        setError("Failed to generate QR code. Please try again.");
+    } finally {
+        setLoading(false);
+    }
+};
+
 
     const startCountdown = () => {
         if (timerRef.current) clearInterval(timerRef.current);
@@ -350,13 +357,7 @@ export default function InstructorQR() {
                                 onClick={closeQR}
                                 className="w-full py-2 rounded-xl border text-gray-100 bg-blue-500"
                             >
-                                View Attendance
-                            </button>
-                            <button
-                                onClick={resetToInitial}
-                                className="w-full py-2 rounded-xl border text-gray-600 hover:bg-gray-50"
-                            >
-                                Cancel
+                                Close Attendance
                             </button>
                         </div>
                     </div>
@@ -425,9 +426,9 @@ export default function InstructorQR() {
                                     {sortedStudents.map((s, i) => (
                                         <tr
                                             key={s._id}
-                                            className={`hover:bg-gray-50 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}
+                                            className={`hover:bg-gray-50 ${i % 2 === 0 ? "bg-white" : "bg-gray-200"}`}
                                         >
-                                            <td className="p-3">{s.userId.firstName} {s.userId.lastName}</td>
+                                            <td className="p-3 font-bold">{s.userId.firstName} {s.userId.lastName}</td>
                                             <td className="p-3">{s.rollNumber}</td>
                                             <td className="p-3 text-center">
                                                 <span

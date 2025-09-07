@@ -3,100 +3,65 @@ import User from "../models/User.js";
 import Subject from "../models/Subject.js";
 import Student from "../models/Student.js";
 import Attendance from "../models/Attendence.js";
-import { normalizeBranchNames } from "../utils/branchUtils.js";
+
+import { normalizeBranchNames, VALID_BRANCHES } from "../utils/branchUtils.js";
 
 export const createSubject = async (req, res) => {
   try {
-    let {
-      instructor = "",
-      branches = [],
-      semester = "",
-      subjectCode = "",
-      subjectName = "",
-      isMinor = false,
-    } = req.body;
+    let { subjectName, subjectCode, branches, semester, isMinor } = req.body;
 
-    // Normalize branch names - convert Mechatronics to MAE
+    // ✅ Normalize branches
     branches = normalizeBranchNames(branches);
 
-    if (!instructor || !branches.length || !semester || !subjectCode || !subjectName) {
-      return res
-        .status(400)
-        .json({ success: false, message: "All fields are required" });
-    }
-
-    // check subject already exists in semester
-    const existSubject = await Subject.findOne({
-      semester,
-      subjectName,
-      branches: { $in: branches },   // ✅ check if any branch overlaps
-    });
-
-    if (existSubject) {
-      return res.status(409).json({
+    // ✅ Validate branches
+    const invalidBranches = branches.filter(
+      (branch) => !VALID_BRANCHES.includes(branch)
+    );
+    if (invalidBranches.length > 0) {
+      return res.status(400).json({
         success: false,
-        message:
-          "This subject code is already assigned to one of the selected branches in this semester.",
+        message: `Invalid branches: ${invalidBranches.join(", ")}`,
       });
     }
-    
 
-    // check instructor
-    const userDetails = await User.findById(instructor);
-    if (!userDetails) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found." });
-    }
+    // ✅ Find students matching branches and semester
+    const students = await Student.find({
+      branch: { $in: branches },
+      semester: semester,
+    });
 
-    // Find instructor details where userId matches
-    const instructorDetails = await Instructor.findOne({ userId: userDetails._id });
-    if (!instructorDetails) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Instructor not found." });
-    }
-
-    // create subject
-    const newSubject = await Subject.create({
+    // ✅ Create the subject with assigned students
+    const subject = await Subject.create({
       subjectName,
       subjectCode,
-      instructor: userDetails._id,
-      semester,
       branches,
-      isMinor,
+      semester,
+      instructor: req.user.id,
+      isMinor: isMinor || false,
+      students: students.map(student => student.userId), // Save student user IDs
     });
 
-    await Instructor.findByIdAndUpdate(instructorDetails._id, {
-      $push: { subjectsTaught: newSubject._id },
-    });
-
-    const populatedSubject = await Subject.findById(newSubject._id)
-      .populate({
-        path: "instructor",
-        select: "firstName lastName email accountType",
-        model: "User"
-      })
-      .lean();
-
-    const instructorSubjects = await Subject.find({
-      instructor: userDetails._id
-    })
-      .select("subjectName subjectCode semester branch")
-      .lean();
-
-    populatedSubject.instructor.subjects = instructorSubjects;
+    // ✅ Update each student to add this subject
+    await Promise.all(
+      students.map(student =>
+        Student.findByIdAndUpdate(student._id, {
+          $addToSet: { subjects: subject._id },
+        })
+      )
+    );
 
     return res.status(201).json({
       success: true,
-      message: "Subject Created Successfully.",
-      data: populatedSubject,
+      message: "Subject created and students assigned successfully",
+      data: subject,
     });
   } catch (error) {
-    console.log("Error in create Subject Controller.", error);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error." });
+    console.error("Error in create Subject Controller:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to create subject",
+      error: error.message,
+    });
   }
 };
 
