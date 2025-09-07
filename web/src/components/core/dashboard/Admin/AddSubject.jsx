@@ -18,6 +18,7 @@ const AddSubject = () => {
     try {
       const response = await apiConnector("GET", subjectEndPoints.FATCH_INSTRUCTOR_API);
       setAllInstructor(response?.data?.data || []);
+      console.log(response?.data?.data);
     } catch (err) {
       console.error("Error fetching instructors:", err);
     }
@@ -28,6 +29,8 @@ const AddSubject = () => {
   }, []);
 
   const onSubmit = async (data) => {
+    console.log("instructor",data.instructor)
+    
     const formData = new FormData();
     formData.append("subjectName", data.subjectName);
     formData.append("subjectCode", data.subjectCode);
@@ -97,8 +100,8 @@ const AddSubject = () => {
                 {...register('instructor', { required: true })}
               >
                 <option value="">Select an instructor</option>
-                {allInstructor.map((instructor) => (
-                  <option value={instructor._id} key={instructor._id}>
+                {allInstructor.map((instructor,index) => (
+                  <option value={instructor._id} key={index}>
                     {instructor.firstName} {instructor.lastName}
                   </option>
                 ))}

@@ -251,3 +251,28 @@ export const getInstructorSummary = async (token) => {
         toast.dismiss(toastId);
     }
 };
+
+
+export const deleteSubject = async(subjectId,token) =>{
+    const toastId = toast.loading("Delete Subject...");
+    try {
+        const response = await apiConnector(
+            "DELETE",
+            subjectEndPoints.DELETE_SUBJECT_API,
+            { subjectId },
+            {
+                Authorization: `Bearer ${token}`,
+            }
+        );
+        if (!response.data.success) {
+            throw new Error(response.data.message);
+        }
+        toast.success("Subject Deleted");
+        return response;
+    } catch (error) {
+        console.error("DELETE_SUBJECT_API ERROR............", error);
+        toast.error("Failed to DELETE SUBJECT");
+    } finally {
+        toast.dismiss(toastId);
+    }
+}

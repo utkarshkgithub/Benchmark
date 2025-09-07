@@ -35,4 +35,5 @@ export const subjectEndPoints = {
   GET_ATTENDANCE_DETAILS_API: BASE_URL + "/subject/getAttendanceDetails",
   UPDATE_ATTENDANCE_API: BASE_URL + "/subject/updateAttendance",
   INSTRUCTOR_SUMMARY_API: BASE_URL + "/subject/instructor-summary",
+  DELETE_SUBJECT_API:BASE_URL + "/subject/delete-subject"
 }

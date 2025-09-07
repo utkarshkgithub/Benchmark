@@ -8,7 +8,7 @@ import { normalizeBranchNames, VALID_BRANCHES } from "../utils/branchUtils.js";
 
 export const createSubject = async (req, res) => {
   try {
-    let { subjectName, subjectCode, branches, semester, isMinor } = req.body;
+    let { subjectName, subjectCode, branches, instructor,semester, isMinor} = req.body;
 
     // ✅ Normalize branches
     branches = normalizeBranchNames(branches);
@@ -36,10 +36,27 @@ export const createSubject = async (req, res) => {
       subjectCode,
       branches,
       semester,
-      instructor: req.user.id,
+      instructor: instructor,
       isMinor: isMinor || false,
       students: students.map(student => student.userId), // Save student user IDs
     });
+
+     // Add subject ID to instructor's subjectsTaught array
+if (instructor) {
+  const updatedInstructor = await Instructor.findOneAndUpdate(
+    { userId: instructor },            // match by userId field
+    { $addToSet: { subjectsTaught: subject._id } }, // add subject ID
+    { new: true }                      // return the updated document
+  );
+
+  if (!updatedInstructor) {
+    console.warn(`Instructor with userId ${instructor} not found`);
+  }
+} else {
+  console.warn("No instructor ID provided for this subject");
+}
+
+
 
     // ✅ Update each student to add this subject
     await Promise.all(

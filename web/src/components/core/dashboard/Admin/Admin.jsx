@@ -2,10 +2,12 @@ import { useEffect } from "react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { fetchAllSubjects } from "../../../../services/opretions/Subject";
+import { deleteSubject, fetchAllSubjects } from "../../../../services/opretions/Subject";
+import { useSelector } from "react-redux";
 
 
 const Admin = () => {
+  const {token} = useSelector((state)=>state.auth);
   const [subjects, setSubjects] = useState([]);
   const [filteredSubjects, setFilteredSubjects] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -43,8 +45,8 @@ const handleAddSubject = () =>{
 
 
   const handleDelete = async (subjectId) => {
-    
-    alert("handle delet clicked.");
+    const res = await deleteSubject(subjectId,token);
+
   };
 
   if (loading) {

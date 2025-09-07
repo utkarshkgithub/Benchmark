@@ -6,6 +6,7 @@ import Subject from "../models/Subject.js";
 import crypto from "crypto";
 import Token from "../models/Token.js";
 import Student from "../models/Student.js";
+import Instructor from "../models/Instructor.js";
 
 dotenv.config();
 
@@ -341,5 +342,47 @@ export const getInstructorAttendanceSummary = async (req, res) => {
   } catch (error) {
     console.error("Error fetching instructor summary:", error);
     return res.status(500).json({ success: false, message: "Failed to fetch attendance summary" });
+  }
+};
+
+
+export const deleteSubject = async (req, res) => {
+  try {
+    const { subjectId } = req.body;
+
+    if (!subjectId) {
+      return res.status(400).json({ success: false, message: "Subject ID is required" });
+    }
+
+    // 1️⃣ Delete the subject
+    const deletedSubject = await Subject.findByIdAndDelete(subjectId);
+
+    if (!deletedSubject) {
+      return res.status(404).json({ success: false, message: "Subject not found" });
+    }
+
+    // 2️⃣ Remove this subject from all students
+    await Student.updateMany(
+      { subjects: subjectId },
+      { $pull: { subjects: subjectId } }
+    );
+
+    // 3️⃣ Remove this subject from all instructors
+    await Instructor.updateMany(
+      { subjectsTaught: subjectId },
+      { $pull: { subjectsTaught: subjectId } }
+    );
+
+    // 4️⃣ Delete all attendance records for this subject
+    await Attendance.deleteMany({ subject: subjectId });
+
+    return res.status(200).json({ 
+      success: true, 
+      message: "Subject deleted, references removed, and related attendance records deleted successfully" 
+    });
+
+  } catch (error) {
+    console.error("Error deleting subject:", error);
+    return res.status(500).json({ success: false, message: "Server Error" });
   }
 };
