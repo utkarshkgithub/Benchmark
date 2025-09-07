@@ -389,31 +389,85 @@ class AuthService {
     }
   }
 
-  static Future<String> verifyOTP({
+  // static Future<String> verifyOTP({
+  //   required String email,
+  //   required String otp,
+  // }) async {
+  //   if (_backendUrl == null) {
+  //     throw Exception("BACKEND_URL is not set in the .env file");
+  //   }
+
+  //   final verifyOTPUrl = Uri.parse('$_backendUrl/api/v1/auth/verifyotp');
+
+  //   final Map<String, dynamic> body = {"email": email, "otp": otp};
+
+  //   try {
+  //     AppLogger.auth('Attempting to verify OTP for email: $email');
+
+  //     final headers = {'Content-Type': 'application/json; charset=UTF-8'};
+  //     NetworkLogger.logRequest(
+  //       method: 'POST',
+  //       url: verifyOTPUrl,
+  //       headers: headers,
+  //       body: jsonEncode(body),
+  //     );
+  //     final start = DateTime.now();
+  //     final response = await http.post(
+  //       verifyOTPUrl,
+  //       headers: headers,
+  //       body: jsonEncode(body),
+  //     );
+  //     NetworkLogger.logResponse(
+  //       response: response,
+  //       duration: DateTime.now().difference(start),
+  //     );
+
+  //     if (response.statusCode == 200 || response.statusCode == 201) {
+  //       final responseData = jsonDecode(response.body);
+  //       AppLogger.success('OTP verified successfully for email: $email');
+  //       return responseData['message'] ?? 'OTP verified successfully';
+  //     } else {
+  //       final errorData = jsonDecode(response.body);
+  //       final errorMessage = errorData['message'] ?? 'Unknown error';
+  //       AppLogger.error('Failed to verify OTP for email: $email', errorMessage);
+  //       throw Exception('Failed to verify OTP: $errorMessage');
+  //     }
+  //   } catch (e) {
+  //     AppLogger.error('Error occurred while verifying OTP', e);
+  //     throw Exception('An error occurred while verifying OTP: $e');
+  //   }
+  // }
+
+  static Future<String> resetPassword({
     required String email,
     required String otp,
+    required String newPassword,
   }) async {
     if (_backendUrl == null) {
       throw Exception("BACKEND_URL is not set in the .env file");
     }
 
-    final verifyOTPUrl = Uri.parse('$_backendUrl/api/v1/auth/verifyotp');
+    final resetPasswordUrl = Uri.parse('$_backendUrl/api/v1/auth/verifyotp');
 
-    final Map<String, dynamic> body = {"email": email, "otp": otp};
+    final Map<String, dynamic> body = {
+      "email": email,
+      "otp": otp,
+      "newPassword": newPassword,
+    };
 
     try {
-      AppLogger.auth('Attempting to verify OTP for email: $email');
+      AppLogger.auth('Attempting to reset password for email: $email');
 
       final headers = {'Content-Type': 'application/json; charset=UTF-8'};
       NetworkLogger.logRequest(
         method: 'POST',
-        url: verifyOTPUrl,
+        url: resetPasswordUrl,
         headers: headers,
         body: jsonEncode(body),
       );
       final start = DateTime.now();
       final response = await http.post(
-        verifyOTPUrl,
+        resetPasswordUrl,
         headers: headers,
         body: jsonEncode(body),
       );
@@ -424,17 +478,20 @@ class AuthService {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
-        AppLogger.success('OTP verified successfully for email: $email');
-        return responseData['message'] ?? 'OTP verified successfully';
+        AppLogger.success('Password reset successfully for email: $email');
+        return responseData['message'] ?? 'Password reset successfully';
       } else {
         final errorData = jsonDecode(response.body);
         final errorMessage = errorData['message'] ?? 'Unknown error';
-        AppLogger.error('Failed to verify OTP for email: $email', errorMessage);
-        throw Exception('Failed to verify OTP: $errorMessage');
+        AppLogger.error(
+          'Failed to reset password for email: $email',
+          errorMessage,
+        );
+        throw Exception('Failed to reset password: $errorMessage');
       }
     } catch (e) {
-      AppLogger.error('Error occurred while verifying OTP', e);
-      throw Exception('An error occurred while verifying OTP: $e');
+      AppLogger.error('Error occurred while resetting password', e);
+      throw Exception('An error occurred while resetting password: $e');
     }
   }
 
