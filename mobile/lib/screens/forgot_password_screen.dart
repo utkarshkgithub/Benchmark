@@ -85,9 +85,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
       try {
         await AuthService.resetPassword(
-          email: _emailController.text.trim(),
           otp: _otpController.text.trim(),
           newPassword: _newPasswordController.text.trim(),
+          email: _emailController.text.trim(),
         );
 
         if (mounted) {
@@ -422,14 +422,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           if (value == null || value.isEmpty) {
                             return 'Please enter a new password';
                           }
-                          if (value.length < 8) {
-                            return 'Password must be at least 8 characters';
+                          if (value.length < 6) {
+                            return 'Password must be at least 6 characters';
                           }
-                          if (!RegExp(
-                            r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)',
-                          ).hasMatch(value)) {
-                            return 'Password must contain uppercase, lowercase and number';
-                          }
+                          // if (!RegExp(
+                          //   r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)',
+                          // ).hasMatch(value)) {
+                          //   return 'Password must contain uppercase, lowercase and number';
+                          // }
                           return null;
                         },
                       ),

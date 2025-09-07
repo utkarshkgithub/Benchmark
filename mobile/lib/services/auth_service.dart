@@ -285,7 +285,7 @@ class AuthService {
     final Map<String, String> body = {
       "email": email,
       "currentpassword": currentPassword,
-      "newpassword": newPassword,
+      "password": newPassword,
     };
 
     final Map<String, String> headers = {
@@ -349,7 +349,7 @@ class AuthService {
 
     // Add message field for forgot password context
     if (isForgotPassword) {
-      body["message"] = "forgot password";
+      body["extra"] = "Forgot-Password";
     }
 
     try {
@@ -452,7 +452,7 @@ class AuthService {
     final Map<String, dynamic> body = {
       "email": email,
       "otp": otp,
-      "newPassword": newPassword,
+      "password": newPassword,
     };
 
     try {
