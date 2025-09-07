@@ -61,7 +61,7 @@ function Navbar() {
               className="h-8 w-8 sm:h-10 sm:w-10 object-contain"
             />
             <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 tracking-wide">
-              <span className="hidden sm:inline">BENCHMARK</span>
+              <span className="hidden sm:inline">IIITBH-BENCHMARK</span>
               <span className="sm:hidden">IIITBH-BMK</span>
             </h2>
           </Link>

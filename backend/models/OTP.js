@@ -28,7 +28,7 @@ async function sendVerificationEmail(email, otp, extra) {
     if(extra == "Forgot-Password"){
       const mailResponse = await mailSender(
       email,
-      "Verification Email from IIITBH1",
+      "Verification Email from IIITBH",
       forgotPasswordTemplate(otp),
     );
    }else{
@@ -45,6 +45,7 @@ async function sendVerificationEmail(email, otp, extra) {
     throw error;
   }
 }
+
 
 OTPSchema.pre("save", async function (next) {
   if(this.isNew){
