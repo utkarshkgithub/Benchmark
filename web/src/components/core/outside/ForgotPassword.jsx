@@ -1,32 +1,37 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FaArrowLeft } from 'react-icons/fa6';
-import { Link } from 'react-router-dom';
-import { getPasswordResetToken } from '../../../services/opretions/Auth';
+import { Link, useNavigate } from 'react-router-dom';
+import {  resetPassword, SENDPasswordResetOTP } from '../../../services/opretions/Auth';
+import toast from 'react-hot-toast';
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [emailSent, setEmailSent] = useState(false);
-  const [otp, setOtp] = useState("");                 // ✅ Added
-  const [newPassword, setNewPassword] = useState(""); // ✅ Added
-  const [confirmPassword, setConfirmPassword] = useState(""); // ✅ Added
+  const [otp, setOtp] = useState("");                 
+  const [password, setpassword] = useState(""); 
+  const [confirmPassword, setConfirmPassword] = useState(""); 
 
   const { loading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
-
+  const navigate = useNavigate();
   const handleOnSubmit = (e) => {
     e.preventDefault();
-    dispatch(getPasswordResetToken(email, setEmailSent));
+    const extra = "Forgot-Password";
+    dispatch(SENDPasswordResetOTP(email,extra,setEmailSent));
   };
 
   const handlePasswordReset = (e) => {
     e.preventDefault();
-    if (newPassword !== confirmPassword) {
-      alert("Passwords do not match");
+    if (password !== confirmPassword) {
+      toast.error("password and confirm password must be same.")
       return;
     }
-    console.log("Resetting password with:", { email, otp, newPassword });
-    // ✅ Call API for reset password here
+console.log(password,confirmPassword)
+    
+
+
+    dispatch(resetPassword(otp,password,navigate))
   };
 
   return (
@@ -88,16 +93,16 @@ function ForgotPassword() {
               />
             </div>
             <div>
-              <label htmlFor="newPassword" className="block text-sm font-medium text-black">
+              <label htmlFor="password" className="block text-sm font-medium text-black">
                 New Password
               </label>
               <input
                 required
-                id="newPassword"
+                id="password"
                 type="password"
                 placeholder="Enter new password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                value={password}
+                onChange={(e) => setpassword(e.target.value)}
                 className="mt-1 block w-full px-4 py-2 text-black border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-md"
               />
             </div>

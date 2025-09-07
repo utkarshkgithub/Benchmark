@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import mailSender from "../utils/mailSender.js";
 import {otpTemplate} from "../mail/templates/otpTemplate.js"
+import { forgotPasswordTemplate } from "../mail/templates/forgot--passwordTemplate.js";
 const OTPSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -15,21 +16,31 @@ const OTPSchema = new mongoose.Schema({
   otp: {
     type: String,
     required: true,
+  },
+  extra:{
+    type:String
   }
 });
 
-async function sendVerificationEmail(email, otp) {
+async function sendVerificationEmail(email, otp, extra) {
   try {
+    // console.log("extra",extra)
+    if(extra == "Forgot-Password"){
+      const mailResponse = await mailSender(
+      email,
+      "Verification Email from IIITBH1",
+      forgotPasswordTemplate(otp),
+    );
+   }else{
     const mailResponse = await mailSender(
       email,
       "Verification Email from IIITBH",
       otpTemplate(otp),
     );
-    // console.log("Email sent Successfully:", mailResponse);
+   }
   } catch (error) {
     console.log("Error occured while sending emails: ", error);
-    // console.log("otp:-",otp);
-    // console.log("email:-",email);
+   
 
     throw error;
   }
@@ -37,7 +48,7 @@ async function sendVerificationEmail(email, otp) {
 
 OTPSchema.pre("save", async function (next) {
   if(this.isNew){
-    await sendVerificationEmail(this.email, this.otp);
+    await sendVerificationEmail(this.email,this.otp , this.extra);
     
   }
   next();
@@ -45,3 +56,8 @@ OTPSchema.pre("save", async function (next) {
 
 const OTP = mongoose.model("OTP", OTPSchema);
 export default OTP;
+
+
+
+
+// $2b$10$pyJwxj/e8lL/61JFXqyRveIqrWQuz1jruHvqDNCayEmF4vwk1KV8q

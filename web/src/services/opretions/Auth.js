@@ -199,45 +199,51 @@ export function login(email, password, navigate) {
   };
 }
 
-
-export function getPasswordResetToken(email, setEmailSent) {
+export function SENDPasswordResetOTP(email,extra,setEmailSent) {
   return async (dispatch) => {
-    console.log("email1:- ",email);
+    console.log(extra)
+    console.log(email)
+
     const toastId = toast.loading("Loading...")
     dispatch(setLoading(true))
     try {
-      const response = await apiConnector("POST", endpoints.RESETPASSTOKEN_API, {
+      const response = await apiConnector("POST", endpoints.SENDOTP_API, {
         email,
-      });
-      console.log("RESETPASSTOKEN RESPONSE............", response)
+        extra,
+        checkUserPresent: true,
+      })
+      // console.log("SENDOTP API RESPONSE............", response)
+
+      // console.log(response.data.success)
 
       if (!response.data.success) {
         throw new Error(response.data.message)
       }
 
-      toast.success("Reset Email Sent")
+      toast.success("OTP Sent Successfully")
       setEmailSent(true)
     } catch (error) {
-      console.log("RESETPASSTOKEN ERROR............", error)
-      toast.error("Failed To Send Reset Email")
+      console.log("SENDOTP API ERROR............", error)
+      toast.error("Could Not Send OTP")
     }
-    toast.dismiss(toastId)
     dispatch(setLoading(false))
+    toast.dismiss(toastId)
   }
 }
 
-export function resetPassword(password, confirmPassword, token, navigate) {
+
+
+export function resetPassword(otp,password, navigate) {
   return async (dispatch) => {
     const toastId = toast.loading("Loading...")
     dispatch(setLoading(true))
     try {
       const response = await apiConnector("POST", endpoints.RESETPASSWORD_API, {
+        otp,
         password,
-        confirmPassword,
-        token,
       })
 
-      // console.log("RESETPASSWORD RESPONSE............", response)
+      console.log("RESETPASSWORD RESPONSE............", response)
 
       if (!response.data.success) {
         throw new Error(response.data.message)
