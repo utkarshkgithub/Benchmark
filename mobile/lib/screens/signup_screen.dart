@@ -97,7 +97,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (!mounted) return;
     setState(fn);
   }
-  
+
   void _nextPage() async {
     // Add bounds checking
     if (_currentPage < 0) _currentPage = 0;
@@ -209,7 +209,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     try {
       final response = await http.get(
         Uri.parse(
-          'https://benchmark-official.onrender.com/api/v1/subject/fetch-subjects',
+          'https://benchmark-official.onrender.com/api/v2/subject/fetch-subjects',
         ),
         headers: {'Content-Type': 'application/json'},
       );

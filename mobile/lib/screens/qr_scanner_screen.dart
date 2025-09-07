@@ -49,7 +49,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     if (!mounted) return;
     setState(fn);
   }
-  
+
   // CORRECTED: This listener now just checks if the camera is ready.
   void _onCameraStateChanged() {
     // FIXED: Type is non-nullable as per the warning.
@@ -98,7 +98,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         qrJson = {'qr_data': qrData, 'raw': true};
       }
 
-      final uri = Uri.parse('$_backendUrl/api/v1/subject/verifyqrcode');
+      final uri = Uri.parse('$_backendUrl/api/v2/subject/verifyqrcode');
       final headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',

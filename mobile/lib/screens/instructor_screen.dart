@@ -322,7 +322,7 @@ class _InstructorPageState extends State<InstructorPage> {
       }
 
       final url =
-          'https://benchmark-official.onrender.com/api/v1/subject/getAttendanceDetails';
+          'https://benchmark-official.onrender.com/api/v2/subject/getAttendanceDetails';
 
       final response = await http.post(
         Uri.parse(url),

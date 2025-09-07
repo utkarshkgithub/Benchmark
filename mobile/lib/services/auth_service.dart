@@ -41,7 +41,7 @@ class AuthService {
       throw Exception("BACKEND_URL is not set in the .env file");
     }
 
-    final signupUrl = Uri.parse('$_backendUrl/api/v1/auth/signup');
+    final signupUrl = Uri.parse('$_backendUrl/api/v2/auth/signup');
 
     final Map<String, dynamic> body = {
       "firstName": firstName,
@@ -193,7 +193,7 @@ class AuthService {
       throw Exception("BACKEND_URL is not set in the .env file");
     }
 
-    final loginUrl = Uri.parse('$_backendUrl/api/v1/auth/mob-login');
+    final loginUrl = Uri.parse('$_backendUrl/api/v2/auth/mob-login');
 
     final Map<String, String> body = {
       "email": email,
@@ -279,7 +279,7 @@ class AuthService {
     }
 
     final changePasswordUrl = Uri.parse(
-      '$_backendUrl/api/v1/auth/changepassword',
+      '$_backendUrl/api/v2/auth/changepassword',
     );
 
     final Map<String, String> body = {
@@ -343,7 +343,7 @@ class AuthService {
       throw Exception("BACKEND_URL is not set in the .env file");
     }
 
-    final sendOTPUrl = Uri.parse('$_backendUrl/api/v1/auth/sendOTP');
+    final sendOTPUrl = Uri.parse('$_backendUrl/api/v2/auth/sendOTP');
 
     final Map<String, dynamic> body = {"email": email};
 
@@ -397,7 +397,7 @@ class AuthService {
   //     throw Exception("BACKEND_URL is not set in the .env file");
   //   }
 
-  //   final verifyOTPUrl = Uri.parse('$_backendUrl/api/v1/auth/verifyotp');
+  //   final verifyOTPUrl = Uri.parse('$_backendUrl/api/v2/auth/verifyotp');
 
   //   final Map<String, dynamic> body = {"email": email, "otp": otp};
 
@@ -447,7 +447,7 @@ class AuthService {
       throw Exception("BACKEND_URL is not set in the .env file");
     }
 
-    final resetPasswordUrl = Uri.parse('$_backendUrl/api/v1/auth/verifyotp');
+    final resetPasswordUrl = Uri.parse('$_backendUrl/api/v2/auth/verifyotp');
 
     final Map<String, dynamic> body = {
       "email": email,
@@ -503,7 +503,7 @@ class AuthService {
       throw Exception("BACKEND_URL is not set in the .env file");
     }
 
-    final qrTokenUrl = Uri.parse('$_backendUrl/api/v1/subject/qrcode');
+    final qrTokenUrl = Uri.parse('$_backendUrl/api/v2/subject/qrcode');
 
     final Map<String, dynamic> body = {"subjectId": subjectId};
 
@@ -562,7 +562,7 @@ class AuthService {
     }
 
     final fetchSubjectsUrl = Uri.parse(
-      '$_backendUrl/api/v1/subject/fetch-subjects',
+      '$_backendUrl/api/v2/subject/fetch-subjects',
     );
 
     try {
