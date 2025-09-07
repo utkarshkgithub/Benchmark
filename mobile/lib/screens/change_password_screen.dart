@@ -31,6 +31,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     super.dispose();
   }
 
+  void safeSetState(VoidCallback fn) {
+    if (!mounted) return;
+    setState(fn);
+  }
+
   Future<void> _handleChangePassword() async {
     if (_formKey.currentState!.validate()) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -49,7 +54,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           token: token,
         );
 
-        setState(() {
+        safeSetState(() {
           _passwordChanged = true;
         });
       } catch (e) {
@@ -126,7 +131,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                     : Icons.visibility_off,
                               ),
                               onPressed: () {
-                                setState(() {
+                                safeSetState(() {
                                   _obscureCurrentPassword =
                                       !_obscureCurrentPassword;
                                 });
@@ -157,7 +162,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                     : Icons.visibility_off,
                               ),
                               onPressed: () {
-                                setState(() {
+                                safeSetState(() {
                                   _obscureNewPassword = !_obscureNewPassword;
                                 });
                               },
@@ -193,7 +198,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                     : Icons.visibility_off,
                               ),
                               onPressed: () {
-                                setState(() {
+                                safeSetState(() {
                                   _obscureConfirmPassword =
                                       !_obscureConfirmPassword;
                                 });

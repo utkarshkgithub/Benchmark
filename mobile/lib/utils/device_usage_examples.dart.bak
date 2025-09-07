@@ -225,7 +225,7 @@ class _AttendanceButtonState extends State<AttendanceButton> {
   bool _isLoading = false;
 
   Future<void> _markAttendance() async {
-    setState(() => _isLoading = true);
+    safeSetState(() => _isLoading = true);
 
     try {
       await ModernDeviceExamples.completeAttendanceFlow(
@@ -249,7 +249,7 @@ class _AttendanceButtonState extends State<AttendanceButton> {
       }
     } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        safeSetState(() => _isLoading = false);
       }
     }
   }

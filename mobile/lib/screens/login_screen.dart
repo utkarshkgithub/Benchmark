@@ -29,6 +29,12 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  
+  void safeSetState(VoidCallback fn) {
+    if (!mounted) return;
+    setState(fn);
+  }
+
   Future<void> _handleLogin() async {
     if (_formKey.currentState!.validate()) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -207,7 +213,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       : Icons.visibility_off,
                                 ),
                                 onPressed: () {
-                                  setState(() {
+                                  safeSetState(() {
                                     _obscurePassword = !_obscurePassword;
                                   });
                                 },

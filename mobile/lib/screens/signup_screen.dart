@@ -93,6 +93,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
+  void safeSetState(VoidCallback fn) {
+    if (!mounted) return;
+    setState(fn);
+  }
+  
   void _nextPage() async {
     // Add bounds checking
     if (_currentPage < 0) _currentPage = 0;
@@ -105,7 +110,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             // Use post-frame callback to avoid animation conflicts
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
-                setState(() {
+                safeSetState(() {
                   _currentPage++;
                 });
                 _pageController.nextPage(
@@ -134,7 +139,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             // Use post-frame callback for error handling too
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
-                setState(() {
+                safeSetState(() {
                   _currentPage--;
                   // Ensure page doesn't go below 0
                   if (_currentPage < 0) _currentPage = 0;
@@ -160,7 +165,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           // Use post-frame callback for other page transitions too
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
-              setState(() {
+              safeSetState(() {
                 _currentPage++;
               });
               _pageController.nextPage(
@@ -199,7 +204,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Future<void> _fetchSubjects() async {
     if (_subjectsFetched || _isLoadingSubjects) return;
 
-    setState(() => _isLoadingSubjects = true);
+    safeSetState(() => _isLoadingSubjects = true);
 
     try {
       final response = await http.get(
@@ -217,7 +222,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               .map((subjectJson) => Subject.fromJson(subjectJson))
               .toList();
 
-          setState(() {
+          safeSetState(() {
             _allSubjects = subjects;
             _subjectsFetched = true;
             _selectedMinorSubjects.clear();
@@ -235,7 +240,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         );
       }
     } finally {
-      setState(() => _isLoadingSubjects = false);
+      safeSetState(() => _isLoadingSubjects = false);
     }
   }
 
@@ -386,7 +391,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         if (_currentPage > 0) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
-              setState(() {
+              safeSetState(() {
                 _currentPage--;
                 if (_currentPage < 0) _currentPage = 0;
               });
@@ -566,7 +571,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   : Icons.visibility_off,
                             ),
                             onPressed: () {
-                              setState(() {
+                              safeSetState(() {
                                 _obscurePassword = !_obscurePassword;
                               });
                             },
@@ -599,7 +604,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   : Icons.visibility_off,
                             ),
                             onPressed: () {
-                              setState(() {
+                              safeSetState(() {
                                 _obscureConfirmPassword =
                                     !_obscureConfirmPassword;
                               });
@@ -642,7 +647,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       //     // ),
                       //   ],
                       //   onChanged: (value) {
-                      //     setState(() {
+                      //     safeSetState(() {
                       //       _accountType = value!;
                       //     });
                       //   },
@@ -931,7 +936,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ],
                         onChanged: (value) {
-                          setState(() {
+                          safeSetState(() {
                             _branch = value!;
                           });
                         },
@@ -1006,7 +1011,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ],
                         onChanged: (value) {
-                          setState(() {
+                          safeSetState(() {
                             _semester = value!;
                             // Reset minor subject selections when semester changes
                             _selectedMinorSubjects.clear();
@@ -1022,7 +1027,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           Checkbox(
                             value: _hasMinorSubject,
                             onChanged: (value) {
-                              setState(() {
+                              safeSetState(() {
                                 _hasMinorSubject = value ?? false;
                                 if (!_hasMinorSubject) {
                                   _selectedMinorSubjects.clear();
@@ -1121,7 +1126,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       ),
                                       value: isSelected,
                                       onChanged: (bool? value) {
-                                        setState(() {
+                                        safeSetState(() {
                                           if (value == true) {
                                             _selectedMinorSubjects.add(
                                               subject.id,
