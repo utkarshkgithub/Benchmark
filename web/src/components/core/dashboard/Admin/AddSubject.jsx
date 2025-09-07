@@ -29,7 +29,7 @@ const AddSubject = () => {
   }, []);
 
   const onSubmit = async (data) => {
-    console.log("instructor",data.instructor)
+    console.log("instructor",data.instructor);
     
     const formData = new FormData();
     formData.append("subjectName", data.subjectName);
