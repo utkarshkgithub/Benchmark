@@ -111,7 +111,7 @@ export const signUp = async (req, res) => {
     }
 
     if(branch === "PG") {
-      if (!studentsMail.includes(email)) {
+      if (!studentsMail().includes(email)) {
         return res.status(403).json({
             success: false,
             message: "Email not authorized for PG signup."
