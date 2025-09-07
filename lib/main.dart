@@ -6,6 +6,7 @@ import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/instructor_screen.dart';
 import 'models/user_models.dart';
+import 'screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -63,23 +64,22 @@ class _MyAppState extends State<MyApp> {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: Consumer<AuthProvider>(
-          builder: (context, authProvider, child) {
-            // Check if user is authenticated
-            if (authProvider.isAuthenticated && authProvider.user != null) {
-              // Check account type and route accordingly
-              final accountType = authProvider.user!['accountType'];
-              if (accountType == 'Instructor') {
-                // Convert user data to User object for instructor page
-                final user = User.fromJson(authProvider.user!);
-                return InstructorPage(user: user);
+        home: SplashScreen(
+          nextScreen: Consumer<AuthProvider>(
+            builder: (context, authProvider, child) {
+              if (authProvider.isAuthenticated && authProvider.user != null) {
+                final accountType = authProvider.user!['accountType'];
+                if (accountType == 'Instructor') {
+                  final user = User.fromJson(authProvider.user!);
+                  return InstructorPage(user: user);
+                } else {
+                  return const HomeScreen();
+                }
               } else {
-                return const HomeScreen();
+                return const LoginScreen();
               }
-            } else {
-              return const LoginScreen();
-            }
-          },
+            },
+          ),
         ),
         debugShowCheckedModeBanner: false,
       ),
