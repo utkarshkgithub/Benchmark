@@ -1,4 +1,4 @@
-name: benchmark
+name: Benchmark
 description: Attendance tracking app
 publish_to: 'none'
 version: 1.0.0+1
@@ -34,11 +34,12 @@ flutter:
   assets:
     - .env
     - assets/icons/BENCHMARK.png
+    - assets/icons/image.png
 
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/icons/BENCHMARK.png"
+  image_path: "assets/icons/image.png"
   min_sdk_android: 21 # android min sdk min:16, default 21
   web:
     generate: true
