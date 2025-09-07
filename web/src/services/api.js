@@ -20,6 +20,7 @@ export const settingsEndpoints = {
   UPDATE_DISPLAY_PICTURE_API: BASE_URL + "/setting/updateDisplayPicture",
   UPDATE_PROFILE_API: BASE_URL + "/setting/updateProfile",
   DELETE_PROFILE_API: BASE_URL + "/setting/deleteProfile",
+  DELETE_STUDENT_API: BASE_URL + "/setting/delete-student",
 }
 
 
@@ -27,6 +28,7 @@ export const subjectEndPoints = {
   ADD_SUBJECT_API: BASE_URL + "/subject/create-subject",
   FATCH_INSTRUCTOR_API: BASE_URL + "/subject/fetch-instructor",
   FETCH_ALL_SUBJECTS_API: BASE_URL + "/subject/fetch-subjects",
+  FETCH_ALL_STUDENTS_API: BASE_URL + "/subject/fetch-students",
   FETCH_STUDENT_ATTENDANCE_API: BASE_URL + "/subject/student",
   FETCH_SUBJECTS_BY_INSTRUCTOR: BASE_URL + "/subject/instructor-subjects",
   FETCH_ATTENDANCE_BY_SUBJECT: BASE_URL + "/subject/fetch-by-subject",

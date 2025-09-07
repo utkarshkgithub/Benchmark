@@ -10,6 +10,7 @@ import Instructor from "../models/Instructor.js"
 import { passwordUpdated } from "../mail/templates/passwordUpdate.js";
 import Subject from "../models/Subject.js";
 import { normalizeBranchName } from "../utils/branchUtils.js";
+import { studentsMail } from "../mail/templates/data/studentMails.js";
 dotenv.config();
 
 //send otp
@@ -108,9 +109,17 @@ export const signUp = async (req, res) => {
       });
       
     }
-    
 
-    // For Student account, extra fields are required
+    if(branch === "PG") {
+      if (!studentsMail.includes(email)) {
+        return res.status(403).json({
+            success: false,
+            message: "Email not authorized for PG signup."
+        });
+      }
+    }
+
+
     if (
       accountType === "Student" &&
       (!rollNumber || !branch || !semester || !deviceId)

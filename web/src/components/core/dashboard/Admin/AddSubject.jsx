@@ -18,7 +18,7 @@ const AddSubject = () => {
     try {
       const response = await apiConnector("GET", subjectEndPoints.FATCH_INSTRUCTOR_API);
       setAllInstructor(response?.data?.data || []);
-      console.log(response?.data?.data);
+      // console.log(response?.data?.data);
     } catch (err) {
       console.error("Error fetching instructors:", err);
     }
@@ -29,7 +29,7 @@ const AddSubject = () => {
   }, []);
 
   const onSubmit = async (data) => {
-    console.log("instructor",data.instructor);
+    // console.log("instructor",data.instructor);
     
     const formData = new FormData();
     formData.append("subjectName", data.subjectName);

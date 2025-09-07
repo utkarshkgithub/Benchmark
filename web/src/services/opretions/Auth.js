@@ -201,8 +201,8 @@ export function login(email, password, navigate) {
 
 export function SENDPasswordResetOTP(email,extra,setEmailSent) {
   return async (dispatch) => {
-    console.log(extra)
-    console.log(email)
+    // console.log(extra)
+    // console.log(email)
 
     const toastId = toast.loading("Loading...")
     dispatch(setLoading(true))
@@ -244,7 +244,7 @@ export function resetPassword(otp,password,email ,navigate) {
         email
       })
 
-      console.log("RESETPASSWORD RESPONSE............", response)
+      // console.log("RESETPASSWORD RESPONSE............", response)
 
       if (!response.data.success) {
         throw new Error(response.data.message)

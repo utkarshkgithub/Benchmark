@@ -1,6 +1,7 @@
 import Instructor from "../models/Instructor.js";
 import Student from "../models/Student.js";
 import User from "../models/User.js";
+import Subject from "../models/Subject.js";
 import { uploadToCloudinary } from "../utils/imageUploader.js";
 
 export const updateDisplayPicture = async (req, res) => {
@@ -49,3 +50,28 @@ export const updateDisplayPicture = async (req, res) => {
     }
 
 }
+
+export const deleteStudent = async (req, res) => {
+    try {
+        const { studentId } = req.body;
+
+        const student = await Student.findById(studentId);
+        if (!student) {
+            return res.status(404).json({ message: "Student not found" });
+        }
+
+        await Subject.updateMany(
+            { students: student.userId },
+            { $pull: { students: student.userId } }
+        );
+
+        await User.findByIdAndDelete(student.userId);
+
+        await Student.findByIdAndDelete(studentId);
+
+        res.status(200).json({ message: "Student deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting student:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};

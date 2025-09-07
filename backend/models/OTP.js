@@ -57,8 +57,3 @@ OTPSchema.pre("save", async function (next) {
 
 const OTP = mongoose.model("OTP", OTPSchema);
 export default OTP;
-
-
-
-
-// $2b$10$pyJwxj/e8lL/61JFXqyRveIqrWQuz1jruHvqDNCayEmF4vwk1KV8q

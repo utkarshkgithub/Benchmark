@@ -41,9 +41,9 @@
 // console.log("2,222828288282")
 
 // // Routes
-// app.use("/api/v1/auth", AuthRoutes);
-// app.use("/api/v1/setting", SettingRoutes);
-// app.use("/api/v1/subject", SubjectRoutes);
+// app.use("/api/v2/auth", AuthRoutes);
+// app.use("/api/v2/setting", SettingRoutes);
+// app.use("/api/v2/subject", SubjectRoutes);
 
 // app.get("/", (req, res) => {
 //   res.send("🚀 API is running securely...");
@@ -89,9 +89,9 @@ app.use(
   })
 )
 
-app.use("/api/v1/auth",AuthRoutes);
-app.use("/api/v1/setting",SettingRoutes)
-app.use("/api/v1/subject",SubjectRoutes)
+app.use("/api/v2/auth",AuthRoutes);
+app.use("/api/v2/setting",SettingRoutes);
+app.use("/api/v2/subject",SubjectRoutes);
 app.get("/", (req, res) => {
   res.send("🚀 API is running...");
 });

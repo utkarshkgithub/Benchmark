@@ -14,21 +14,21 @@ async function migrateBranchNames() {
   try {
     // Connect to MongoDB
     await mongoose.connect(MONGODB_URL);
-    console.log('Connected to MongoDB');
+    // console.log('Connected to MongoDB');
 
     // Update Student records
     const studentResult = await Student.updateMany(
       { branch: "Mechatronics" },
       { $set: { branch: "MAE" } }
     );
-    console.log(`Updated ${studentResult.modifiedCount} student records`);
+    // console.log(`Updated ${studentResult.modifiedCount} student records`);
 
     // Update Subject records - branches array
     const subjectResult = await Subject.updateMany(
       { branches: "Mechatronics" },
       { $set: { "branches.$": "MAE" } }
     );
-    console.log(`Updated ${subjectResult.modifiedCount} subject records`);
+    // console.log(`Updated ${subjectResult.modifiedCount} subject records`);
 
     // Additional update for subjects with multiple occurrences
     const subjects = await Subject.find({ branches: "Mechatronics" });
@@ -39,12 +39,12 @@ async function migrateBranchNames() {
       await subject.save();
     }
 
-    console.log('Migration completed successfully');
+    // console.log('Migration completed successfully');
   } catch (error) {
     console.error('Migration failed:', error);
   } finally {
     await mongoose.disconnect();
-    console.log('Disconnected from MongoDB');
+    // console.log('Disconnected from MongoDB');
   }
 }
 

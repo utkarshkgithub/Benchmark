@@ -4,7 +4,7 @@ import { subjectEndPoints } from "../api";
 
 
 
-export const fetchAllSubjects = async (navigate) => {
+export const fetchAllSubjects = async () => {
     const toastId = toast.loading("Loading...");
     try {
         const response = await apiConnector(
@@ -27,6 +27,28 @@ export const fetchAllSubjects = async (navigate) => {
     }
 };
 
+export const fetchAllStudents = async () => {
+    const toastId = toast.loading("Loading...");
+    try {
+        const response = await apiConnector(
+            "GET",
+            subjectEndPoints.FETCH_ALL_STUDENTS_API,
+            null
+        );
+        // console.log("fetch Students API RESPONSE............", response);
+
+        if (!response.data.success) {
+            throw new Error(response.data.message);
+        }
+        toast.success("Stuednts fetched Successfully");
+        return response;
+    } catch (error) {
+        console.log("Add Students API ERROR............", error);
+        toast.error(error.message || "Failed To Add Students");
+    } finally {
+        toast.dismiss(toastId);
+    }
+};
 
 
 export const addSubject = async (formData, token, navigate) => {

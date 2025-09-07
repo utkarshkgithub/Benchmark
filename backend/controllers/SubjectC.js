@@ -130,6 +130,31 @@ export const fetchSubjects = async (req, res) => {
   }
 };
 
+export const fetchStudent = async (req, res) => {
+  try {
+    const students = await Student.find({})
+      .populate({
+        path: "userId",
+        select: "firstName lastName email accountType",
+        model: "User",
+      })
+      .lean();
+
+    return res.status(200).json({
+      success: true,
+      message: "All Students fetched successfully",
+      data: students,
+    });
+  } catch (error) {
+    console.error("Error fetching Subjects:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching subjects",
+      error: error.message,
+    });
+  }
+};
+
 
 
 export const fetchInstructorSubjects = async (req, res) => {
