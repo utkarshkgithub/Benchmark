@@ -233,7 +233,7 @@ export function SENDPasswordResetOTP(email,extra,setEmailSent) {
 
 
 
-export function resetPassword(otp,password, navigate) {
+export function resetPassword(otp,password,email ,navigate) {
   return async (dispatch) => {
     const toastId = toast.loading("Loading...")
     dispatch(setLoading(true))
@@ -241,6 +241,7 @@ export function resetPassword(otp,password, navigate) {
       const response = await apiConnector("POST", endpoints.RESETPASSWORD_API, {
         otp,
         password,
+        email
       })
 
       console.log("RESETPASSWORD RESPONSE............", response)

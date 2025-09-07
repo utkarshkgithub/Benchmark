@@ -27,11 +27,11 @@ function ForgotPassword() {
       toast.error("password and confirm password must be same.")
       return;
     }
-console.log(password,confirmPassword)
+console.log(password,confirmPassword,email)
     
 
 
-    dispatch(resetPassword(otp,password,navigate))
+    dispatch(resetPassword(otp,password,email,navigate))
   };
 
   return (

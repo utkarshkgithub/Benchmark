@@ -52,18 +52,13 @@ export const resetPasswordToken = async (req, res) => {
 
 export const resetPassword = async (req, res) => {
     try {
-        const { otp, password } = req.body;
+        const { otp, password, email } = req.body;
 
         // Find OTP entry
-        const userOtp = await OTP.findOne({ otp });
-        if (!userOtp) {
-            return res.status(400).json({
-                success: false,
-                message: "OTP is invalid or expired.",
-            });
-        }
+        
+        
 
-        const user = await User.findOne({ email: userOtp.email });
+        const user = await User.findOne({ email:email });
         if (!user) {
             return res.status(404).json({
                 success: false,
@@ -71,7 +66,7 @@ export const resetPassword = async (req, res) => {
             });
         }
 
-        const recentOtp = await OTP.find({ email: user.email })
+        const recentOtp = await OTP.find({ email: email })
             .sort({ createdAt: -1 })
             .limit(1);
 
@@ -85,7 +80,7 @@ export const resetPassword = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         await User.findOneAndUpdate(
-            { email: user.email },
+            { email: email },
             { password: hashedPassword },
             { new: true }
         );
