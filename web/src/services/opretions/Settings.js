@@ -101,8 +101,7 @@ export async function deleteStudent(studentId,token ){
       if (!response.data.success) {
         throw new Error(response.data.message)
       }
-      toast.success("Profile Deleted Successfully")
-      dispatch(logout(navigate))
+      toast.success("Student Deleted Successfully")
     } catch (error) {
      console.log("DELETE_PROFILE_API API ERROR............", error)
       toast.error("Could Not Delete Profile")

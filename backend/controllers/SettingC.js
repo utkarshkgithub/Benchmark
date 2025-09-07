@@ -69,7 +69,7 @@ export const deleteStudent = async (req, res) => {
 
         await Student.findByIdAndDelete(studentId);
 
-        res.status(200).json({ message: "Student deleted successfully" });
+        res.status(200).json({success:true, message: "Student deleted successfully" });
     } catch (error) {
         console.error("Error deleting student:", error);
         res.status(500).json({ message: "Server error", error: error.message });
