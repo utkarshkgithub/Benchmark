@@ -10,10 +10,8 @@ export const createSubject = async (req, res) => {
   try {
     let { subjectName, subjectCode, branches, instructor,semester, isMinor} = req.body;
 
-    // ✅ Normalize branches
     branches = normalizeBranchNames(branches);
 
-    // ✅ Validate branches
     const invalidBranches = branches.filter(
       (branch) => !VALID_BRANCHES.includes(branch)
     );
@@ -24,13 +22,11 @@ export const createSubject = async (req, res) => {
       });
     }
 
-    // ✅ Find students matching branches and semester
     const students = await Student.find({
       branch: { $in: branches },
       semester: semester,
     });
 
-    // ✅ Create the subject with assigned students
     const subject = await Subject.create({
       subjectName,
       subjectCode,
@@ -38,15 +34,15 @@ export const createSubject = async (req, res) => {
       semester,
       instructor: instructor,
       isMinor: isMinor || false,
-      students: students.map(student => student.userId), // Save student user IDs
+      students: students.map(student => student.userId),
     });
 
-     // Add subject ID to instructor's subjectsTaught array
+    
 if (instructor) {
   const updatedInstructor = await Instructor.findOneAndUpdate(
-    { userId: instructor },            // match by userId field
-    { $addToSet: { subjectsTaught: subject._id } }, // add subject ID
-    { new: true }                      // return the updated document
+    { userId: instructor },           
+    { $addToSet: { subjectsTaught: subject._id } },
+    { new: true }                      
   );
 
   if (!updatedInstructor) {
@@ -58,7 +54,7 @@ if (instructor) {
 
 
 
-    // ✅ Update each student to add this subject
+  
     await Promise.all(
       students.map(student =>
         Student.findByIdAndUpdate(student._id, {
@@ -184,24 +180,20 @@ export const fetchAttendanceBySubject = async (req, res) => {
     const { subjectId } = req.params;
     const instructorId = req.user.id;
 
-    // ✅ check subject belongs to instructor
     const subject = await Subject.findOne({ _id: subjectId, instructor: instructorId });
     if (!subject) {
       return res.status(403).json({ success: false, message: "Unauthorized access to subject" });
     }
 
-    // ✅ get attendance records
     const attendance = await Attendance.find({ subject: subjectId })
       .populate("presentStudent", "firstName lastName email")
       .sort({ createdAt: -1 });
 
-    // ✅ calculate total students by branch
     const totalStudents = await Student.countDocuments({
       subjects: subjectId,
       branch: { $in: subject.branches },
     });
 
-    // ✅ format response
     const formatted = attendance.map((rec) => ({
       _id: rec._id,
       date: rec.date,
@@ -227,15 +219,13 @@ export const getSubjectStudents = async (req, res) => {
   try {
     const { subjectId } = req.body;
 
-    // 1️⃣ Check subject existence
     const subject = await Subject.findById(subjectId);
     if (!subject) {
       return res.status(404).json({ success: false, message: "Subject not found" });
     }
 
-    // 2️⃣ Find students who are enrolled in this subject
     const students = await Student.find({ subjects: subjectId })
-      .populate("userId", "firstName lastName email") // ✅ get student user details
+      .populate("userId", "firstName lastName email") 
       .lean();
 
     return res.status(200).json({

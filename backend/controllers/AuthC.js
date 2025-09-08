@@ -16,14 +16,10 @@ dotenv.config();
 //send otp
 export const sendOTP = async (req, res) => {
     try {
-        // fetch email from request ki body
         const { email,extra="" } = req.body;
-    // console.log("2:---",extra)
 
-        // check if user already exist
         if(extra==""){const chackUserPreSent = await User.findOne({ email });
 
-        //if user is already exits,then return a response.
         if (chackUserPreSent) {
             return res.status(401).json({
                 success: false,
@@ -31,7 +27,6 @@ export const sendOTP = async (req, res) => {
             });
         }}
 
-        //if user not exist already,then we generate OTP.
 
         //generate otp
 
@@ -43,7 +38,6 @@ export const sendOTP = async (req, res) => {
 
         // console.log("OTP generated:-", otp);
 
-        //check unique otp or not
         let result = await OTP.findOne({ otp: otp });
 
         while (result) {
@@ -62,7 +56,6 @@ export const sendOTP = async (req, res) => {
 
         const otpPayload = { email, otp , extra };
 
-        //create an en entry in db for otp
 
         const otpBody = await OTP.create(otpPayload);
         // console.log("OTP body:-",otpBody);
@@ -98,10 +91,9 @@ export const signUp = async (req, res) => {
       semester = "",
       deviceId = "",
       department = "",
-      subjects = [],   // ✅ frontend will send selected subject IDs
+      subjects = [],  
     } = req.body;
     let {branch = ""} = req.body;
-    // ✅ validate required fields
     if (!firstName || !lastName || !email || !password || !accountType || !otp) {
       return res.status(403).json({
         success: false,
@@ -135,7 +127,6 @@ export const signUp = async (req, res) => {
       });
     }
 
-    // ✅ check existing user
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
@@ -145,9 +136,7 @@ export const signUp = async (req, res) => {
     }
 
     if (accountType === "Student") {
-      // Normalize branch name
       branch = normalizeBranchName(branch);
-      // Create composite device ID
       const compositeDeviceId = `${firstName.toLowerCase()}_${lastName.toLowerCase()}_${rollNumber}_${deviceId}`;
       
       const deviceDetails = await Student.findOne({ deviceId: compositeDeviceId });
@@ -166,7 +155,6 @@ export const signUp = async (req, res) => {
       }
     }
 
-    // ✅ OTP check
     const recentOtp = await OTP.find({ email })
       .sort({ createdAt: -1 })
       .limit(1);
@@ -183,10 +171,8 @@ export const signUp = async (req, res) => {
       });
     }
 
-    // ✅ password hash
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // ✅ create base user
     const userDetails = await User.create({
       firstName,
       lastName,
@@ -270,7 +256,6 @@ export const login = async (req, res) => {
             });
         }
 
-        // check if user exists
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(401).json({
@@ -279,7 +264,6 @@ export const login = async (req, res) => {
             });
         }
 
-        // check password
         const isPasswordCorrect = await bcrypt.compare(password, user.password);
         if (!isPasswordCorrect) {
             return res.status(401).json({
@@ -288,19 +272,17 @@ export const login = async (req, res) => {
             });
         }
 
-        // fetch userDetails with subject population
         let userDetails;
         if (user.accountType === "Student") {
             userDetails = await Student.findOne({ userId: user._id })
-                .populate("subjects") // ✅ populate subjects
+                .populate("subjects") 
                 .lean();
         } else if (user.accountType === "Instructor") {
             userDetails = await Instructor.findOne({ userId: user._id })
-                .populate("subjectsTaught") // ✅ populate subjectsTaught
+                .populate("subjectsTaught")
                 .lean();
         }
 
-        // generate JWT
         const payload = {
             email: user.email,
             id: user._id,
@@ -311,16 +293,13 @@ export const login = async (req, res) => {
             expiresIn: "7d",
         });
 
-        // remove password before sending response
         const { password: _, ...userWithoutPassword } = user.toObject();
 
-        // combine user + userDetails into one object
         const fullUser = {
             ...userWithoutPassword,
             ...userDetails,
         };
 
-        // create cookie
         const options = {
             expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             httpOnly: true,
@@ -346,7 +325,6 @@ export const login = async (req, res) => {
 
 export const mobLogin = async (req, res) => {
     try {
-        // get data from request body
         const { email, password, deviceId = "" } = req.body;
         if (!email || !password) {
             return res.status(400).json({
@@ -355,7 +333,6 @@ export const mobLogin = async (req, res) => {
             });
         }
 
-        // check if user exists
         const user = await User.findOne({ email }).lean();
         if (!user) {
             return res.status(401).json({
@@ -368,7 +345,7 @@ export const mobLogin = async (req, res) => {
 
         if (user.accountType === "Student") {
            userDetails = await Student.findOne({ userId: user._id })
-                .populate("subjects") // ✅ populate subjects
+                .populate("subjects")
                 .lean();
             if (!userDetails) {
                 return res.status(404).json({
@@ -377,7 +354,7 @@ export const mobLogin = async (req, res) => {
                 });
             }
             
-            // Create composite device ID for comparison
+            
             const compositeDeviceId = `${user.firstName.toLowerCase()}_${user.lastName.toLowerCase()}_${userDetails.rollNumber}_${deviceId}`;
             
             if (userDetails.deviceId !== compositeDeviceId) {
@@ -388,7 +365,7 @@ export const mobLogin = async (req, res) => {
             }
         } else if (user.accountType === "Instructor") {
             userDetails = await Instructor.findOne({ userId: user._id })
-                .populate("subjectsTaught") // ✅ populate subjectsTaught
+                .populate("subjectsTaught")
                 .lean();
             if (!userDetails) {
                 return res.status(404).json({
@@ -405,7 +382,6 @@ export const mobLogin = async (req, res) => {
             // }
         }
 
-        // check password
         const isPasswordMatch = await bcrypt.compare(password, user.password);
         if (!isPasswordMatch) {
             return res.status(401).json({
@@ -414,7 +390,6 @@ export const mobLogin = async (req, res) => {
             });
         }
 
-        // generate token
         const payload = {
             email: user.email,
             id: user._id,
@@ -424,17 +399,13 @@ export const mobLogin = async (req, res) => {
             expiresIn: "7d",
         });
 
-        // remove password field
         delete user.password;
 
-        // merge user + userDetails + token
         const fullUser = {
             ...user,
             ...userDetails,
         };
-        // console.log("uuserData:-",fullUser)
 
-        // cookie options
         const options = {
             expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             httpOnly: true,

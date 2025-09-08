@@ -54,10 +54,6 @@ export const resetPassword = async (req, res) => {
     try {
         const { otp, password, email } = req.body;
 
-        // Find OTP entry
-        
-        
-
         const user = await User.findOne({ email:email });
         if (!user) {
             return res.status(404).json({
