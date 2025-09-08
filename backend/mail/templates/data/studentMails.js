@@ -12,6 +12,8 @@ export const studentsMail = () => {
         "shweta.250302014@iiitbh.ac.in",
         "simran.250202001@iiitbh.ac.in",
         "swadha.250302002@iiitbh.ac.in",
+        "bhavana.250302011@iiitbh.ac.in",
+        "nilesh.250302003@iiitbh.ac.in",
         "amit@iiitbh.ac.in"
     ];
 };
