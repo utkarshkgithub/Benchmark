@@ -343,14 +343,6 @@ export const mobLogin = async (req, res) => {
             });
         }
 
-        // Check if user has an active token and it's not expired
-        if (user.isActiveToken === "true" && user.activePasswordExpires && new Date() < user.activePasswordExpires) {
-            return res.status(429).json({
-                success: false,
-                message: "Please wait 2 minutes before logging in again.",
-            });
-        }
-
         let userDetails = null;
 
         if (user.accountType === "Student") {
@@ -392,8 +384,8 @@ export const mobLogin = async (req, res) => {
             });
         }
 
-        // Update user to mark active token and expiration
-        const twoMinutesLater = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes
+        // Set active token and expiration every time the user logs in
+        const twoMinutesLater = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes from now
         await User.findByIdAndUpdate(user._id, {
             isActiveToken: "true",
             activePasswordExpires: twoMinutesLater,
@@ -427,7 +419,7 @@ export const mobLogin = async (req, res) => {
                 success: true,
                 token,
                 user: fullUser,
-                message: "Logged in Successfully.",
+                message: "Logged in Successfully. Next login allowed after 2 minutes.",
             });
 
     } catch (error) {
@@ -438,6 +430,7 @@ export const mobLogin = async (req, res) => {
         });
     }
 };
+
 
 
 
