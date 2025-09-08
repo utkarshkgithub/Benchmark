@@ -47,8 +47,12 @@
             resetPasswordExpires:{
                 type:Date,
             },
-            
-                
+            isActiveToken:{
+                type:String,
+            },
+            activePasswordExpires:{
+                type:Date,
+            }
         },
         { 
             timestamps: true 

@@ -323,9 +323,11 @@ export const login = async (req, res) => {
     }
 };
 
+
 export const mobLogin = async (req, res) => {
     try {
         const { email, password, deviceId = "" } = req.body;
+        
         if (!email || !password) {
             return res.status(400).json({
                 success: false,
@@ -341,10 +343,18 @@ export const mobLogin = async (req, res) => {
             });
         }
 
+        // Check if user has an active token and it's not expired
+        if (user.isActiveToken === "true" && user.activePasswordExpires && new Date() < user.activePasswordExpires) {
+            return res.status(429).json({
+                success: false,
+                message: "Please wait 2 minutes before logging in again.",
+            });
+        }
+
         let userDetails = null;
 
         if (user.accountType === "Student") {
-           userDetails = await Student.findOne({ userId: user._id })
+            userDetails = await Student.findOne({ userId: user._id })
                 .populate("subjects")
                 .lean();
             if (!userDetails) {
@@ -354,9 +364,7 @@ export const mobLogin = async (req, res) => {
                 });
             }
             
-            
             const compositeDeviceId = `${user.firstName.toLowerCase()}_${user.lastName.toLowerCase()}_${userDetails.rollNumber}_${deviceId}`;
-            
             if (userDetails.deviceId !== compositeDeviceId) {
                 return res.status(401).json({
                     success: false,
@@ -373,13 +381,7 @@ export const mobLogin = async (req, res) => {
                     message: "Instructor details not found.",
                 });
             }
-            // Device check can be enabled here if required:
-            // if (userDetails.deviceId !== deviceId) {
-            //     return res.status(401).json({
-            //         success: false,
-            //         message: "Device not matched, please use old device",
-            //     });
-            // }
+            // Optional: device check
         }
 
         const isPasswordMatch = await bcrypt.compare(password, user.password);
@@ -389,6 +391,13 @@ export const mobLogin = async (req, res) => {
                 message: "Password is incorrect",
             });
         }
+
+        // Update user to mark active token and expiration
+        const twoMinutesLater = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes
+        await User.findByIdAndUpdate(user._id, {
+            isActiveToken: "true",
+            activePasswordExpires: twoMinutesLater,
+        });
 
         const payload = {
             email: user.email,
@@ -411,24 +420,25 @@ export const mobLogin = async (req, res) => {
             httpOnly: true,
         };
 
-            return res
-                .cookie("token", token, options)
-                .status(200)
-                .json({
-                    success: true,
-                    token,
-                    user: fullUser,
-                    message: "Logged in Successfully.",
-                });
-
-        } catch (error) {
-            console.error(error);
-            return res.status(500).json({
-                success: false,
-                message: "Login Failure, please try again",
+        return res
+            .cookie("token", token, options)
+            .status(200)
+            .json({
+                success: true,
+                token,
+                user: fullUser,
+                message: "Logged in Successfully.",
             });
-        }
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Login Failure, please try again",
+        });
+    }
 };
+
 
 
 //change password
