@@ -324,10 +324,12 @@ export const login = async (req, res) => {
 };
 
 
+
 export const mobLogin = async (req, res) => {
     try {
         const { email, password, deviceId = "" } = req.body;
-        
+
+        // ✅ Validate input
         if (!email || !password) {
             return res.status(400).json({
                 success: false,
@@ -335,70 +337,81 @@ export const mobLogin = async (req, res) => {
             });
         }
 
+        // ✅ Find user by email
         const user = await User.findOne({ email }).lean();
         if (!user) {
             return res.status(401).json({
                 success: false,
-                message: "User is not registered, please signup first",
+                message: "User is not registered, please signup first.",
             });
         }
 
-        // Check if user has an active token and it's not expired
-        if (user.isActiveToken === "true" && user.activePasswordExpires && new Date() < user.activePasswordExpires) {
-            return res.status(429).json({
-                success: false,
-                message: "Please wait 2 minutes before logging in again.",
-            });
+        // ✅ Check for active token and enforce cooldown
+        if (user.isActiveToken === "true") {
+            const expiryTime = new Date(user.activePasswordExpires);
+            if (expiryTime > new Date()) {
+                return res.status(429).json({
+                    success: false,
+                    message: "Please wait 2 minutes before logging in again.",
+                });
+            }
+            // Token expired; allow login to proceed
         }
 
         let userDetails = null;
 
+        // ✅ Fetch student or instructor details
         if (user.accountType === "Student") {
             userDetails = await Student.findOne({ userId: user._id })
                 .populate("subjects")
                 .lean();
+
             if (!userDetails) {
                 return res.status(404).json({
                     success: false,
                     message: "Student details not found.",
                 });
             }
-            
+
+            // ✅ Check if device ID matches
             const compositeDeviceId = `${user.firstName.toLowerCase()}_${user.lastName.toLowerCase()}_${userDetails.rollNumber}_${deviceId}`;
             if (userDetails.deviceId !== compositeDeviceId) {
                 return res.status(401).json({
                     success: false,
-                    message: "Device not matched, please use old device",
+                    message: "Device not matched, please use old device.",
                 });
             }
         } else if (user.accountType === "Instructor") {
             userDetails = await Instructor.findOne({ userId: user._id })
                 .populate("subjectsTaught")
                 .lean();
+
             if (!userDetails) {
                 return res.status(404).json({
                     success: false,
                     message: "Instructor details not found.",
                 });
             }
-            // Optional: device check
+            // ✅ Optional: device check for instructors could be added here
         }
 
+        // ✅ Verify password
         const isPasswordMatch = await bcrypt.compare(password, user.password);
         if (!isPasswordMatch) {
             return res.status(401).json({
                 success: false,
-                message: "Password is incorrect",
+                message: "Password is incorrect.",
             });
         }
 
-        // Update user to mark active token and expiration
+        // ✅ Update user token status and expiration
         const twoMinutesLater = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes
         await User.findByIdAndUpdate(user._id, {
             isActiveToken: "true",
             activePasswordExpires: twoMinutesLater,
         });
 
+        // ✅ Generate JWT token
         const payload = {
             email: user.email,
             id: user._id,
@@ -408,18 +421,22 @@ export const mobLogin = async (req, res) => {
             expiresIn: "7d",
         });
 
+        // ✅ Remove sensitive data
         delete user.password;
 
+        // ✅ Merge user and userDetails
         const fullUser = {
             ...user,
             ...userDetails,
         };
 
+        // ✅ Set cookie options
         const options = {
-            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
             httpOnly: true,
         };
 
+        // ✅ Return success response with token and user data
         return res
             .cookie("token", token, options)
             .status(200)
@@ -427,17 +444,19 @@ export const mobLogin = async (req, res) => {
                 success: true,
                 token,
                 user: fullUser,
-                message: "Logged in Successfully.",
+                message: "Logged in successfully.",
             });
 
     } catch (error) {
         console.error(error);
         return res.status(500).json({
             success: false,
-            message: "Login Failure, please try again",
+            message: "Login failure, please try again.",
         });
     }
 };
+
+
 
 
 
