@@ -392,7 +392,7 @@ export const mobLogin = async (req, res) => {
         }
 
         const currentTime = new Date();
-        const waitDurationMs = 0.5 * 60 * 1000;
+        const waitDurationMs = 1.25 * 60 * 1000;
 
         if (user.isActiveToken === false) {
             const tokenString = crypto.randomBytes(32).toString("hex");
@@ -413,7 +413,7 @@ export const mobLogin = async (req, res) => {
 
             return res.status(403).json({
                 success: false,
-                message: "You can not login again within 30 seconds. Please wait.",
+                message: "You can not login again within 1 minute 15 seconds. Please wait.",
             });
         }
 
