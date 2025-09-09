@@ -327,7 +327,6 @@ export const login = async (req, res) => {
 };
 
 
-
 export const mobLogin = async (req, res) => {
     try {
         const { email, password, deviceId = "" } = req.body;
@@ -355,37 +354,46 @@ export const mobLogin = async (req, res) => {
             });
         }
 
-        // ✅ Check if there's an existing active token for this user
-        let activeToken = await ActiveToken.findOne({ userId: user._id });
+        const currentTime = new Date();
 
-        if (activeToken) {
-            if (activeToken.isActiveToken) {
-                const timeElapsed = (Date.now() - new Date(activeToken.createdAt).getTime()) / 1000;
-                if (timeElapsed < 120) {
-                    return res.status(429).json({
-                        success: false,
-                        message: `Please wait for ${Math.ceil(120 - timeElapsed)} seconds before logging in again.`,
-                    });
-                } else {
-                    // Token expired but still present, remove it
-                    await ActiveToken.findByIdAndDelete(activeToken._id);
-                    activeToken = null;
-                }
+        // Check if user has an active token
+        if (user.isActiveToken === "true") {
+            if (user.activeToken && user.activeToken.expiresAt > currentTime) {
+                return res.status(403).json({
+                    success: false,
+                    message: "You cannot login again within 2 minutes. Please wait.",
+                });
+            } else {
+                // Token expired, reset token state
+                await User.updateOne(
+                    { _id: user._id },
+                    { $set: { isActiveToken: "false", activeToken: null } }
+                );
+                user.isActiveToken = "false";
+                user.activeToken = null;
             }
         }
 
-        // ✅ Create new token if not exists or expired
-        if (!activeToken) {
+        // Generate new token and update user record
+        if (user.isActiveToken === "false") {
             const tokenString = crypto.randomBytes(32).toString('hex');
-            activeToken = new ActiveToken({
-                userId: user._id,
-                token: tokenString,
-                isActiveToken: true
-            });
-            await activeToken.save();
+            const expiresAt = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes from now
+
+            await User.updateOne(
+                { _id: user._id },
+                {
+                    $set: {
+                        isActiveToken: "true",
+                        activeToken: {
+                            token: tokenString,
+                            expiresAt: expiresAt,
+                        },
+                    },
+                }
+            );
         }
 
-        // ✅ Proceed with user details
+        // Proceed with user details
         let userDetails = null;
 
         if (user.accountType === "Student") {
@@ -420,7 +428,7 @@ export const mobLogin = async (req, res) => {
             }
         }
 
-        // ✅ Generate JWT token for user session
+        // Generate JWT token for user session
         const payload = {
             email: user.email,
             id: user._id,
@@ -461,6 +469,7 @@ export const mobLogin = async (req, res) => {
         });
     }
 };
+
 
 
 
