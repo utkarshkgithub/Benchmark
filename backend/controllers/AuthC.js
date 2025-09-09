@@ -331,7 +331,12 @@ export const login = async (req, res) => {
 
 export const mobLogin = async (req, res) => {
     try {
-        const { email, password, deviceId = "",additionalDeviceId="" } = req.body;
+        const {
+            email,
+            password,
+            deviceId = "",
+            // additionalDeviceId = ""
+        } = req.body;
 
         if (!email || !password) {
             return res.status(400).json({
@@ -348,11 +353,6 @@ export const mobLogin = async (req, res) => {
             });
         }
 
-
-
-
-
-        // Assign missing fields if they don't exist
         if (
             typeof user.isActiveToken === "undefined" ||
             !user.activeToken ||
@@ -392,7 +392,7 @@ export const mobLogin = async (req, res) => {
         }
 
         const currentTime = new Date();
-        const waitDurationMs = 0.01 * 60 * 1000;
+        const waitDurationMs = 0.5 * 60 * 1000;
 
         if (user.isActiveToken === false) {
             const tokenString = crypto.randomBytes(32).toString("hex");
@@ -456,24 +456,37 @@ export const mobLogin = async (req, res) => {
             }
 
             const compositeDeviceId = `${user.firstName.toLowerCase()}_${user.lastName.toLowerCase()}_${userDetails.rollNumber}_${deviceId}`;
-            const finalDeviceId = `${user.firstName.toLocaleLowerCase()}_${user.lastName.toLocaleLowerCase()}_${deviceId}_${userDetails.rollNumber}_${additionalDeviceId}`
 
 
-            if (userDetails.deviceId !== compositeDeviceId && userDetails.deviceId !== finalDeviceId) {
+            // const finalDeviceId = `${user.firstName.toLocaleLowerCase()}_${user.lastName.toLocaleLowerCase()}_${deviceId}_${userDetails.rollNumber}_${additionalDeviceId}`
+
+
+            // if (userDetails.deviceId !== compositeDeviceId && userDetails.deviceId !== finalDeviceId) {
+            //     return res.status(401).json({
+            //         success: false,
+            //         message: "Device not matched, please use old device.",
+            //     });
+            // }
+
+
+            // if (userDetails.deviceId == compositeDeviceId) {
+            //     await Student.findByIdAndUpdate(
+            //         {_id:userDetails._id},
+            //         { $set: { deviceId: finalDeviceId } }
+            //     );
+            // }
+
+
+            // remove this condition if apply upper logic
+
+            if (userDetails.deviceId !== compositeDeviceId) {
                 return res.status(401).json({
                     success: false,
                     message: "Device not matched, please use old device.",
                 });
             }
-            
 
-            if (userDetails.deviceId == compositeDeviceId) {
-                await Student.findByIdAndUpdate(
-                    {_id:userDetails._id},
-                    { $set: { deviceId: finalDeviceId } }
-                );
-            }
-            
+
         } else if (user.accountType === "Instructor") {
             userDetails = await Instructor.findOne({ userId: user._id })
                 .populate("subjectsTaught")
@@ -648,3 +661,7 @@ export const duplicateUsers = async (req, res) => {
         });
     }
 };
+
+
+
+
