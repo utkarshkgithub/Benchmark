@@ -12,6 +12,9 @@ import Subject from "../models/Subject.js";
 import { normalizeBranchName } from "../utils/branchUtils.js";
 import { studentsMail } from "../mail/templates/data/studentMails.js";
 dotenv.config();
+import ActiveToken from '../models/ActiveToken.js';
+import crypto from 'crypto';
+
 
 //send otp
 export const sendOTP = async (req, res) => {
@@ -118,7 +121,7 @@ export const signUp = async (req, res) => {
     ) {
       return res.status(403).json({
         success: false,
-        message: "Student account requires rollNumber, branch, semester, deviceId",
+        message: "Student account requires rollNumber, branch, semester",
       });
     } else if (accountType === "Instructor" && !department) {
       return res.status(403).json({
@@ -329,7 +332,6 @@ export const mobLogin = async (req, res) => {
     try {
         const { email, password, deviceId = "" } = req.body;
 
-        // ✅ Validate input
         if (!email || !password) {
             return res.status(400).json({
                 success: false,
@@ -337,7 +339,6 @@ export const mobLogin = async (req, res) => {
             });
         }
 
-        // ✅ Find user by email
         const user = await User.findOne({ email }).lean();
         if (!user) {
             return res.status(401).json({
@@ -346,21 +347,47 @@ export const mobLogin = async (req, res) => {
             });
         }
 
-        // ✅ Check for active token and enforce cooldown
-        if (user.isActiveToken === "true") {
-            const expiryTime = new Date(user.activePasswordExpires);
-            if (expiryTime > new Date()) {
-                return res.status(429).json({
-                    success: false,
-                    message: "Please wait 2 minutes before logging in again.",
-                });
-            }
-            // Token expired; allow login to proceed
+        const isPasswordMatch = await bcrypt.compare(password, user.password);
+        if (!isPasswordMatch) {
+            return res.status(401).json({
+                success: false,
+                message: "Password is incorrect.",
+            });
         }
 
+        // ✅ Check if there's an existing active token for this user
+        let activeToken = await ActiveToken.findOne({ userId: user._id });
+
+        if (activeToken) {
+            if (activeToken.isActiveToken) {
+                const timeElapsed = (Date.now() - new Date(activeToken.createdAt).getTime()) / 1000;
+                if (timeElapsed < 120) {
+                    return res.status(429).json({
+                        success: false,
+                        message: `Please wait for ${Math.ceil(120 - timeElapsed)} seconds before logging in again.`,
+                    });
+                } else {
+                    // Token expired but still present, remove it
+                    await ActiveToken.findByIdAndDelete(activeToken._id);
+                    activeToken = null;
+                }
+            }
+        }
+
+        // ✅ Create new token if not exists or expired
+        if (!activeToken) {
+            const tokenString = crypto.randomBytes(32).toString('hex');
+            activeToken = new ActiveToken({
+                userId: user._id,
+                token: tokenString,
+                isActiveToken: true
+            });
+            await activeToken.save();
+        }
+
+        // ✅ Proceed with user details
         let userDetails = null;
 
-        // ✅ Fetch student or instructor details
         if (user.accountType === "Student") {
             userDetails = await Student.findOne({ userId: user._id })
                 .populate("subjects")
@@ -373,7 +400,6 @@ export const mobLogin = async (req, res) => {
                 });
             }
 
-            // ✅ Check if device ID matches
             const compositeDeviceId = `${user.firstName.toLowerCase()}_${user.lastName.toLowerCase()}_${userDetails.rollNumber}_${deviceId}`;
             if (userDetails.deviceId !== compositeDeviceId) {
                 return res.status(401).json({
@@ -392,63 +418,43 @@ export const mobLogin = async (req, res) => {
                     message: "Instructor details not found.",
                 });
             }
-            // ✅ Optional: device check for instructors could be added here
         }
 
-        // ✅ Verify password
-        const isPasswordMatch = await bcrypt.compare(password, user.password);
-        if (!isPasswordMatch) {
-            return res.status(401).json({
-                success: false,
-                message: "Password is incorrect.",
-            });
-        }
-
-        // ✅ Update user token status and expiration
-        const twoMinutesLater = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes
-        await User.findByIdAndUpdate(user._id, {
-            isActiveToken: "true",
-            activePasswordExpires: twoMinutesLater,
-        });
-
-        // ✅ Generate JWT token
+        // ✅ Generate JWT token for user session
         const payload = {
             email: user.email,
             id: user._id,
             accountType: user.accountType,
         };
-        const token = jwt.sign(payload, process.env.JWT_SECRET, {
+
+        const jwtToken = jwt.sign(payload, process.env.JWT_SECRET, {
             expiresIn: "7d",
         });
 
-        // ✅ Remove sensitive data
         delete user.password;
 
-        // ✅ Merge user and userDetails
         const fullUser = {
             ...user,
             ...userDetails,
         };
 
-        // ✅ Set cookie options
         const options = {
-            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             httpOnly: true,
         };
 
-        // ✅ Return success response with token and user data
         return res
-            .cookie("token", token, options)
+            .cookie("token", jwtToken, options)
             .status(200)
             .json({
                 success: true,
-                token,
+                token: jwtToken,
                 user: fullUser,
                 message: "Logged in successfully.",
             });
 
     } catch (error) {
-        console.error(error);
+        console.error("Login error:", error);
         return res.status(500).json({
             success: false,
             message: "Login failure, please try again.",
