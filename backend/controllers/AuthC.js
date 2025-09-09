@@ -357,7 +357,7 @@ export const mobLogin = async (req, res) => {
         const currentTime = new Date();
 
         // Check if user has an active token
-        if (user.isActiveToken === "true") {
+        if (user.isActiveToken == "true") {
             if (user.activeToken && user.activeToken.expiresAt > currentTime) {
                 return res.status(403).json({
                     success: false,
@@ -375,9 +375,9 @@ export const mobLogin = async (req, res) => {
         }
 
         // Generate new token and update user record
-        if (user.isActiveToken === "false") {
+        if (user.isActiveToken == "false") {
             const tokenString = crypto.randomBytes(32).toString('hex');
-            const expiresAt = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes from now
+            const expiresAt = new Date(Date.now() + 1.5 * 60 * 1000); // 2 minutes from now
 
             await User.updateOne(
                 { _id: user._id },
@@ -391,6 +391,10 @@ export const mobLogin = async (req, res) => {
                     },
                 }
             );
+            return res.status(403).json({
+                    success: false,
+                    message: "You cannot login again within 2 minutes. Please wait.",
+                });
         }
 
         // Proceed with user details
