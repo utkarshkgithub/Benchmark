@@ -65,6 +65,9 @@ const Admin = () => {
   };
 
   const handleDeleteSubject = async (subjectId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this subject?");
+    if (!confirmDelete) return;
+
     try {
       await deleteSubject(subjectId, token);
       toast.success("Subject deleted successfully");
@@ -75,6 +78,9 @@ const Admin = () => {
   };
 
   const handleDeleteStudent = async (studentId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this student?");
+    if (!confirmDelete) return;
+
     try {
       await deleteStudent(studentId, token);
       toast.success("Student deleted successfully");
@@ -84,7 +90,6 @@ const Admin = () => {
     }
   };
 
-  // Helper to access nested fields
   const getFieldValue = (obj, field) => {
     if (!field.includes(".")) return obj[field];
     const keys = field.split(".");
@@ -95,7 +100,6 @@ const Admin = () => {
     return value || "";
   };
 
-  // Sorting logic
   const sortData = (data, field, order) => {
     if (!field) return data;
     return [...data].sort((a, b) => {

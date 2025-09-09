@@ -331,6 +331,7 @@ export const mobLogin = async (req, res) => {
     try {
         const { email, password, deviceId = "" } = req.body;
 
+        // Validate input
         if (!email || !password) {
             return res.status(400).json({
                 success: false,
@@ -338,6 +339,7 @@ export const mobLogin = async (req, res) => {
             });
         }
 
+        // Find user by email
         const user = await User.findOne({ email }).lean();
         if (!user) {
             return res.status(401).json({
@@ -346,6 +348,7 @@ export const mobLogin = async (req, res) => {
             });
         }
 
+        // Check password
         const isPasswordMatch = await bcrypt.compare(password, user.password);
         if (!isPasswordMatch) {
             return res.status(401).json({
@@ -355,35 +358,18 @@ export const mobLogin = async (req, res) => {
         }
 
         const currentTime = new Date();
+        const waitDurationMs = 1.5 * 60 * 1000; // 1 minute 30 seconds
 
-        // Check if user has an active token
-        if (user.isActiveToken == "true") {
-            if (user.activeToken && user.activeToken.expiresAt > currentTime) {
-                return res.status(403).json({
-                    success: false,
-                    message: "You cannot login again within 2 minutes. Please wait.",
-                });
-            } else {
-                // Token expired, reset token state
-                await User.updateOne(
-                    { _id: user._id },
-                    { $set: { isActiveToken: "false", activeToken: null } }
-                );
-                user.isActiveToken = "false";
-                user.activeToken = null;
-            }
-        }
-
-        // Generate new token and update user record
-        if (user.isActiveToken == "false") {
-            const tokenString = crypto.randomBytes(32).toString('hex');
-            const expiresAt = new Date(Date.now() + 1.5 * 60 * 1000); // 2 minutes from now
+        // If isActiveToken is false, set it and block login for 1m30s
+        if (user.isActiveToken === false) {
+            const tokenString = crypto.randomBytes(32).toString("hex");
+            const expiresAt = new Date(Date.now() + waitDurationMs);
 
             await User.updateOne(
                 { _id: user._id },
                 {
                     $set: {
-                        isActiveToken: "true",
+                        isActiveToken: true,
                         activeToken: {
                             token: tokenString,
                             expiresAt: expiresAt,
@@ -391,15 +377,39 @@ export const mobLogin = async (req, res) => {
                     },
                 }
             );
+
             return res.status(403).json({
-                    success: false,
-                    message: "You cannot login again within 2 minutes. Please wait.",
-                });
+                success: false,
+                message: "You cannot login again within 1 minute 30 seconds. Please wait.",
+            });
         }
 
-        // Proceed with user details
-        let userDetails = null;
+        // If isActiveToken is true, check expiration
+        if (user.isActiveToken === true) {
+            if (user.activeToken && user.activeToken.expiresAt) {
+                const expiresAt = new Date(user.activeToken.expiresAt);
+                if (expiresAt > currentTime) {
+                    const remaining = expiresAt - currentTime;
+                    const seconds = Math.floor((remaining / 1000) % 60);
+                    const minutes = Math.floor((remaining / 1000 / 60) % 60);
 
+                    return res.status(403).json({
+                        success: false,
+                        message: `You cannot login again. Please wait ${minutes} minute(s) ${seconds} second(s).`,
+                    });
+                }
+            }
+            // Token expired, reset token state
+            await User.updateOne(
+                { _id: user._id },
+                { $set: { isActiveToken: false, activeToken: null } }
+            );
+        }
+
+        // Proceed with generating new token and completing login
+
+        // Fetch additional user details
+        let userDetails = null;
         if (user.accountType === "Student") {
             userDetails = await Student.findOne({ userId: user._id })
                 .populate("subjects")
@@ -432,7 +442,7 @@ export const mobLogin = async (req, res) => {
             }
         }
 
-        // Generate JWT token for user session
+        // Generate JWT token
         const payload = {
             email: user.email,
             id: user._id,
@@ -443,13 +453,14 @@ export const mobLogin = async (req, res) => {
             expiresIn: "7d",
         });
 
-        delete user.password;
+        delete user.password; // Do not expose password
 
         const fullUser = {
             ...user,
             ...userDetails,
         };
 
+        // Set the token in cookie
         const options = {
             expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             httpOnly: true,
@@ -473,7 +484,6 @@ export const mobLogin = async (req, res) => {
         });
     }
 };
-
 
 
 
@@ -543,3 +553,54 @@ export const mobLogin = async (req, res) => {
 //         });
 //     }
 // };
+
+
+export const duplicateUsers = async (req, res) => {
+    try {
+        const duplicates = await Student.aggregate([
+            {
+                $addFields: {
+                    baseDeviceId: {
+                        $arrayElemAt: [
+                            { $split: ["$deviceId", "_"] },
+                            -1
+                        ]
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: "$baseDeviceId",
+                    count: { $sum: 1 },
+                    students: { $push: "$$ROOT" }
+                }
+            },
+            {
+                $match: {
+                    count: { $gt: 1 }
+                }
+            }
+        ]);
+
+        if (duplicates.length === 0) {
+            return res.status(200).json({
+                success: true,
+                message: "No duplicate base deviceIds found.",
+                duplicates: []
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Duplicate base deviceIds found.",
+            duplicates: duplicates
+        });
+
+    } catch (error) {
+        console.error("Error finding duplicate users:", error);
+        return res.status(500).json({
+            success: false,
+            message: "An error occurred while checking for duplicate device IDs."
+        });
+    }
+};
