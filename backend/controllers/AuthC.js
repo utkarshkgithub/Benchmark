@@ -19,16 +19,18 @@ import crypto from 'crypto';
 //send otp
 export const sendOTP = async (req, res) => {
     try {
-        const { email,extra="" } = req.body;
+        const { email, extra = "" } = req.body;
 
-        if(extra==""){const chackUserPreSent = await User.findOne({ email });
+        if (extra == "") {
+            const chackUserPreSent = await User.findOne({ email });
 
-        if (chackUserPreSent) {
-            return res.status(401).json({
-                success: false,
-                message: "User already registered",
-            });
-        }}
+            if (chackUserPreSent) {
+                return res.status(401).json({
+                    success: false,
+                    message: "User already registered",
+                });
+            }
+        }
 
 
         //generate otp
@@ -57,7 +59,7 @@ export const sendOTP = async (req, res) => {
         // console.log("Result is Generate OTP Func");
         // console.log("Result", result);
 
-        const otpPayload = { email, otp , extra };
+        const otpPayload = { email, otp, extra };
 
 
         const otpBody = await OTP.create(otpPayload);
@@ -82,168 +84,168 @@ export const sendOTP = async (req, res) => {
 
 
 export const signUp = async (req, res) => {
-  try {
-    const {
-      firstName,
-      lastName,
-      email,
-      accountType,
-      password,
-      otp,
-      rollNumber = "",
-      semester = "",
-      deviceId = "",
-      department = "",
-      subjects = [],  
-    } = req.body;
-    let {branch = ""} = req.body;
-    if (!firstName || !lastName || !email || !password || !accountType || !otp) {
-      return res.status(403).json({
-        success: false,
-        message: "All required fields must be filled.",
-      });
-      
-    }
-
-    if(branch === "PG") {
-      if (!studentsMail().includes(email)) {
-        return res.status(403).json({
-            success: false,
-            message: "Email not authorized for PG signup."
-        });
-      }
-    }
-
-
-    if (
-      accountType === "Student" &&
-      (!rollNumber || !branch || !semester || !deviceId)
-    ) {
-      return res.status(403).json({
-        success: false,
-        message: "Student account requires rollNumber, branch, semester",
-      });
-    } else if (accountType === "Instructor" && !department) {
-      return res.status(403).json({
-        success: false,
-        message: "Instructor account requires department",
-      });
-    }
-
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: "User already registered with this email.",
-      });
-    }
-
-    if (accountType === "Student") {
-      branch = normalizeBranchName(branch);
-      const compositeDeviceId = `${firstName.toLowerCase()}_${lastName.toLowerCase()}_${rollNumber}_${deviceId}`;
-      
-      const deviceDetails = await Student.findOne({ deviceId: compositeDeviceId });
-      if (deviceDetails) {
-        return res.status(400).json({
-          success: false,
-          message: "Device already assigned to other.",
-        });
-      }
-      const rollDetails = await Student.findOne({ rollNumber });
-      if (rollDetails) {
-        return res.status(400).json({
-          success: false,
-          message: "ROLL NUMBER should must be Unique",
-        });
-      }
-    }
-
-    const recentOtp = await OTP.find({ email })
-      .sort({ createdAt: -1 })
-      .limit(1);
-
-    if (recentOtp.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "OTP not found.",
-      });
-    } else if (otp !== recentOtp[0].otp) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid OTP.",
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const userDetails = await User.create({
-      firstName,
-      lastName,
-      email,
-      password: hashedPassword,
-      accountType,
-      approved: accountType === "Instructor" ? false : true,
-      active: true,
-      image: `https://api.dicebear.com/5.x/initials/png?seed=${firstName}%20${lastName}`,
-    });
-
-    let user = "";
     try {
-      if (accountType === "Student") {
-        const compositeDeviceId = `${firstName.toLowerCase()}_${lastName.toLowerCase()}_${rollNumber}_${deviceId}`;
-        
-        let finalSubjects = [...subjects];
-  
-        const branchSemesterSubjects = await Subject.find({
-          branches: { $in: [branch] },
-          semester: semester,
-        }).select("_id");
-  
-        const extraSubjectIds = branchSemesterSubjects.map((sub) => sub._id.toString());
-  
-        finalSubjects = [...new Set([...finalSubjects, ...extraSubjectIds])];
-  
-        user = await Student.create({
-          userId: userDetails._id,
-          deviceId: compositeDeviceId,
-          rollNumber,
-          branch,
-          semester,
-          subjects: finalSubjects,
+        const {
+            firstName,
+            lastName,
+            email,
+            accountType,
+            password,
+            otp,
+            rollNumber = "",
+            semester = "",
+            deviceId = "",
+            department = "",
+            subjects = [],
+        } = req.body;
+        let { branch = "" } = req.body;
+        if (!firstName || !lastName || !email || !password || !accountType || !otp) {
+            return res.status(403).json({
+                success: false,
+                message: "All required fields must be filled.",
+            });
+
+        }
+
+        if (branch === "PG") {
+            if (!studentsMail().includes(email)) {
+                return res.status(403).json({
+                    success: false,
+                    message: "Email not authorized for PG signup."
+                });
+            }
+        }
+
+
+        if (
+            accountType === "Student" &&
+            (!rollNumber || !branch || !semester || !deviceId)
+        ) {
+            return res.status(403).json({
+                success: false,
+                message: "Student account requires rollNumber, branch, semester",
+            });
+        } else if (accountType === "Instructor" && !department) {
+            return res.status(403).json({
+                success: false,
+                message: "Instructor account requires department",
+            });
+        }
+
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({
+                success: false,
+                message: "User already registered with this email.",
+            });
+        }
+
+        if (accountType === "Student") {
+            branch = normalizeBranchName(branch);
+            const compositeDeviceId = `${firstName.toLowerCase()}_${lastName.toLowerCase()}_${rollNumber}_${deviceId}`;
+
+            const deviceDetails = await Student.findOne({ deviceId: compositeDeviceId });
+            if (deviceDetails) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Device already assigned to other.",
+                });
+            }
+            const rollDetails = await Student.findOne({ rollNumber });
+            if (rollDetails) {
+                return res.status(400).json({
+                    success: false,
+                    message: "ROLL NUMBER should must be Unique",
+                });
+            }
+        }
+
+        const recentOtp = await OTP.find({ email })
+            .sort({ createdAt: -1 })
+            .limit(1);
+
+        if (recentOtp.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "OTP not found.",
+            });
+        } else if (otp !== recentOtp[0].otp) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid OTP.",
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const userDetails = await User.create({
+            firstName,
+            lastName,
+            email,
+            password: hashedPassword,
+            accountType,
+            approved: accountType === "Instructor" ? false : true,
+            active: true,
+            image: `https://api.dicebear.com/5.x/initials/png?seed=${firstName}%20${lastName}`,
         });
-  
-        await Subject.updateMany(
-          { _id: { $in: finalSubjects } },
-          { $addToSet: { students: user.userId._id } }
-        );
-      } else if (accountType === "Instructor") {
-        user = await Instructor.create({
-          userId: userDetails._id,
-          department,
+
+        let user = "";
+        try {
+            if (accountType === "Student") {
+                const compositeDeviceId = `${firstName.toLowerCase()}_${lastName.toLowerCase()}_${rollNumber}_${deviceId}`;
+
+                let finalSubjects = [...subjects];
+
+                const branchSemesterSubjects = await Subject.find({
+                    branches: { $in: [branch] },
+                    semester: semester,
+                }).select("_id");
+
+                const extraSubjectIds = branchSemesterSubjects.map((sub) => sub._id.toString());
+
+                finalSubjects = [...new Set([...finalSubjects, ...extraSubjectIds])];
+
+                user = await Student.create({
+                    userId: userDetails._id,
+                    deviceId: compositeDeviceId,
+                    rollNumber,
+                    branch,
+                    semester,
+                    subjects: finalSubjects,
+                });
+
+                await Subject.updateMany(
+                    { _id: { $in: finalSubjects } },
+                    { $addToSet: { students: user.userId._id } }
+                );
+            } else if (accountType === "Instructor") {
+                user = await Instructor.create({
+                    userId: userDetails._id,
+                    department,
+                });
+            }
+        } catch (error) {
+            await User.findByIdAndDelete(userDetails._id);
+            console.error("Error during student/instructor creation:", error);
+            return res.status(500).json({
+                success: false,
+                message: "User could not be registered, please try again.",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            user,
+            userDetails,
+            message: "User registered successfully.",
         });
-      }
     } catch (error) {
-      await User.findByIdAndDelete(userDetails._id);
-      console.error("Error during student/instructor creation:", error);
-      return res.status(500).json({
-        success: false,
-        message: "User could not be registered, please try again.",
-      });
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "User could not be registered, please try again.",
+        });
     }
-  
-    return res.status(200).json({
-      success: true,
-      user,
-      userDetails,
-      message: "User registered successfully.",
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "User could not be registered, please try again.",
-    });
-  }
 };
 
 
@@ -278,7 +280,7 @@ export const login = async (req, res) => {
         let userDetails;
         if (user.accountType === "Student") {
             userDetails = await Student.findOne({ userId: user._id })
-                .populate("subjects") 
+                .populate("subjects")
                 .lean();
         } else if (user.accountType === "Instructor") {
             userDetails = await Instructor.findOne({ userId: user._id })
@@ -329,7 +331,7 @@ export const login = async (req, res) => {
 
 export const mobLogin = async (req, res) => {
     try {
-        const { email, password, deviceId = "" } = req.body;
+        const { email, password, deviceId = "",additionalDeviceId="" } = req.body;
 
         if (!email || !password) {
             return res.status(400).json({
@@ -339,36 +341,40 @@ export const mobLogin = async (req, res) => {
         }
 
         const user = await User.findOne({ email }).lean();
-if (!user) {
-    return res.status(401).json({
-        success: false,
-        message: "User is not registered, please signup first.",
-    });
-}
-
-// Assign missing fields if they don't exist
-if (
-    typeof user.isActiveToken === "undefined" ||
-    !user.activeToken ||
-    typeof user.activePasswordExpires === "undefined"
-) {
-    await User.updateOne(
-        { _id: user._id },
-        {
-            $set: {
-                isActiveToken: user.isActiveToken ?? false,
-                activeToken: user.activeToken ?? { token: "", expiresAt: new Date(0) },
-                activePasswordExpires: user.activePasswordExpires ?? new Date(0),
-            },
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: "User is not registered, please signup first.",
+            });
         }
-    );
 
-    // Refetch updated user
-    const updatedUser = await User.findById(user._id).lean();
-    user.isActiveToken = updatedUser.isActiveToken;
-    user.activeToken = updatedUser.activeToken;
-    user.activePasswordExpires = updatedUser.activePasswordExpires;
-}
+
+
+
+
+        // Assign missing fields if they don't exist
+        if (
+            typeof user.isActiveToken === "undefined" ||
+            !user.activeToken ||
+            typeof user.activePasswordExpires === "undefined"
+        ) {
+            await User.updateOne(
+                { _id: user._id },
+                {
+                    $set: {
+                        isActiveToken: user.isActiveToken ?? false,
+                        activeToken: user.activeToken ?? { token: "", expiresAt: new Date(0) },
+                        activePasswordExpires: user.activePasswordExpires ?? new Date(0),
+                    },
+                }
+            );
+
+            // Refetch updated user
+            const updatedUser = await User.findById(user._id).lean();
+            user.isActiveToken = updatedUser.isActiveToken;
+            user.activeToken = updatedUser.activeToken;
+            user.activePasswordExpires = updatedUser.activePasswordExpires;
+        }
 
         if (!user) {
             return res.status(401).json({
@@ -386,7 +392,7 @@ if (
         }
 
         const currentTime = new Date();
-        const waitDurationMs = 0.5 * 60 * 1000; 
+        const waitDurationMs = 0.01 * 60 * 1000;
 
         if (user.isActiveToken === false) {
             const tokenString = crypto.randomBytes(32).toString("hex");
@@ -450,12 +456,24 @@ if (
             }
 
             const compositeDeviceId = `${user.firstName.toLowerCase()}_${user.lastName.toLowerCase()}_${userDetails.rollNumber}_${deviceId}`;
-            if (userDetails.deviceId !== compositeDeviceId) {
+            const finalDeviceId = `${user.firstName.toLocaleLowerCase()}_${user.lastName.toLocaleLowerCase()}_${deviceId}_${userDetails.rollNumber}_${additionalDeviceId}`
+
+
+            if (userDetails.deviceId !== compositeDeviceId && userDetails.deviceId !== finalDeviceId) {
                 return res.status(401).json({
                     success: false,
                     message: "Device not matched, please use old device.",
                 });
             }
+            
+
+            if (userDetails.deviceId == compositeDeviceId) {
+                await Student.findByIdAndUpdate(
+                    {_id:userDetails._id},
+                    { $set: { deviceId: finalDeviceId } }
+                );
+            }
+            
         } else if (user.accountType === "Instructor") {
             userDetails = await Instructor.findOne({ userId: user._id })
                 .populate("subjectsTaught")
@@ -476,7 +494,7 @@ if (
         };
 
         const jwtToken = jwt.sign(payload, process.env.JWT_SECRET, {
-            expiresIn: "7d",
+            expiresIn: "30d",
         });
 
         delete user.password; // Do not expose password
@@ -488,7 +506,7 @@ if (
 
         // Set the token in cookie
         const options = {
-            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
             httpOnly: true,
         };
 
@@ -522,7 +540,7 @@ if (
 //         // validation
 //         const email = userDetails.email;
 //         const user = await User.findOne({ email });
-        
+
 //         if (await bcrypt.compare(currentPassword, user.password)) {
 //             const hashedPassword = await bcrypt.hash(newPassword, 10);
 
