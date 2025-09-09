@@ -331,7 +331,6 @@ export const mobLogin = async (req, res) => {
     try {
         const { email, password, deviceId = "" } = req.body;
 
-        // Validate input
         if (!email || !password) {
             return res.status(400).json({
                 success: false,
@@ -339,8 +338,38 @@ export const mobLogin = async (req, res) => {
             });
         }
 
-        // Find user by email
         const user = await User.findOne({ email }).lean();
+if (!user) {
+    return res.status(401).json({
+        success: false,
+        message: "User is not registered, please signup first.",
+    });
+}
+
+// Assign missing fields if they don't exist
+if (
+    typeof user.isActiveToken === "undefined" ||
+    !user.activeToken ||
+    typeof user.activePasswordExpires === "undefined"
+) {
+    await User.updateOne(
+        { _id: user._id },
+        {
+            $set: {
+                isActiveToken: user.isActiveToken ?? false,
+                activeToken: user.activeToken ?? { token: "", expiresAt: new Date(0) },
+                activePasswordExpires: user.activePasswordExpires ?? new Date(0),
+            },
+        }
+    );
+
+    // Refetch updated user
+    const updatedUser = await User.findById(user._id).lean();
+    user.isActiveToken = updatedUser.isActiveToken;
+    user.activeToken = updatedUser.activeToken;
+    user.activePasswordExpires = updatedUser.activePasswordExpires;
+}
+
         if (!user) {
             return res.status(401).json({
                 success: false,
@@ -348,7 +377,6 @@ export const mobLogin = async (req, res) => {
             });
         }
 
-        // Check password
         const isPasswordMatch = await bcrypt.compare(password, user.password);
         if (!isPasswordMatch) {
             return res.status(401).json({
@@ -358,9 +386,8 @@ export const mobLogin = async (req, res) => {
         }
 
         const currentTime = new Date();
-        const waitDurationMs = 1.5 * 60 * 1000; // 1 minute 30 seconds
+        const waitDurationMs = 0.5 * 60 * 1000; 
 
-        // If isActiveToken is false, set it and block login for 1m30s
         if (user.isActiveToken === false) {
             const tokenString = crypto.randomBytes(32).toString("hex");
             const expiresAt = new Date(Date.now() + waitDurationMs);
@@ -380,7 +407,7 @@ export const mobLogin = async (req, res) => {
 
             return res.status(403).json({
                 success: false,
-                message: "You cannot login again within 1 minute 30 seconds. Please wait.",
+                message: "You can not login again within 30 seconds. Please wait.",
             });
         }
 
@@ -442,7 +469,6 @@ export const mobLogin = async (req, res) => {
             }
         }
 
-        // Generate JWT token
         const payload = {
             email: user.email,
             id: user._id,
