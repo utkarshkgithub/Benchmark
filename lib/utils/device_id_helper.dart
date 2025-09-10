@@ -1,4 +1,5 @@
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/services.dart';
 import 'dart:io';
 import 'dart:developer';
 
@@ -132,5 +133,51 @@ class DeviceIdHelper {
         'error': e.toString(),
       };
     }
+  }
+
+  /// Get additional device info string (Hardware identifiers for Android, fallback for others)
+  static Future<String> getAdditionalDeviceInfo() async {
+    try {
+      if (Platform.isAndroid) {
+        // Try to get complete hardware identifiers from Keystore
+        try {
+          // Import the Keystore class to use getHardwareIdentifiers
+          final hardwareIdentifiers =
+              await _getHardwareIdentifiersFromKeystore();
+          return hardwareIdentifiers;
+        } catch (e) {
+          // Fallback to device_info_plus if Keystore fails
+          final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+          final AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+          final model = androidInfo.model;
+          final brand = androidInfo.brand;
+          final manufacturer = androidInfo.manufacturer;
+          return '$model$brand$manufacturer';
+        }
+      } else if (Platform.isIOS) {
+        final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+        final IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+        final model = iosInfo.model;
+        final name = iosInfo.name;
+        final localizedModel = iosInfo.localizedModel;
+
+        // For iOS, use model + name + localizedModel
+        return '$model$name$localizedModel';
+      } else {
+        return 'unknown-platform';
+      }
+    } catch (e) {
+      return 'unknown-device-info';
+    }
+  }
+
+  /// Helper method to get hardware identifiers from Keystore
+  static Future<String> _getHardwareIdentifiersFromKeystore() async {
+    // Import Keystore dynamically to avoid circular dependencies
+    const channel = MethodChannel('com.iiitbh.benchmark/keystore');
+    final identifiers = await channel.invokeMethod<String>(
+      'getHardwareIdentifiers',
+    );
+    return identifiers ?? 'unknown-hardware';
   }
 }

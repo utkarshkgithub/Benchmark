@@ -104,7 +104,7 @@ class SignupAPIExamples {
       await AuthService.signup(
         firstName: 'Test',
         lastName: 'User',
-        email: 'test@example.com',
+        email: 'test@iiitbh.com',
         accountType: 'Student',
         password: 'password123',
         otp: '000000', // Invalid OTP

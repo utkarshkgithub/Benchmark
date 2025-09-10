@@ -36,6 +36,14 @@ class AuthService {
     required String semester,
     required String deviceId,
     List<String>? subjects,
+    // Enhanced device data (optional)
+    String? deviceType,
+    String? platform,
+    String? enhancedDeviceId,
+    String? legacyDeviceId,
+    String? publicKey,
+    String? deviceFingerprint,
+    String? additionalDeviceInfo,
   }) async {
     if (_backendUrl == null) {
       throw Exception("BACKEND_URL is not set in the .env file");
@@ -56,6 +64,14 @@ class AuthService {
       "deviceId": deviceId,
       "subjects": subjects ?? [],
     };
+
+    // Add enhanced device data if available
+    // if (deviceType != null) {
+    //   body["deviceType"] = deviceType;
+    // }
+    if (additionalDeviceInfo != null) {
+      body["additionaldeviceId"] = additionalDeviceInfo;
+    }
 
     try {
       AppLogger.auth('Attempting to register user: $email');
@@ -188,6 +204,7 @@ class AuthService {
     required String email,
     required String password,
     required String deviceId,
+    String? additionalDeviceInfo,
   }) async {
     if (_backendUrl == null) {
       throw Exception("BACKEND_URL is not set in the .env file");
@@ -195,11 +212,16 @@ class AuthService {
 
     final loginUrl = Uri.parse('$_backendUrl/api/v2/auth/mob-login');
 
-    final Map<String, String> body = {
+    final Map<String, dynamic> body = {
       "email": email,
       "password": password,
       "deviceId": deviceId,
     };
+
+    // Add AdditionalDeviceInfo if available
+    if (additionalDeviceInfo != null) {
+      body["additionaldeviceId"] = additionalDeviceInfo;
+    }
 
     try {
       final headers = {'Content-Type': 'application/json; charset=UTF-8'};
