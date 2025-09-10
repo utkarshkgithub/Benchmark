@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'dart:developer';
 import '../providers/auth_provider.dart';
 import '../services/auth_service.dart';
-import '../utils/device_id_helper.dart';
+import '../services/enhanced_device_service.dart';
 import 'login_screen.dart';
 
 // Subject model
@@ -56,7 +56,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  String _accountType = 'Student';
+  final String _accountType = 'Student';
 
   // Page 2 Controllers
   final _otpController = TextEditingController();
@@ -66,7 +66,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String _branch = 'CSE';
   String _semester = 'I';
   bool _hasMinorSubject = false;
-  List<String> _selectedMinorSubjects = [];
+  final List<String> _selectedMinorSubjects = [];
   List<Subject> _allSubjects = [];
   bool _isLoadingSubjects = false;
   bool _subjectsFetched = false;
@@ -273,9 +273,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
       authProvider.setLoading(true);
 
       try {
-        // Get device ID with better error handling and debugging
-        final String deviceId = await DeviceIdHelper.getDeviceId();
+        // Get enhanced device data
+        final deviceData =
+            await EnhancedDeviceService.getDeviceRegistrationPayload();
+        final String deviceId = deviceData['deviceId'];
         print('DEBUG: Generated Device ID: $deviceId'); // Debug log
+        print('DEBUG: Device Type: ${deviceData['deviceType']}'); // Debug log
+        if (deviceData['deviceType'] == 'enhanced') {
+          print('DEBUG: Enhanced Device Features Available');
+          print(
+            'DEBUG: Device Fingerprint: ${deviceData['deviceFingerprint']}',
+          );
+        }
 
         // Check if device ID is properly generated
         if (deviceId.isEmpty || deviceId == 'unknown') {
@@ -305,7 +314,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
           'accuracy': position.accuracy,
           'hasMinorSubject': _hasMinorSubject,
           'minorSubjectIds': _hasMinorSubject ? _selectedMinorSubjects : [],
+          // Enhanced device data
+          'deviceType': deviceData['deviceType'],
+          'platform': deviceData['platform'],
+          'AdditionalDeviceInfo': deviceData['AdditionalDeviceInfo'],
         };
+
+        // Add enhanced device information if available
+        if (deviceData['deviceType'] == 'enhanced') {
+          userData.addAll({
+            'enhancedDeviceId': deviceData['enhancedDeviceId'],
+            'legacyDeviceId': deviceData['legacyDeviceId'],
+            'publicKey': deviceData['publicKey'],
+            'deviceFingerprint': deviceData['deviceFingerprint'],
+          });
+        }
 
         print('DEBUG: Signup data prepared for email: ${userData['email']}');
         print('DEBUG: Device ID: ${userData['deviceId']}');
@@ -336,6 +359,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
               )
               .map((subject) => subject.id)
               .toList(),
+          // Enhanced device data
+          deviceType: userData['deviceType'] as String?,
+          platform: userData['platform'] as String?,
+          enhancedDeviceId: userData['enhancedDeviceId'] as String?,
+          legacyDeviceId: userData['legacyDeviceId'] as String?,
+          publicKey: userData['publicKey'] as String?,
+          deviceFingerprint: userData['deviceFingerprint'] as String?,
+          additionalDeviceInfo: userData['AdditionalDeviceInfo'] as String?,
         );
 
         print(

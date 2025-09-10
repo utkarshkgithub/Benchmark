@@ -80,7 +80,40 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     });
 
     try {
-      // Example: Mark attendance using device service
+      // First, validate location security (check for mock location)
+      final locationValidation = await DeviceService.validateLocationSecurity();
+
+      if (!locationValidation['isValid']) {
+        String errorMessage =
+            locationValidation['error'] ?? 'Location validation failed';
+        String errorCode = locationValidation['errorCode'] ?? 'UNKNOWN';
+
+        safeSetState(() {
+          _error = errorMessage;
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 5),
+              action: errorCode == 'MOCK_LOCATION'
+                  ? SnackBarAction(
+                      label: 'Help',
+                      textColor: Colors.white,
+                      onPressed: () {
+                        _showMockLocationHelp();
+                      },
+                    )
+                  : null,
+            ),
+          );
+        }
+        return; // Stop execution if location is not secure
+      }
+
+      // Location is validated, proceed with attendance marking
       final success = await DeviceService.markAttendance(
         username: 'student_username', // Replace with actual username
         password: 'student_password', // Replace with actual password
@@ -106,6 +139,46 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  /// Show help dialog for mock location detection
+  void _showMockLocationHelp() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Mock Location Detected'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Your device is using a fake/mock location. To mark attendance, please:',
+              ),
+              SizedBox(height: 10),
+              Text('1. Turn off all location spoofing apps'),
+              Text('2. Disable "Allow mock locations" in Developer Options'),
+              Text('3. Enable high accuracy GPS'),
+              Text('4. Make sure you\'re in the correct location'),
+              SizedBox(height: 10),
+              Text(
+                'Common spoofing apps to disable:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text('• Fake GPS, GPS Joystick'),
+              Text('• Location Changer apps'),
+              Text('• VPN apps with location masking'),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _resetDeviceId() async {

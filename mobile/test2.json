@@ -1,0 +1,22 @@
+{
+    "firstName": "utkarsh",
+    "lastName": "ku",
+    "email": "utkarsh2.230101147@iiitbh.ac.in",
+    "accountType": "Student",
+    "password": "111111",
+    "otp": "614363",
+    "rollNumber": "677",
+    "branch": "CSE",
+    "semester": "V",
+    "deviceId": "825488101",
+    "subjects": [
+        "68bd913bde6eb8f096acfe5b",
+        "68bd972a34a901fb0d413dfe"
+    ],
+    "deviceType": "enhanced",
+    "platform": "android",
+    "enhancedDeviceId": "825488101",
+    "legacyDeviceId": "RKQ1.211001.001",
+    "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEB1UTK24NqIFurf/y+vbrQJSb0kqcKKaxaIjX1r9wRE42DWAfYOf0q5VP1kvgMxSQaR1UgQUYVXzMltrmIKm69Q==",
+    "deviceFingerprint": "03b0d3d39e4e71992c2027451227bf0dea6d46001f308528120d3a598e325028"
+}

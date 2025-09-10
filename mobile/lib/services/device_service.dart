@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uuid/uuid.dart';
+import 'package:safe_device/safe_device.dart';
 import 'dart:convert';
 import 'dart:io';
 import '../utils/network_logger.dart';
@@ -216,17 +217,75 @@ class DeviceService {
     }
   }
 
-  /// Get current location with high accuracy
+  /// Check if location is mocked/spoofed
+  static Future<bool> checkIfLocationIsMocked() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        locationSettings: LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
+        ),
+      );
+
+      if (position.isMocked) {
+        print("Warning: Location is spoofed!");
+        return true;
+      } else {
+        print("Location appears to be real.");
+        return false;
+      }
+    } catch (e) {
+      print("Error checking location mock status: $e");
+      // If we can't determine, assume it might be mocked for security
+      return true;
+    }
+  }
+
+  /// Comprehensive location security check before allowing QR scanner
+  static Future<Map<String, dynamic>> validateLocationSecurity() async {
+    try {
+      // Use the new secure location service
+      Position position = await SecureLocationService.getCurrentLocation();
+
+      // Check location accuracy (if too inaccurate, might be spoofed)
+      if (position.accuracy > 100) {
+        // More than 100 meters accuracy is suspicious
+        return {
+          'isValid': false,
+          'error':
+              'Location accuracy too low. Please ensure GPS is enabled and you\'re in an open area.',
+          'errorCode': 'LOW_ACCURACY',
+          'accuracy': position.accuracy,
+        };
+      }
+
+      return {
+        'isValid': true,
+        'position': position,
+        'accuracy': position.accuracy,
+        'message': 'Location security validation passed',
+      };
+    } catch (e) {
+      if (e is LocationSecurityException) {
+        return {
+          'isValid': false,
+          'error': e.message,
+          'errorCode': 'SECURITY_THREAT',
+        };
+      }
+
+      return {
+        'isValid': false,
+        'error': 'Failed to validate location security: $e',
+        'errorCode': 'VALIDATION_ERROR',
+      };
+    }
+  }
+
   static Future<Position> getCurrentLocation() async {
     try {
-      await checkLocationPermissions();
-
-      return await Geolocator.getCurrentPosition(
-        locationSettings: LocationSettings(
-        accuracy: LocationAccuracy.high,
-        timeLimit: Duration(seconds: 10),
-      ),
-      );
+      // Use secure location service instead of basic location check
+      return await SecureLocationService.getCurrentLocation();
     } catch (e) {
       throw Exception('Failed to get current location: $e');
     }
@@ -242,9 +301,9 @@ class DeviceService {
 
       return await Geolocator.getCurrentPosition(
         locationSettings: LocationSettings(
-        accuracy: LocationAccuracy.high,
-        timeLimit: Duration(seconds: 10),
-      ),
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
+        ),
       );
     } catch (e) {
       throw Exception('Failed to get location: $e');
@@ -432,5 +491,140 @@ class DeviceService {
     );
 
     return distance <= radiusInMeters;
+  }
+}
+
+/// Custom exception for location security issues
+class LocationSecurityException implements Exception {
+  final String message;
+  LocationSecurityException(this.message);
+
+  @override
+  String toString() => 'LocationSecurityException: $message';
+}
+
+/// Secure location service with comprehensive security checks
+class SecureLocationService {
+  static Future<Position> getCurrentLocation() async {
+    try {
+      // Ensure location permissions are granted first (required for mock detection)
+      await _checkLocationPermissions();
+
+      // Multi-layer security check
+      bool isSafeForLocation = await _performSecurityChecks();
+
+      if (!isSafeForLocation) {
+        throw LocationSecurityException(
+          'Security threat detected: GPS spoofing, rooted device, or developer mode enabled',
+        );
+      }
+
+      // Get location with high accuracy
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 15),
+        ),
+      );
+
+      // Final fallback check using geolocator's built-in detection
+      if (position.isMocked) {
+        throw LocationSecurityException(
+          'Mock location detected in position data',
+        );
+      }
+
+      return position;
+    } catch (e) {
+      throw Exception('Failed to get secure location: $e');
+    }
+  }
+
+  static Future<bool> _performSecurityChecks() async {
+    try {
+      // Check if running on real device first
+      bool isRealDevice = await SafeDevice.isRealDevice;
+
+      if (!isRealDevice) {
+        // Development mode - bypass some checks for emulators/simulators
+        print(
+          '⚠️ Running on emulator - bypassing some security checks for development',
+        );
+        return await _performSecurityChecksWithDevBypass();
+      }
+
+      // Full security checks on real devices
+      bool isMockLocation = await SafeDevice.isMockLocation;
+
+      // Use the aggregated safety check
+      bool isSafeDevice = await SafeDevice.isSafeDevice;
+
+      // Log details for debugging if unsafe
+      if (!isSafeDevice) {
+        await _logSecurityDetails();
+      }
+
+      return isSafeDevice && !isMockLocation && isRealDevice;
+    } catch (e) {
+      print('Security check failed: $e');
+      return false; // Assume unsafe if checks fail
+    }
+  }
+
+  static Future<bool> _performSecurityChecksWithDevBypass() async {
+    try {
+      // For development/testing - bypass emulator checks
+      bool isRealDevice = await SafeDevice.isRealDevice;
+
+      if (!isRealDevice) {
+        print(
+          '⚠️ Running on emulator - bypassing some security checks for development',
+        );
+        // Only check critical security issues, not emulator-related ones
+        bool isMockLocation = await SafeDevice.isMockLocation;
+        return !isMockLocation;
+      }
+
+      // Full security checks on real devices
+      return await SafeDevice.isSafeDevice;
+    } catch (e) {
+      print('Development security check failed: $e');
+      return true; // Be lenient in development mode
+    }
+  }
+
+  static Future<void> _logSecurityDetails() async {
+    try {
+      // Get detailed breakdown for debugging
+      if (Platform.isAndroid) {
+        Map<String, dynamic> rootDetails =
+            await SafeDevice.rootDetectionDetails;
+        print('Root detection details: $rootDetails');
+      }
+
+      if (Platform.isIOS) {
+        Map<String, dynamic> jailbreakDetails =
+            await SafeDevice.jailbreakDetails;
+        print('Jailbreak detection details: $jailbreakDetails');
+      }
+    } catch (e) {
+      print('Failed to get security details: $e');
+    }
+  }
+
+  static Future<void> _checkLocationPermissions() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        throw Exception(
+          'Location permissions are required for secure location detection',
+        );
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      throw Exception('Location permissions are permanently denied');
+    }
   }
 }

@@ -22,6 +22,8 @@ dependencies:
   shared_preferences: ^2.3.2
   mobile_scanner: ^7.0.1
   vector_math: ^2.1.4
+  safe_device: ^1.3.5
+  app_security: ^1.0.7
 
 dev_dependencies:
   flutter_test:

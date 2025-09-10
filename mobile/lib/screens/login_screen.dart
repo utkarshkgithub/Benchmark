@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../services/auth_service.dart';
-import '../utils/device_id_helper.dart';
+import '../services/enhanced_device_service.dart';
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
 import 'home_screen.dart';
@@ -29,7 +29,6 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  
   void safeSetState(VoidCallback fn) {
     if (!mounted) return;
     setState(fn);
@@ -43,16 +42,24 @@ class _LoginScreenState extends State<LoginScreen> {
       authProvider.setLoading(true);
 
       try {
-        // Get device ID dynamically
-        log('Login: Starting device ID fetch...');
-        final String deviceId = await DeviceIdHelper.getDeviceId();
+        // Get enhanced device data
+        log('Login: Starting enhanced device data fetch...');
+        final deviceData =
+            await EnhancedDeviceService.getDeviceRegistrationPayload();
+        final String deviceId = deviceData['deviceId'];
         log('Login: Device ID retrieved: $deviceId');
+        log('Login: Device Type: ${deviceData['deviceType']}');
+        if (deviceData['deviceType'] == 'enhanced') {
+          log('Login: Enhanced Device Features Available');
+          log('Login: Device Fingerprint: ${deviceData['deviceFingerprint']}');
+        }
 
         log('Login: Calling AuthService.mobileLogin with device ID: $deviceId');
         final loginResponse = await AuthService.mobileLogin(
           email: _emailController.text.trim(),
           password: _passwordController.text,
           deviceId: deviceId,
+          additionalDeviceInfo: deviceData['AdditionalDeviceInfo'] as String?,
         );
         log('Login: Successfully got login response.');
 

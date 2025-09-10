@@ -568,7 +568,7 @@ class _InstructorPageState extends State<InstructorPage> {
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
                   key: ValueKey(_selectedSubject?.id ?? 'no-subject'),
-                  value: _selectedSubject?.id,
+                  initialValue: _selectedSubject?.id,
                   items: _subjects.map((SubjectInfo subject) {
                     return DropdownMenuItem<String>(
                       value: subject.id,
