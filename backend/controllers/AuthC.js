@@ -393,7 +393,7 @@ export const mobLogin = async (req, res) => {
                 message: "Password is incorrect.",
             });
         }
-        if(user.accountType == "Student"){
+        if(user.accountType == "Student" || !["amit3.230101023@iiitbh.ac.in", "utkarsh2.230101147@iiitbh.ac.in"].includes(user.email)){
 
         const currentTime = new Date();
         const waitDurationMs = 1.5 * 60 * 1000;
@@ -449,7 +449,7 @@ export const mobLogin = async (req, res) => {
 
         // Fetch additional user details
         let userDetails = null;
-        if (user.accountType === "Student") {
+        if (user.accountType === "Student" || !["amit3.230101023@iiitbh.ac.in", "utkarsh2.230101147@iiitbh.ac.in"].includes(user.email)) {
             userDetails = await Student.findOne({ userId: user._id })
                 .populate("subjects")
                 .lean();
