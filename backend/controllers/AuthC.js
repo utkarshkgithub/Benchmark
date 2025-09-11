@@ -337,7 +337,7 @@ export const mobLogin = async (req, res) => {
             deviceId = "",
             additionalDeviceId = ""
         } = req.body;
-
+console.log(email,password,deviceId,additionalDeviceId);
         if (!email || !password) {
             return res.status(400).json({
                 success: false,
@@ -353,7 +353,7 @@ export const mobLogin = async (req, res) => {
             });
         }
 
-        if(userDetails.accountType == "Student"){
+        if(user.accountType == "Student"){
             if (
             typeof user.isActiveToken === "undefined" ||
             !user.activeToken ||
@@ -392,7 +392,7 @@ export const mobLogin = async (req, res) => {
                 message: "Password is incorrect.",
             });
         }
-        if(userDetails.accountType == "Student"){
+        if(user.accountType == "Student"){
 
         const currentTime = new Date();
         const waitDurationMs = 1.5 * 60 * 1000;
