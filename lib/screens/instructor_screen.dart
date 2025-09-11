@@ -7,6 +7,7 @@ import 'dart:async';
 import '../services/auth_service.dart';
 import '../models/user_models.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/reusable_qr_scanner.dart';
 import 'login_screen.dart';
 
 // Attendance data models
@@ -630,6 +631,32 @@ class _InstructorPageState extends State<InstructorPage> {
                             ? 'Show QR Code'
                             : 'Generate QR Code',
                       ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Scan QR Code Button for Instructor
+              ElevatedButton(
+                onPressed: _selectedSubject == null
+                    ? null
+                    : () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ReusableQRScanner(
+                              endpoint:
+                                  '/api/v2/subject/verifyqrcodeInstructor',
+                              title: 'Instructor QR Scanner',
+                            ),
+                          ),
+                        );
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green[700],
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: const Text('Scan QR Code'),
               ),
 
               // Show active QR status when QR is generated but not displayed

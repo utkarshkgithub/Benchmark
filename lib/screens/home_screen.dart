@@ -44,11 +44,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
       // Get current position
       Position position = await Geolocator.getCurrentPosition(
-      locationSettings: LocationSettings(
-        accuracy: LocationAccuracy.high,
-        timeLimit: Duration(seconds: 10), // prevents hanging forever
-      ),
-    );
+        locationSettings: LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10), // prevents hanging forever
+        ),
+      );
 
       // Calculate distance to target coordinates
       double distanceInMeters = Geolocator.distanceBetween(
@@ -79,9 +79,9 @@ class _HomeScreenState extends State<HomeScreen> {
       // Get the distance for the message (even if not within range)
       Position position = await Geolocator.getCurrentPosition(
         locationSettings: LocationSettings(
-        accuracy: LocationAccuracy.high,
-        timeLimit: Duration(seconds: 10), // prevents hanging forever
-      ),
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10), // prevents hanging forever
+        ),
       );
       double distanceInMeters = Geolocator.distanceBetween(
         position.latitude,
@@ -327,7 +327,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   //         else ...[
                   //           _buildInfoRow('Current Location', _currentLocation),
                   //           _buildInfoRow(
-                  //             'Target Location',
+                  //             'ion',
                   //             '${targetLatitude.toStringAsFixed(6)}, ${targetLongitude.toStringAsFixed(6)}',
                   //           ),
                   //           _buildInfoRow(
