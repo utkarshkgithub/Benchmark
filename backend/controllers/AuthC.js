@@ -3,16 +3,16 @@ import OTP from "../models/OTP.js";
 import jwt from "jsonwebtoken";
 import otpGenerator from "otp-generator";
 import bcrypt from "bcryptjs";
-import mailSender from '../utils/mailSender.js';
+// import mailSender from '../utils/mailSender.js';
 import dotenv from "dotenv";
 import Student from "../models/Student.js";
 import Instructor from "../models/Instructor.js"
-import { passwordUpdated } from "../mail/templates/passwordUpdate.js";
+// import { passwordUpdated } from "../mail/templates/passwordUpdate.js";
 import Subject from "../models/Subject.js";
 import { normalizeBranchName } from "../utils/branchUtils.js";
 import { studentsMail } from "../mail/templates/data/studentMails.js";
 dotenv.config();
-import ActiveToken from '../models/ActiveToken.js';
+// import ActiveToken from '../models/ActiveToken.js';
 import crypto from 'crypto';
 
 
@@ -335,7 +335,7 @@ export const mobLogin = async (req, res) => {
             email,
             password,
             deviceId = "",
-            // additionalDeviceId = ""
+            additionalDeviceId = ""
         } = req.body;
 
         if (!email || !password) {
@@ -353,7 +353,8 @@ export const mobLogin = async (req, res) => {
             });
         }
 
-        if (
+        if(userDetails.accountType == "Student"){
+            if (
             typeof user.isActiveToken === "undefined" ||
             !user.activeToken ||
             typeof user.activePasswordExpires === "undefined"
@@ -375,6 +376,7 @@ export const mobLogin = async (req, res) => {
             user.activeToken = updatedUser.activeToken;
             user.activePasswordExpires = updatedUser.activePasswordExpires;
         }
+        }
 
         if (!user) {
             return res.status(401).json({
@@ -390,9 +392,10 @@ export const mobLogin = async (req, res) => {
                 message: "Password is incorrect.",
             });
         }
+        if(userDetails.accountType == "Student"){
 
         const currentTime = new Date();
-        const waitDurationMs = 1.25 * 60 * 1000;
+        const waitDurationMs = 1.5 * 60 * 1000;
 
         if (user.isActiveToken === false) {
             const tokenString = crypto.randomBytes(32).toString("hex");
@@ -418,7 +421,8 @@ export const mobLogin = async (req, res) => {
         }
 
         // If isActiveToken is true, check expiration
-        if (user.isActiveToken === true) {
+       
+         if (user.isActiveToken === true) {
             if (user.activeToken && user.activeToken.expiresAt) {
                 const expiresAt = new Date(user.activeToken.expiresAt);
                 if (expiresAt > currentTime) {
@@ -439,6 +443,7 @@ export const mobLogin = async (req, res) => {
             );
         }
 
+       }
         // Proceed with generating new token and completing login
 
         // Fetch additional user details
@@ -458,33 +463,33 @@ export const mobLogin = async (req, res) => {
             const compositeDeviceId = `${user.firstName.toLowerCase()}_${user.lastName.toLowerCase()}_${userDetails.rollNumber}_${deviceId}`;
 
 
-            // const finalDeviceId = `${user.firstName.toLocaleLowerCase()}_${user.lastName.toLocaleLowerCase()}_${deviceId}_${userDetails.rollNumber}_${additionalDeviceId}`
+            const finalDeviceId = `${user.firstName.toLocaleLowerCase()}_${user.lastName.toLocaleLowerCase()}_${deviceId}_${userDetails.rollNumber}_${additionalDeviceId}`
 
 
-            // if (userDetails.deviceId !== compositeDeviceId && userDetails.deviceId !== finalDeviceId) {
-            //     return res.status(401).json({
-            //         success: false,
-            //         message: "Device not matched, please use old device.",
-            //     });
-            // }
-
-
-            // if (userDetails.deviceId == compositeDeviceId) {
-            //     await Student.findByIdAndUpdate(
-            //         {_id:userDetails._id},
-            //         { $set: { deviceId: finalDeviceId } }
-            //     );
-            // }
-
-
-            // remove this condition if apply upper logic
-
-            if (userDetails.deviceId !== compositeDeviceId) {
+            if (userDetails.deviceId !== compositeDeviceId && userDetails.deviceId !== finalDeviceId) {
                 return res.status(401).json({
                     success: false,
                     message: "Device not matched, please use old device.",
                 });
             }
+
+
+            if (userDetails.deviceId == compositeDeviceId) {
+                await Student.findByIdAndUpdate(
+                    {_id:userDetails._id},
+                    { $set: { deviceId: finalDeviceId } }
+                );
+            }
+
+
+            // remove this condition if apply upper logic
+
+            // if (userDetails.deviceId !== compositeDeviceId) {
+            //     return res.status(401).json({
+            //         success: false,
+            //         message: "Device not matched, please use old device.",
+            //     });
+            // }
 
 
         } else if (user.accountType === "Instructor") {
