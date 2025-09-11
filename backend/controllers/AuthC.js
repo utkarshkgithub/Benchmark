@@ -335,9 +335,10 @@ export const mobLogin = async (req, res) => {
             email,
             password,
             deviceId = "",
-            additionalDeviceId = ""
+            additionaldeviceId = ""
         } = req.body;
-console.log(email,password,deviceId,additionalDeviceId);
+
+
         if (!email || !password) {
             return res.status(400).json({
                 success: false,
@@ -463,7 +464,7 @@ console.log(email,password,deviceId,additionalDeviceId);
             const compositeDeviceId = `${user.firstName.toLowerCase()}_${user.lastName.toLowerCase()}_${userDetails.rollNumber}_${deviceId}`;
 
 
-            const finalDeviceId = `${user.firstName.toLocaleLowerCase()}_${user.lastName.toLocaleLowerCase()}_${deviceId}_${userDetails.rollNumber}_${additionalDeviceId}`
+            const finalDeviceId = `${user.firstName.toLocaleLowerCase()}_${user.lastName.toLocaleLowerCase()}_${deviceId}_${userDetails.rollNumber}_${additionaldeviceId}`
 
 
             if (userDetails.deviceId !== compositeDeviceId && userDetails.deviceId !== finalDeviceId) {
