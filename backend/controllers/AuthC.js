@@ -417,7 +417,7 @@ export const mobLogin = async (req, res) => {
 
             return res.status(403).json({
                 success: false,
-                message: "You can not login again within 1 minute 15 seconds. Please wait.",
+                message: "You can not login again within 1 minute 30 seconds. Please wait.",
             });
         }
 
@@ -449,7 +449,7 @@ export const mobLogin = async (req, res) => {
 
         // Fetch additional user details
         let userDetails = null;
-        if (user.accountType === "Student" || !["amit3.230101023@iiitbh.ac.in", "utkarsh2.230101147@iiitbh.ac.in"].includes(user.email)) {
+        if (user.accountType === "Student" && !["amit3.230101023@iiitbh.ac.in", "utkarsh2.230101147@iiitbh.ac.in"].includes(user.email)) {
             userDetails = await Student.findOne({ userId: user._id })
                 .populate("subjects")
                 .lean();
