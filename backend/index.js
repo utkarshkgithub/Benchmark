@@ -89,9 +89,9 @@ app.use(
   })
 )
 
-app.use("/api/v2/auth",AuthRoutes);
-app.use("/api/v2/setting",SettingRoutes);
-app.use("/api/v2/subject",SubjectRoutes);
+app.use("/api/v3/auth",AuthRoutes);
+app.use("/api/v3/setting",SettingRoutes);
+app.use("/api/v3/subject",SubjectRoutes);
 app.get("/", (req, res) => {
   res.send("🚀 API is running...");
 });
