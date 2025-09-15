@@ -8,8 +8,8 @@ function MyProfile() {
   const { user } = useSelector((state) => state.auth);
 
   return (
-    <div className='flex justify-center items-center h-[calc(100vh-65px)] overflow-y-hidden bg-gradient-to-br from-slate-50 to-blue-50'>
-      <div className="flex flex-col gap-8 h-[calc(100vh-150px)] overflow-y-scroll overflow-x-hidden scrollbar-hide">
+    <div className='flex items-center justify-center h-[calc(100vh-65px)] overflow-y-hidden bg-gradient-to-br from-slate-50 to-blue-50'>
+      <div className="flex flex-col gap-8 h-[calc(100vh-150px)] w-11/12 overflow-y-scroll overflow-x-hidden scrollbar-hide">
         <div className="animate-fade-in">
           <h1 className="font-extrabold text-5xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
             My Profile
@@ -34,7 +34,7 @@ function MyProfile() {
           </div>
           
           <div className="space-y-6 ">
-            <div className="grid md:grid-cols-2 grid-cols-1 gap-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl hover:from-blue-100 hover:to-indigo-100 transition-colors duration-300">
+            <div className="grid sm:grid-cols-2 grid-cols-1 gap-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl hover:from-blue-100 hover:to-indigo-100 transition-colors duration-300">
               <div className="space-y-1">
                 <p className="text-gray-500 text-sm font-medium uppercase tracking-wider">First Name</p>
                 <p className="text-gray-800 font-semibold text-lg">{user?.firstName}</p>

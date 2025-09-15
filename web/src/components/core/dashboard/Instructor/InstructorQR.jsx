@@ -35,6 +35,7 @@ export default function InstructorQR() {
     const [viewMode, setViewMode] = useState("initial"); // "initial", "qr", "list", "submitted"
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState("name"); // sorting option
+    const [allSelected, setAllSelected] = useState(false);
 
     useEffect(() => {
         const fetchSubjects = async () => {
@@ -57,6 +58,14 @@ export default function InstructorQR() {
             closeQR();
         }
     }, [remaining, viewMode]);
+
+    // Add this useEffect to update allSelected state when attendance changes
+    useEffect(() => {
+        if (students.length > 0) {
+            const allPresent = students.every(student => attendance[student._id]);
+            setAllSelected(allPresent);
+        }
+    }, [attendance, students]);
 
     const onGenerate = async () => {
         if (!selectedSubject) return;
@@ -136,6 +145,19 @@ export default function InstructorQR() {
         setAttendance((prev) => ({ ...prev, [studentId]: isChecked }));
     };
 
+    // Add this function to handle toggling all students
+    const toggleAllStudents = () => {
+        const newAllSelected = !allSelected;
+        setAllSelected(newAllSelected);
+        
+        const newAttendance = {};
+        students.forEach(student => {
+            newAttendance[student._id] = newAllSelected;
+        });
+        
+        setAttendance(newAttendance);
+    };
+
     const handleSubmitAttendance = async () => {
         setLoading(true);
         setError(null);
@@ -197,6 +219,7 @@ export default function InstructorQR() {
         setRemaining(TWO_MIN);
         setError(null);
         setSuccessMessage(null);
+        setAllSelected(false);
     };
 
     useEffect(() => {
@@ -379,9 +402,9 @@ export default function InstructorQR() {
                 {/* QR View */}
                 {viewMode === "qr" && (
                     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4 animate-fade-in">
-                        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-3xl w-full max-w-md md:max-w-xl lg:max-w-2xl p-8 space-y-6 text-center animate-scale-in">
+                        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-3xl w-full max-w-md md:max-w-xl lg:max-w-2xl space-y-6 text-center animate-scale-in">
                             <div className="relative">
-                                <h3 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                                <h3 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                                     {selectedSubject?.subjectName}
                                 </h3>
                                 <p className="text-lg text-gray-600 font-semibold">
@@ -389,20 +412,20 @@ export default function InstructorQR() {
                                 </p>
                             </div>
 
-                            <div className={`inline-flex items-center px-6 py-3 rounded-2xl border-2 font-bold text-lg ${getTimerColor()} shadow-lg animate-pulse-timer`}>
+                            <div className={`inline-flex items-center px-6 py-1 rounded-2xl border-2 font-bold text-lg ${getTimerColor()} shadow-lg animate-pulse-timer`}>
                                 <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 <span>{timeLabel}</span>
                             </div>
 
-                            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-8 flex justify-center shadow-inner">
+                            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl flex justify-center shadow-inner">
                                 <div className="relative">
                                     <div className="absolute -inset-4 bg-gradient-to-r from-blue-400 to-purple-400 rounded-2xl opacity-20 blur-lg animate-pulse"></div>
-                                    <div className="relative bg-white p-6 rounded-2xl shadow-lg">
+                                    <div className="relative bg-white rounded-2xl shadow-lg">
                                         <QRCodeCanvas 
                                             value={qrData} 
-                                            size={280} 
+                                            size={400} 
                                             style={{ width: "100%", height: "auto" }}
                                             className="animate-fade-in" 
                                         />
@@ -410,10 +433,10 @@ export default function InstructorQR() {
                                 </div>
                             </div>
 
-                            <div className="flex gap-4">
+                            <div className="flex justify-center">
                                 <button
                                     onClick={closeQR}
-                                    className="w-full py-4 rounded-xl border-2 border-blue-500 text-blue-600 bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 font-bold transition-all transform hover:scale-105"
+                                    className="w-fit p-4 rounded-xl border-2 border-blue-500 text-blue-600 bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 font-bold"
                                 >
                                     📋 Close & Review Attendance
                                 </button>
@@ -446,10 +469,34 @@ export default function InstructorQR() {
                                 <p className="text-sm text-red-700 font-semibold">Absent</p>
                             </div>
                             <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 border-2 border-indigo-200 shadow-lg text-center hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                                <div className="w-12 h-12 bg-gradient-to-r from-indigo-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <div className="w-15 h-15 bg-gradient-to-r from-indigo-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-3">
                                     <span className="text-white text-lg font-bold">{attendanceStats.attendanceRate}%</span>
                                 </div>
                                 <p className="text-sm text-indigo-700 font-semibold">Rate</p>
+                            </div>
+                        </div>
+
+                        {/* Toggle All Button */}
+                        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg animate-slide-up">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                <div>
+                                    <h4 className="text-lg font-bold text-gray-800 mb-1">Mark All Students</h4>
+                                    <p className="text-sm text-gray-600">Toggle all students as present or absent</p>
+                                </div>
+                                <div className="flex items-center">
+                                    <span className="mr-3 text-sm font-medium text-gray-700">
+                                        {allSelected ? 'All Present' : 'All Absent'}
+                                    </span>
+                                    <label className="relative inline-flex items-center cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={allSelected}
+                                            onChange={toggleAllStudents}
+                                            className="sr-only peer"
+                                        />
+                                        <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-blue-500 peer-checked:to-purple-500"></div>
+                                    </label>
+                                </div>
                             </div>
                         </div>
 
@@ -628,7 +675,7 @@ export default function InstructorQR() {
                                 onClick={handleViewAttendance}
                                 className="px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
                             >
-                                🏠 Back to Dashboard
+                                Back to Dashboard
                             </button>
                         </div>
                     </div>
