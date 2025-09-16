@@ -15,6 +15,9 @@ const authValidation = {
     email: Joi.string().email().required().messages({
       'string.email': 'Please provide a valid email address',
       'any.required': 'Email is required'
+    }),
+    extra: Joi.string().optional().allow('').messages({
+      'string.base': 'Extra field must be a string'
     })
   }),
   
@@ -54,6 +57,43 @@ const authValidation = {
       'any.required': 'OTP is required',
       'string.length': 'OTP must be exactly 6 digits',
       'string.pattern.base': 'OTP must contain only numbers'
+    }),
+    // Additional fields for Student account
+    rollNumber: Joi.string().optional().allow('').when('accountType', {
+      is: 'Student',
+      then: Joi.string().required().messages({
+        'any.required': 'Roll number is required for student accounts'
+      })
+    }),
+    semester: Joi.string().optional().allow('').when('accountType', {
+      is: 'Student', 
+      then: Joi.string().required().messages({
+        'any.required': 'Semester is required for student accounts'
+      })
+    }),
+    deviceId: Joi.string().optional().allow('').when('accountType', {
+      is: 'Student',
+      then: Joi.string().required().messages({
+        'any.required': 'Device ID is required for student accounts'
+      })
+    }),
+    branch: Joi.string().optional().allow('').when('accountType', {
+      is: 'Student',
+      then: Joi.string().required().messages({
+        'any.required': 'Branch is required for student accounts'
+      })
+    }),
+    subjects: Joi.array().items(Joi.string().hex().length(24)).optional().default([]).messages({
+      'array.base': 'Subjects must be an array',
+      'string.hex': 'Invalid subject ID format',
+      'string.length': 'Invalid subject ID length'
+    }),
+    // Additional field for Instructor account
+    department: Joi.string().optional().allow('').when('accountType', {
+      is: 'Instructor',
+      then: Joi.string().required().messages({
+        'any.required': 'Department is required for instructor accounts'
+      })
     })
   }),
   
@@ -97,18 +137,20 @@ const authValidation = {
   
   // Verify OTP and reset password validation
   verifyOTP: Joi.object({
+    otp: Joi.string().required().length(6).pattern(/^\d+$/).messages({
+      'any.required': 'OTP is required',
+      'string.length': 'OTP must be exactly 6 digits',
+      'string.pattern.base': 'OTP must contain only numbers'
+    }),
     password: Joi.string().required().min(8).max(128).pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/).messages({
       'any.required': 'New password is required',
       'string.min': 'Password must be at least 8 characters long',
       'string.max': 'Password cannot exceed 128 characters',
       'string.pattern.base': 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
     }),
-    confirmPassword: Joi.string().required().valid(Joi.ref('password')).messages({
-      'any.required': 'Please confirm your password',
-      'any.only': 'Passwords do not match'
-    }),
-    token: Joi.string().required().messages({
-      'any.required': 'Reset token is required'
+    email: Joi.string().email().required().lowercase().messages({
+      'string.email': 'Please provide a valid email address',
+      'any.required': 'Email is required'
     })
   })
 };

@@ -22,13 +22,9 @@ const attendanceValidation = {
   
   // QR code verification validation
   verifyQR: Joi.object({
-    token: Joi.string().required().messages({
-      'any.required': 'Attendance token is required'
-    }),
-    location: Joi.object({
-      latitude: Joi.number().min(-90).max(90),
-      longitude: Joi.number().min(-180).max(180)
-    }).optional()
+    qr_data: Joi.string().required().messages({
+      'any.required': 'QR code data is required'
+    })
   }),
   
   // Subject creation validation
@@ -42,6 +38,25 @@ const attendanceValidation = {
       'any.required': 'Subject code is required',
       'string.min': 'Subject code must be at least 2 characters',
       'string.max': 'Subject code cannot exceed 20 characters'
+    }),
+    branches: Joi.array().items(Joi.string().min(1).max(50)).required().min(1).messages({
+      'any.required': 'At least one branch is required',
+      'array.min': 'At least one branch must be selected',
+      'string.min': 'Branch name cannot be empty',
+      'string.max': 'Branch name cannot exceed 50 characters'
+    }),
+    instructor: Joi.string().required().hex().length(24).messages({
+      'any.required': 'Instructor is required',
+      'string.hex': 'Invalid instructor ID format',
+      'string.length': 'Invalid instructor ID length'
+    }),
+    semester: Joi.string().required().min(1).max(10).messages({
+      'any.required': 'Semester is required',
+      'string.min': 'Semester cannot be empty',
+      'string.max': 'Semester cannot exceed 10 characters'
+    }),
+    isMinor: Joi.boolean().optional().default(false).messages({
+      'boolean.base': 'isMinor must be a boolean value'
     })
   }),
   
@@ -53,11 +68,49 @@ const attendanceValidation = {
       'string.length': 'Invalid subject ID length'
     })
   }),
-getAttendanceDetails: Joi.object({
+
+  // Delete subject validation
+  deleteSubject: Joi.object({
+    subjectId: Joi.string().required().hex().length(24).messages({
+      'any.required': 'Subject ID is required',
+      'string.hex': 'Invalid subject ID format', 
+      'string.length': 'Invalid subject ID length'
+    })
+  }),
+
+  // Update attendance validation
+  updateAttendance: Joi.object({
     attendanceId: Joi.string().required().hex().length(24).messages({
-      'any.required': 'attendance ID is required',
+      'any.required': 'Attendance ID is required',
       'string.hex': 'Invalid attendance ID format',
       'string.length': 'Invalid attendance ID length'
+    }),
+    studentId: Joi.string().required().hex().length(24).messages({
+      'any.required': 'Student ID is required',
+      'string.hex': 'Invalid student ID format',
+      'string.length': 'Invalid student ID length'
+    }),
+    action: Joi.string().required().valid('present', 'absent').messages({
+      'any.required': 'Action is required',
+      'any.only': 'Action must be either "present" or "absent"'
+    })
+  }),
+
+  // Get subject students validation
+  getSubjectStudents: Joi.object({
+    subjectId: Joi.string().required().hex().length(24).messages({
+      'any.required': 'Subject ID is required',
+      'string.hex': 'Invalid subject ID format',
+      'string.length': 'Invalid subject ID length'
+    })
+  }),
+
+  // Get attendance details validation
+  getAttendanceDetails: Joi.object({
+    subjectId: Joi.string().required().hex().length(24).messages({
+      'any.required': 'Subject ID is required',
+      'string.hex': 'Invalid subject ID format',
+      'string.length': 'Invalid subject ID length'
     })
   })
 };
@@ -75,7 +128,7 @@ router.post("/create-subject",
 router.delete("/delete-subject", 
   auth, 
   isAdmin, 
-  validateRequest(attendanceValidation.subjectIdParam),
+  validateRequest(attendanceValidation.deleteSubject),
   deleteSubject
 );
 
@@ -90,13 +143,14 @@ router.post("/qrcode",
 router.put("/updateAttendance", 
   auth, 
   isInstructor, 
+  validateRequest(attendanceValidation.updateAttendance),
   updateAttendance
 );
 
 router.post("/getSubjectStudents", 
   auth, 
   isInstructor, 
-  validateRequest(attendanceValidation.subjectIdParam),
+  validateRequest(attendanceValidation.getSubjectStudents),
   getSubjectStudents
 );
 
@@ -107,6 +161,7 @@ router.post("/getAttendanceDetails",
   getAttendanceDetails
 );
 
+// Student routes (medium security - main attack vector)
 // Student routes (medium security - main attack vector)
 router.post("/verifyqrcode", 
   auth, 
