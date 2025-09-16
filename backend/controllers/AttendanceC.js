@@ -80,7 +80,6 @@ export const verifyQrCode = async (req, res) => {
   try {
     const userId = req.user.id;
     const { qr_data } = req.body;
-
     if (!qr_data || !userId) {
       return res.status(400).json({ success: false, message: "Invalid request" });
     }

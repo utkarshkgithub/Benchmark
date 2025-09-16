@@ -107,8 +107,8 @@ const attendanceValidation = {
 
   // Get attendance details validation
   getAttendanceDetails: Joi.object({
-    subjectId: Joi.string().required().hex().length(24).messages({
-      'any.required': 'Subject ID is required',
+    attendanceId: Joi.string().required().hex().length(24).messages({
+      'any.required': 'attendance ID is required',
       'string.hex': 'Invalid subject ID format',
       'string.length': 'Invalid subject ID length'
     })
