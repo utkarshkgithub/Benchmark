@@ -71,8 +71,20 @@ const authValidation = {
   
   // Mobile login validation
   mobLogin: Joi.object({
-    email: Joi.string().email().required().lowercase(),
-    password: Joi.string().required().min(1)
+    email: Joi.string().email().required().lowercase().messages({
+      'string.email': 'Please provide a valid email address',
+      'any.required': 'Email is required'
+    }),
+    password: Joi.string().required().min(1).messages({
+      'any.required': 'Password is required',
+      'string.min': 'Password cannot be empty'
+    }),
+    deviceId: Joi.string().optional().allow('').max(100).messages({
+      'string.max': 'Device ID cannot exceed 100 characters'
+    }),
+    additionaldeviceId: Joi.string().optional().allow('').max(100).messages({
+      'string.max': 'Additional device ID cannot exceed 100 characters'
+    })
   }),
   
   // Reset password token validation
