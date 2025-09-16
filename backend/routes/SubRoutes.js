@@ -3,15 +3,12 @@ import { createSubject, fetchAttendanceBySubject, fetchInstructor,fetchInstructo
 import { auth, isAdmin, isInstructor, isStudent } from '../middleware/auth.js';
 import { fetchStudentAttendance } from '../controllers/getStudentAttendance.js';
 import { deleteSubject, generateQr, getAttendanceDetails, getInstructorAttendanceSummary, updateAttendance, verifyQrCode } from '../controllers/AttendanceC.js';
-// 🔒 Import validation middleware and schemas
 import { validateRequest, validationSchemas } from '../middleware/security.js';
 import Joi from 'joi';
 
 const router = express.Router()
 
-// 🔒 COMPREHENSIVE validation schemas for attendance system
 const attendanceValidation = {
-  // QR code generation validation
   generateQR: Joi.object({
     subjectId: Joi.string().required().hex().length(24).messages({
       'any.required': 'Subject ID is required',
@@ -20,14 +17,14 @@ const attendanceValidation = {
     })
   }),
   
-  // QR code verification validation
+
   verifyQR: Joi.object({
     qr_data: Joi.string().required().messages({
       'any.required': 'QR code data is required'
     })
   }),
   
-  // Subject creation validation
+
   createSubject: Joi.object({
     subjectName: Joi.string().required().min(2).max(100).trim().messages({
       'any.required': 'Subject name is required',
@@ -60,7 +57,7 @@ const attendanceValidation = {
     })
   }),
   
-  // Subject ID parameter validation
+
   subjectIdParam: Joi.object({
     subjectId: Joi.string().required().hex().length(24).messages({
       'any.required': 'Subject ID is required',
@@ -69,7 +66,7 @@ const attendanceValidation = {
     })
   }),
 
-  // Delete subject validation
+
   deleteSubject: Joi.object({
     subjectId: Joi.string().required().hex().length(24).messages({
       'any.required': 'Subject ID is required',
@@ -78,25 +75,23 @@ const attendanceValidation = {
     })
   }),
 
-  // Update attendance validation
+
   updateAttendance: Joi.object({
-    attendanceId: Joi.string().required().hex().length(24).messages({
-      'any.required': 'Attendance ID is required',
-      'string.hex': 'Invalid attendance ID format',
-      'string.length': 'Invalid attendance ID length'
-    }),
-    studentId: Joi.string().required().hex().length(24).messages({
-      'any.required': 'Student ID is required',
-      'string.hex': 'Invalid student ID format',
-      'string.length': 'Invalid student ID length'
-    }),
-    action: Joi.string().required().valid('present', 'absent').messages({
-      'any.required': 'Action is required',
-      'any.only': 'Action must be either "present" or "absent"'
-    })
+     attendanceId: Joi.string().required().hex().length(24).messages({
+    'any.required': 'Attendance ID is required',
+    'string.hex': 'Invalid attendance ID format',
+    'string.length': 'Invalid attendance ID length'
+  }),
+  updatedStudents: Joi.object().pattern(
+    Joi.string().hex().length(24),
+    Joi.boolean()
+  ).required().messages({
+    'any.required': 'Updated students are required',
+    'object.base': 'Updated students must be an object with student IDs as keys'
+  })
   }),
 
-  // Get subject students validation
+
   getSubjectStudents: Joi.object({
     subjectId: Joi.string().required().hex().length(24).messages({
       'any.required': 'Subject ID is required',
@@ -105,7 +100,7 @@ const attendanceValidation = {
     })
   }),
 
-  // Get attendance details validation
+
   getAttendanceDetails: Joi.object({
     attendanceId: Joi.string().required().hex().length(24).messages({
       'any.required': 'attendance ID is required',
@@ -115,9 +110,7 @@ const attendanceValidation = {
   })
 };
 
-// 🔒 Routes with FULL validation middleware
-
-// Admin routes (highest security)
+// Admin routes
 router.post("/create-subject", 
   auth, 
   isAdmin, 
@@ -132,7 +125,7 @@ router.delete("/delete-subject",
   deleteSubject
 );
 
-// Instructor routes (high security)
+// Instructor routes
 router.post("/qrcode", 
   auth, 
   isInstructor, 
@@ -160,15 +153,15 @@ router.post("/getAttendanceDetails",
   validateRequest(attendanceValidation.getAttendanceDetails),
   getAttendanceDetails
 );
+ 
 
-// Student routes (medium security - main attack vector)
-// Student routes (medium security - main attack vector)
-router.post("/verifyqrcode", 
-  auth, 
-  isStudent, 
-  validateRequest(attendanceValidation.verifyQR),
-  verifyQrCode
-);
+// router.post("/verifyqrcode", 
+//   auth, 
+//   isStudent, 
+//   validateRequest(attendanceValidation.verifyQR),
+//   verifyQrCode
+// );
+router.post("/verifyqrcode", auth, isStudent, verifyQrCode);
 
 router.get("/student", 
   auth, 

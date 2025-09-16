@@ -6,7 +6,6 @@ import { deleteSubject, generateQr, getAttendanceDetails, getInstructorAttendanc
 
 const router = express.Router()
 
-// 🔒 Routes with basic security via middleware (rate limiting applied in main app)
 
 // Admin routes (highest security)
 router.post("/create-subject", auth, isAdmin, createSubject);
@@ -19,7 +18,7 @@ router.post("/getSubjectStudents", auth, isInstructor, getSubjectStudents);
 router.post("/getAttendanceDetails", auth, isInstructor, getAttendanceDetails);
 
 // Student routes (main attack vector - protected by rate limiting)
-router.post("/verifyqrcode", auth, isStudent, verifyQrCode);
+
 router.get("/student", auth, isStudent, fetchStudentAttendance);
 
 // General fetch routes
