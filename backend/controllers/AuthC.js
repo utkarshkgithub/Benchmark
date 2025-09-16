@@ -3,16 +3,13 @@ import OTP from "../models/OTP.js";
 import jwt from "jsonwebtoken";
 import otpGenerator from "otp-generator";
 import bcrypt from "bcryptjs";
-// import mailSender from '../utils/mailSender.js';
 import dotenv from "dotenv";
 import Student from "../models/Student.js";
 import Instructor from "../models/Instructor.js"
-// import { passwordUpdated } from "../mail/templates/passwordUpdate.js";
 import Subject from "../models/Subject.js";
 import { normalizeBranchName } from "../utils/branchUtils.js";
 import { studentsMail } from "../mail/templates/data/studentMails.js";
 dotenv.config();
-// import ActiveToken from '../models/ActiveToken.js';
 import crypto from 'crypto';
 
 
@@ -548,74 +545,6 @@ export const mobLogin = async (req, res) => {
     }
 };
 
-
-
-
-
-//change password
-// export const changePassword = async (req, res) => {
-//     try {
-//         const { password } = req.body;
-//         // validation
-//         const email = userDetails.email;
-//         const user = await User.findOne({ email });
-
-//         if (await bcrypt.compare(currentPassword, user.password)) {
-//             const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-//             // entry create in db
-//             const updatedUserDetails = await User.findOneAndUpdate(
-//                 { email: email },              // find basis of email.
-//                 { password: hashedPassword },  // update password
-//                 { new: true }                  // return new updated password.
-//             );
-
-//             // send mail - Password Updated.
-//             try {
-//                 const emailResponse = await mailSender(
-//                     updatedUserDetails.email,
-//                     `Password Updated Successfully`,
-//                     passwordUpdated(
-//                         updatedUserDetails.email,
-//                         updatedUserDetails.firstName
-//                     )
-//                 );
-//                 // console.log(emailResponse);
-//                 if (emailResponse && emailResponse.response) {
-//                     console.log("Email sent successfully");
-//                 } else {
-//                     console.log("Email sent successfully, but no response received.");
-//                 }
-//                 console.log("Email sent successfully");
-//             } catch (error) {
-//                 // If there's an error sending the email, log the error and return a 500 (Internal Server Error) error
-//                 console.error("Error occurred while sending email:", error);
-//                 return res.status(500).json({
-//                     success: false,
-//                     message: "Error occurred while sending email",
-//                     error: error.message,
-//                 });
-//             }
-
-//             // return res
-//             return res.status(200).json({
-//                 success: true,
-//                 message: "Password changed successfully.",
-//             });
-//         } else {
-//             return res.status(401).json({
-//                 success: false,
-//                 message: "Incorrect current password.",
-//             });
-//         }
-//     } catch (error) {
-//         res.status(500).json({
-//             success: false,
-//             message: "Password can't be changed, issue in password change.",
-//             error: error.message,
-//         });
-//     }
-// };
 
 
 export const duplicateUsers = async (req, res) => {

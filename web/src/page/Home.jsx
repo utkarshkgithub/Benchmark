@@ -12,25 +12,25 @@ function Home() {
             title: "QR Code Scanning",
             description: "Quick and contactless attendance marking",
             icon: "📱",
-            color: "from-blue-500 to-cyan-500"
+            color: "from-gray-100 to-gray-200"
         },
         {
             title: "Real-time Analytics",
             description: "Instant attendance reports and insights",
             icon: "📊",
-            color: "from-purple-500 to-pink-500"
+            color: "from-gray-100 to-gray-200"
         },
         {
             title: "Multi-role Dashboard",
             description: "Tailored interfaces for everyone",
             icon: "👥",
-            color: "from-green-500 to-emerald-500"
+            color: "from-gray-100 to-gray-200"
         },
         {
             title: "Automated Reports",
             description: "Generate detailed attendance reports",
             icon: "📈",
-            color: "from-orange-500 to-red-500"
+            color: "from-gray-100 to-gray-200"
         }
     ]
 
@@ -112,14 +112,13 @@ function Home() {
                         <div className='flex flex-col sm:flex-row gap-4 justify-center mb-12 animate-slide-up' style={{ animationDelay: '0.6s' }}>
                             <Link to="/signup" className="transform hover:scale-105 transition-all duration-300">
                                 <div className="relative group">
-                                    <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-200"></div>
                                     <div className="relative">
-                                        <CTAButton text="🚀 Get Started" active='true' />
+                                        <CTAButton text="Get Started" active='true' />
                                     </div>
                                 </div>
                             </Link>
                             <Link to="/learn" className="transform hover:scale-105 transition-all duration-300">
-                                <CTAButton text="📺 View Demo" active={false}/>
+                                <CTAButton text="View Demo" active={false}/>
                             </Link>
                         </div>
 
@@ -137,10 +136,10 @@ function Home() {
                                         }`}
                                     >
                                         <div className="text-4xl mb-3">{feature.icon}</div>
-                                        <h4 className={`font-bold mb-2 ${currentFeature === index ? 'text-white' : 'text-gray-800'}`}>
+                                        <h4 className={`font-bold mb-2 ${currentFeature === index ? 'text-gray-800' : 'text-gray-800'}`}>
                                             {feature.title}
                                         </h4>
-                                        <p className={`text-sm ${currentFeature === index ? 'text-white/90' : 'text-gray-600'}`}>
+                                        <p className={`text-sm ${currentFeature === index ? 'text-gray-600' : 'text-gray-600'}`}>
                                             {feature.description}
                                         </p>
                                     </div>
@@ -155,7 +154,7 @@ function Home() {
             <section className="relative z-10 py-20 bg-white/50 backdrop-blur-sm">
                 <div className="max-w-6xl mx-auto px-4">
                     <h2 className="text-4xl font-bold text-center mb-12 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-                        Trusted by Thousands
+                        Trusted by Hundreds
                     </h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                         {stats.map((stat, index) => (
@@ -181,7 +180,7 @@ function Home() {
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {[
-                            { step: "01", title: "Scan QR Code", desc: "Students scan the unique QR code displayed by instructors", icon: "📱", color: "from-blue-500 to-cyan-500" },
+                            { step: "01", title: "Scan QR Code", desc: "Students scan the unique QR code displayed by instructors", icon: "🧾", color: "from-blue-500 to-cyan-500" },
                             { step: "02", title: "Mark Attendance", desc: "System automatically records attendance with timestamp", icon: "✅", color: "from-green-500 to-emerald-500" },
                             { step: "03", title: "Generate Reports", desc: "View detailed analytics and generate comprehensive reports", icon: "📊", color: "from-purple-500 to-pink-500" }
                         ].map((item, index) => (
