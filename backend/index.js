@@ -16,12 +16,10 @@ applySecurity(app);
 
 // console.log("🛡️ All security middleware applied - Server protected against spam attacks");
 
-// 🛣️ API Routes
 app.use("/api/v3/auth", AuthRoutes);
 app.use("/api/v3/setting", SettingRoutes);
 app.use("/api/v3/subject", SubjectRoutes);
 
-// 🏠 Health check endpoint
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,

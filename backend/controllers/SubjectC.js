@@ -2,9 +2,9 @@ import Instructor from "../models/Instructor.js";
 import User from "../models/User.js";
 import Subject from "../models/Subject.js";
 import Student from "../models/Student.js";
-import Attendance from "../models/Attendence.js";
 
 import { normalizeBranchNames, VALID_BRANCHES } from "../utils/branchUtils.js";
+import Attendance from "../models/Attendance.js";
 
 export const createSubject = async (req, res) => {
   try {
@@ -180,28 +180,38 @@ export const fetchAttendanceBySubject = async (req, res) => {
     const { subjectId } = req.params;
     const instructorId = req.user.id;
 
+    // ✅ Verify that the subject belongs to the instructor
     const subject = await Subject.findOne({ _id: subjectId, instructor: instructorId });
     if (!subject) {
       return res.status(403).json({ success: false, message: "Unauthorized access to subject" });
     }
 
+    // ✅ Get attendance records and populate presentStudent.student
     const attendance = await Attendance.find({ subject: subjectId })
-      .populate("presentStudent", "firstName lastName email")
+      .populate("presentStudent.student", "firstName lastName email")
       .sort({ createdAt: -1 });
 
+    // ✅ Count total students enrolled in the subject considering applicable branches
     const totalStudents = await Student.countDocuments({
       subjects: subjectId,
       branch: { $in: subject.branches },
     });
 
+    // ✅ Format the attendance data to include populated student details
     const formatted = attendance.map((rec) => ({
       _id: rec._id,
       date: rec.date,
       branch: subject.branches.join(", "),
       totalStudents: totalStudents,
-      presentStudent: rec.presentStudent,
+      presentStudent: rec.presentStudent.map((entry) => ({
+        studentId: entry.student._id,
+        name: `${entry.student.firstName} ${entry.student.lastName}`,
+        email: entry.student.email,
+        markedAt: entry.markedAt,
+      })),
     }));
 
+    // ✅ Return response
     return res.status(200).json({
       success: true,
       attendance: formatted,
@@ -211,6 +221,7 @@ export const fetchAttendanceBySubject = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to fetch attendance records",
+      error: error.message,
     });
   }
 };

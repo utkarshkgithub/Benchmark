@@ -269,20 +269,25 @@ const Instructor = () => {
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {rec.presentStudent.map((stu, stuIndex) => (
                                   <div 
-                                    key={stu._id} 
+                                    key={stu.studentId || stu._id} 
                                     className="flex items-center p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200 hover:from-blue-50 hover:to-purple-50 hover:border-blue-200 transition-all duration-300 transform hover:scale-105 hover:shadow-md animate-fade-in-student"
                                     style={{ animationDelay: `${stuIndex * 0.1}s` }}
                                   >
                                     <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white text-lg font-bold mr-4 shadow-md">
-                                      {stu.firstName.charAt(0).toUpperCase()}
+                                      {(stu.name ? stu.name.charAt(0) : stu.firstName.charAt(0)).toUpperCase()}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                       <p className="text-sm font-semibold text-gray-900 truncate">
-                                        {stu.firstName} {stu.lastName}
+                                        {stu.name || `${stu.firstName} ${stu.lastName}`}
                                       </p>
                                       <p className="text-xs text-gray-600 truncate">
                                         {stu.email}
                                       </p>
+                                      {stu.markedAt && (
+                                        <p className="text-xs text-blue-600 font-medium mt-1">
+                                          Marked: {new Date(stu.markedAt).toLocaleTimeString()}
+                                        </p>
+                                      )}
                                     </div>
                                   </div>
                                 ))}

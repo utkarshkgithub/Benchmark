@@ -1,7 +1,7 @@
 import User from "../models/User.js";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
-import Attendance from "../models/Attendence.js";
+import Attendance from "../models/Attendance.js";
 import Subject from "../models/Subject.js";
 import crypto from "crypto";
 import Token from "../models/Token.js";
@@ -75,23 +75,22 @@ export const generateQr = async (req, res) => {
   }
 };
 
-
 export const verifyQrCode = async (req, res) => {
   try {
     const userId = req.user.id;
     const { qr_data } = req.body;
-    console.log(typeof(qr_data));
+
     if (!qr_data || !userId) {
       return res.status(400).json({ success: false, message: "Invalid request" });
     }
 
-    // 1️⃣ Find token
+    // Find token
     const tokenDoc = await Token.findOne({ shortId: qr_data });
     if (!tokenDoc) {
       return res.status(401).json({ success: false, message: "Invalid or expired QR code" });
     }
 
-    // 2️⃣ Decode JWT
+    // Decode JWT
     let decoded;
     try {
       decoded = jwt.verify(tokenDoc.jwt, process.env.JWT_SECRET);
@@ -101,19 +100,19 @@ export const verifyQrCode = async (req, res) => {
 
     const { attendanceId } = decoded;
 
-    // 3️⃣ Get attendance
+    //  Get attendance
     const attendance = await Attendance.findById(attendanceId).populate("subject");
     if (!attendance) {
       return res.status(404).json({ success: false, message: "Attendance not found" });
     }
 
-    // 4️⃣ Get subject details + students
+    // Get subject details + students
     const subject = await Subject.findById(attendance.subject._id).populate("students");
     if (!subject) {
       return res.status(404).json({ success: false, message: "Subject not found" });
     }
 
-    // 5️⃣ Check if subject contains this student
+    // Check if student is part of the subject
     const isInSubject = subject.students.some(
       (stu) => stu._id.toString() === userId.toString()
     );
@@ -124,7 +123,7 @@ export const verifyQrCode = async (req, res) => {
       });
     }
 
-    // 6️⃣ Check in Student model (userId + subjects)
+    // Check in Student model (userId + subjects)
     const studentDetails = await Student.findOne({ userId }).populate("subjects");
     if (!studentDetails) {
       return res.status(404).json({ success: false, message: "Student details not found" });
@@ -140,16 +139,22 @@ export const verifyQrCode = async (req, res) => {
       });
     }
 
-    // 7️⃣ Already marked?
-    if (attendance.presentStudent.includes(userId)) {
+    // Check if already marked
+    const alreadyMarked = attendance.presentStudent.some(
+      (entry) => entry.student.toString() === userId.toString()
+    );
+    if (alreadyMarked) {
       return res.status(400).json({
         success: false,
         message: "Already marked present",
       });
     }
 
-    // 8️⃣ Mark attendance
-    attendance.presentStudent.push(userId);
+    // Mark attendance
+    attendance.presentStudent.push({
+      student: userId,
+      markedAt: new Date(),
+    });
     await attendance.save();
 
     return res.status(200).json({
@@ -164,17 +169,16 @@ export const verifyQrCode = async (req, res) => {
       error: error.message,
     });
   }
-};
-
+}
 
 
 export const getAttendanceDetails = async (req, res) => {
   try {
     const { attendanceId } = req.body;
-    // console.log("attendanceId :- ", attendanceId);
 
-    // 1️⃣ Find attendance
-    const attendance = await Attendance.findById(attendanceId);
+    // 1️⃣ Find attendance and populate presentStudent.student
+    const attendance = await Attendance.findById(attendanceId)
+      .populate("presentStudent.student", "firstName lastName email");
     if (!attendance) {
       return res
         .status(404)
@@ -194,24 +198,29 @@ export const getAttendanceDetails = async (req, res) => {
       .populate("userId", "firstName lastName email")
       .lean();
 
-    // 4️⃣ Build present/absent list
-    const presentStudentsSet = new Set(
-      attendance.presentStudent.map((id) => id.toString())
+    // 4️⃣ Create a map of present students with their markedAt times
+    const presentStudentsMap = new Map(
+      attendance.presentStudent
+        .filter(entry => entry.student) // remove null students
+        .map(entry => [entry.student._id.toString(), entry.markedAt])
     );
 
-    const studentStatusList = students.map((student) => ({
-      student: student._id,
-      name: `${student.userId.firstName} ${student.userId.lastName}`,
-      rollNumber: student.rollNumber,
-      branch: student.branch,
-      semester: student.semester,
-      email: student.userId.email,
-      status: presentStudentsSet.has(student.userId._id.toString())
-        ? "Present"
-        : "Absent",
-    }));
+    // 5️⃣ Build student status list with present/absent and markedAt if present
+    const studentStatusList = students.map((student) => {
+      const isPresent = presentStudentsMap.has(student.userId._id.toString());
+      return {
+        student: student._id,
+        name: `${student.userId.firstName} ${student.userId.lastName}`,
+        rollNumber: student.rollNumber,
+        branch: student.branch,
+        semester: student.semester,
+        email: student.userId.email,
+        status: isPresent ? "Present" : "Absent",
+        markedAt: isPresent ? presentStudentsMap.get(student.userId._id.toString()) : null
+      };
+    });
 
-    // 5️⃣ Return response
+    // 6️⃣ Return response
     return res.status(200).json({
       success: true,
       attendance: {
@@ -224,7 +233,7 @@ export const getAttendanceDetails = async (req, res) => {
     console.error("Get attendance error:", error);
     return res
       .status(500)
-      .json({ success: false, message: "Failed to get attendance" });
+      .json({ success: false, message: "Failed to get attendance", error: error.message });
   }
 };
 
@@ -232,7 +241,6 @@ export const getAttendanceDetails = async (req, res) => {
 export const updateAttendance = async (req, res) => {
   try {
     const { attendanceId, updatedStudents } = req.body;
-    // console.log("Received updatedStudents:", updatedStudents);
 
     if (!attendanceId || !updatedStudents) {
       return res.status(400).json({ success: false, message: "Invalid request" });
@@ -255,22 +263,25 @@ export const updateAttendance = async (req, res) => {
 
     // ✅ Find the corresponding Student documents to get their User IDs
     const students = await Student.find({ '_id': { $in: presentStudentIds } });
-    const presentUserIds = students.map(student => student.userId);
+    const presentStudentEntries = students.map(student => ({
+      student: student.userId,
+      markedAt: new Date()
+    }));
 
-    attendance.presentStudent = presentUserIds;
+    // ✅ Update attendance with the new presentStudent array
+    attendance.presentStudent = presentStudentEntries;
     await attendance.save();
 
     return res.status(200).json({
       success: true,
       message: "Attendance updated successfully",
-      presentStudentCount: presentUserIds.length,
+      presentStudentCount: presentStudentEntries.length,
     });
   } catch (error) {
     console.error("Update attendance error:", error);
-    return res.status(500).json({ success: false, message: "Attendance update failed" });
+    return res.status(500).json({ success: false, message: "Attendance update failed", error: error.message });
   }
 };
-
 
 
 export const getInstructorAttendanceSummary = async (req, res) => {
@@ -302,7 +313,10 @@ export const getInstructorAttendanceSummary = async (req, res) => {
 
         // ✅ Count present occurrences for this student
         attendanceRecords.forEach((record) => {
-          if (record.presentStudent.map(id => id.toString()).includes(student.userId._id.toString())) {
+          const isPresent = record.presentStudent.some(
+            (entry) => entry.student.toString() === student.userId._id.toString()
+          );
+          if (isPresent) {
             presentCount++;
           }
         });
@@ -341,9 +355,10 @@ export const getInstructorAttendanceSummary = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching instructor summary:", error);
-    return res.status(500).json({ success: false, message: "Failed to fetch attendance summary" });
+    return res.status(500).json({ success: false, message: "Failed to fetch attendance summary", error: error.message });
   }
 };
+
 
 
 export const deleteSubject = async (req, res) => {

@@ -118,17 +118,33 @@ export default function InstructorQR() {
 
         try {
             const studentRes = await getSubjectStudents(token, selectedSubject._id);
-            setStudents(studentRes?.data?.students || []);
+            const allStudents = studentRes?.data?.students || [];
+            
             const attendanceRes = await getAttendanceDetails(token, currentAttendanceId);
             const attendanceRecord = attendanceRes?.data?.attendance;
 
             if (attendanceRecord) {
+                // Create attendance status map for checkboxes
                 const studentStatus = attendanceRecord.students.reduce((acc, rec) => {
                     acc[rec.student] = rec.status === "Present";
                     return acc;
                 }, {});
+                
+                // Merge attendance details (including markedAt) with student data
+                const studentsWithAttendance = allStudents.map(student => {
+                    const attendanceInfo = attendanceRecord.students.find(att => att.student === student._id);
+                    return {
+                        ...student,
+                        status: attendanceInfo?.status || "Absent",
+                        markedAt: attendanceInfo?.markedAt || null
+                    };
+                });
+                
+                setStudents(studentsWithAttendance);
                 setAttendance(studentStatus);
                 setInitialAttendance(studentStatus);
+            } else {
+                setStudents(allStudents);
             }
 
             setViewMode("list");
@@ -181,14 +197,19 @@ export default function InstructorQR() {
 
     const exportToPDF = () => {
         const doc = new jsPDF();
-        const tableColumn = ["Name", "Roll Number", "Status"];
+        const tableColumn = ["Name", "Roll Number", "Status", "Marked At"];
         const tableRows = [];
 
         sortedStudents.forEach((student) => {
+            const markedAt = student.markedAt 
+                ? new Date(student.markedAt).toLocaleString()
+                : "—";
+            
             const studentData = [
                 `${student.userId.firstName} ${student.userId.lastName}`,
                 student.rollNumber,
                 attendance[student._id] ? "Present" : "Absent",
+                markedAt,
             ];
             tableRows.push(studentData);
         });
@@ -545,6 +566,7 @@ export default function InstructorQR() {
                                                 <th className="p-6 text-left font-bold text-gray-800">Student Name</th>
                                                 <th className="p-6 text-left font-bold text-gray-800">Roll Number</th>
                                                 <th className="p-6 text-center font-bold text-gray-800">Status</th>
+                                                <th className="p-6 text-center font-bold text-gray-800">Marked At</th>
                                                 <th className="p-6 text-center font-bold text-gray-800">Mark Present</th>
                                             </tr>
                                         </thead>
@@ -581,6 +603,20 @@ export default function InstructorQR() {
                                                         >
                                                             {attendance[s._id] ? "Present" : "Absent"}
                                                         </span>
+                                                    </td>
+                                                    <td className="p-6 text-center">
+                                                        {s.markedAt ? (
+                                                            <div className="text-xs">
+                                                                <div className="font-medium text-gray-700">
+                                                                    {new Date(s.markedAt).toLocaleDateString()}
+                                                                </div>
+                                                                <div className="text-gray-500">
+                                                                    {new Date(s.markedAt).toLocaleTimeString()}
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-gray-400 text-xs">—</span>
+                                                        )}
                                                     </td>
                                                     <td className="p-6 text-center">
                                                         <label className="relative inline-flex items-center cursor-pointer">

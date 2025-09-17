@@ -207,6 +207,7 @@ export const getAttendanceDetails = async (token, attendanceId) => {
                 Authorization: `Bearer ${token}`,
             }
         );
+        // console.log("GET_ATTENDANCE_DETAILS_API:-",response)
         if (!response.data.success) {
             throw new Error(response.data.message);
         }
