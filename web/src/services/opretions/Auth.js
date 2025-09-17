@@ -13,7 +13,6 @@ export function sendOtp(email, navigate) {
     try {
       const response = await apiConnector("POST", endpoints.SENDOTP_API, {
         email,
-        checkUserPresent: true,
       })
       // console.log("SENDOTP API RESPONSE............", response)
 

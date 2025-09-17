@@ -12,7 +12,7 @@ export const fetchAllSubjects = async () => {
             subjectEndPoints.FETCH_ALL_SUBJECTS_API,
             null
         );
-        // console.log("fetch subject API RESPONSE............", response);
+        console.log("fetch subject API RESPONSE............", response);
 
         if (!response.data.success) {
             throw new Error(response.data.message);
@@ -51,15 +51,15 @@ export const fetchAllStudents = async () => {
 };
 
 
-export const addSubject = async (formData, token, navigate) => {
+export const addSubject = async (data, token, navigate) => {
     const toastId = toast.loading("Loading...");
     try {
         const response = await apiConnector(
             "POST",
             subjectEndPoints.ADD_SUBJECT_API,
-            formData,
+            data,
             {
-                "Content-Type": "multipart/form-data",
+                "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             }
         );

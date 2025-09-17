@@ -10,6 +10,17 @@ export const createSubject = async (req, res) => {
   try {
     let { subjectName, subjectCode, branches, instructor,semester, isMinor} = req.body;
 
+    // Ensure branches is always an array (handle FormData case)
+    if (typeof branches === 'string') {
+      branches = [branches];
+    } else if (!Array.isArray(branches)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid request data",
+        details: "branches must be an array or string"
+      });
+    }
+
     branches = normalizeBranchNames(branches);
 
     const invalidBranches = branches.filter(

@@ -31,20 +31,17 @@ const AddSubject = () => {
   const onSubmit = async (data) => {
     // console.log("instructor",data.instructor);
     
-    const formData = new FormData();
-    formData.append("subjectName", data.subjectName);
-    formData.append("subjectCode", data.subjectCode);
-    formData.append("instructor", data.instructor);
-    formData.append("semester", data.semester);
-
     // ✅ Ensure branches is always an array
     const branches = Array.isArray(data.branches) ? data.branches : [data.branches];
-    branches.forEach(branch => {
-      formData.append("branches", branch);
-    });
-
-    // Handle isMinor
-    formData.append("isMinor", data.isMinor ? true : false);
+    
+    const formData = {
+      subjectName: data.subjectName,
+      subjectCode: data.subjectCode,
+      instructor: data.instructor,
+      semester: data.semester,
+      branches: branches,
+      isMinor: data.isMinor ? true : false
+    };
 
     try {
       setLoading(true);
