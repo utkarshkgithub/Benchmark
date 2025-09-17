@@ -27,9 +27,13 @@ export const fetchStudentAttendance = async (req, res) => {
       const totalClasses = subjectAttendance.length;
 
       const presentCount = subjectAttendance.filter((record) =>
-        record.presentStudent.some(
-          (entry) => entry.student._id.toString() === userId.toString()
-        )
+        record.presentStudent.some((entry) => {
+          // Handle both old format (direct ObjectId) and new format (object with student field)
+          const studentId = entry.student || entry;
+          return studentId && studentId._id 
+            ? studentId._id.toString() === userId.toString()
+            : studentId.toString() === userId.toString();
+        })
       ).length;
 
       return {

@@ -140,9 +140,11 @@ export const verifyQrCode = async (req, res) => {
     }
 
     // Check if already marked
-    const alreadyMarked = attendance.presentStudent.some(
-      (entry) => entry.student.toString() === userId.toString()
-    );
+    const alreadyMarked = attendance.presentStudent.some((entry) => {
+      // Handle both old format (direct ObjectId) and new format (object with student field)
+      const studentId = entry.student || entry;
+      return studentId && studentId.toString() === userId.toString();
+    });
     if (alreadyMarked) {
       return res.status(400).json({
         success: false,
@@ -202,7 +204,13 @@ export const getAttendanceDetails = async (req, res) => {
     const presentStudentsMap = new Map(
       attendance.presentStudent
         .filter(entry => entry.student) // remove null students
-        .map(entry => [entry.student._id.toString(), entry.markedAt])
+        .map(entry => {
+          // Handle both populated and non-populated student references
+          const studentId = entry.student._id 
+            ? entry.student._id.toString() 
+            : entry.student.toString();
+          return [studentId, entry.markedAt];
+        })
     );
 
     // 5️⃣ Build student status list with present/absent and markedAt if present
@@ -313,9 +321,11 @@ export const getInstructorAttendanceSummary = async (req, res) => {
 
         // ✅ Count present occurrences for this student
         attendanceRecords.forEach((record) => {
-          const isPresent = record.presentStudent.some(
-            (entry) => entry.student.toString() === student.userId._id.toString()
-          );
+          const isPresent = record.presentStudent.some((entry) => {
+            // Handle both old format (direct ObjectId) and new format (object with student field)
+            const studentId = entry.student || entry;
+            return studentId && studentId.toString() === student.userId._id.toString();
+          });
           if (isPresent) {
             presentCount++;
           }
