@@ -29,7 +29,6 @@ export const generateQr = async (req, res) => {
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
     let attendance = await Attendance.findOne({
       subject: subjectDetails._id,
-      instructor: userDetails._id,
       createdAt: { $gte: fiveMinutesAgo }
     });
 
@@ -38,7 +37,6 @@ export const generateQr = async (req, res) => {
       attendance = await Attendance.create({
         date: new Date().toISOString(),
         subject: subjectDetails._id,
-        instructor: userDetails._id,
         presentStudent: []
       });
     }
@@ -107,7 +105,7 @@ export const verifyQrCode = async (req, res) => {
     }
 
     // Get subject details + students
-    const subject = await Subject.findById(attendance.subject._id).populate("students");
+    const subject = await Subject.findById(attendance.subject).populate("students");
     if (!subject) {
       return res.status(404).json({ success: false, message: "Subject not found" });
     }
@@ -129,9 +127,10 @@ export const verifyQrCode = async (req, res) => {
       return res.status(404).json({ success: false, message: "Student details not found" });
     }
 
-    const isEligible = studentDetails.subjects.some(
-      (subj) => subj._id.toString() === subject._id.toString()
-    );
+    const isEligible = studentDetails.subjects.some((subj) => {
+      const subjId = subj._id ? subj._id.toString() : subj.toString();
+      return subjId === subject._id.toString();
+    });
     if (!isEligible) {
       return res.status(403).json({
         success: false,
@@ -211,10 +210,15 @@ export const getAttendanceDetails = async (req, res) => {
             : entry.student.toString();
           return [studentId, entry.markedAt];
         })
-    );
+    );g
 
     // 5️⃣ Build student status list with present/absent and markedAt if present
     const studentStatusList = students.map((student) => {
+      if (!student.userId) {
+        console.warn(`Student ${student._id} has no userId`);
+        return null;
+      }
+      
       const isPresent = presentStudentsMap.has(student.userId._id.toString());
       return {
         student: student._id,
@@ -226,7 +230,7 @@ export const getAttendanceDetails = async (req, res) => {
         status: isPresent ? "Present" : "Absent",
         markedAt: isPresent ? presentStudentsMap.get(student.userId._id.toString()) : null
       };
-    });
+    }).filter(Boolean); // Remove null entries
 
     // 6️⃣ Return response
     return res.status(200).json({
@@ -317,6 +321,11 @@ export const getInstructorAttendanceSummary = async (req, res) => {
       let studentData = [];
 
       for (const student of students) {
+        if (!student.userId) {
+          console.warn(`Student ${student._id} has no userId in instructor summary`);
+          continue;
+        }
+        
         let presentCount = 0;
 
         // ✅ Count present occurrences for this student

@@ -203,12 +203,14 @@ export const fetchAttendanceBySubject = async (req, res) => {
       date: rec.date,
       branch: subject.branches.join(", "),
       totalStudents: totalStudents,
-      presentStudent: rec.presentStudent.map((entry) => ({
-        studentId: entry.student._id,
-        name: `${entry.student.firstName} ${entry.student.lastName}`,
-        email: entry.student.email,
-        markedAt: entry.markedAt,
-      })),
+      presentStudent: rec.presentStudent
+        .filter(entry => entry.student) // Filter out entries without student
+        .map((entry) => ({
+          studentId: entry.student._id,
+          name: `${entry.student.firstName} ${entry.student.lastName}`,
+          email: entry.student.email,
+          markedAt: entry.markedAt,
+        })),
     }));
 
     // ✅ Return response
