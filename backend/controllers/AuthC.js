@@ -335,7 +335,7 @@ export const mobLogin = async (req, res) => {
             additionaldeviceId = ""
         } = req.body;
 
-
+console.log(email,password,deviceId,additionaldeviceId)
         if (!email || !password) {
             return res.status(400).json({
                 success: false,
@@ -390,7 +390,10 @@ export const mobLogin = async (req, res) => {
                 message: "Password is incorrect.",
             });
         }
-        if(user.accountType == "Student" && !["amit3.230101023@iiitbh.ac.in", "utkarsh2.230101147@iiitbh.ac.in"].includes(user.email)){
+        if(user.accountType == "Student" 
+            && 
+            !["amit3.230101023@iiitbh.ac.in", "utkarsh2.230101147@iiitbh.ac.in"].includes(user.email)
+        ){
 
         const currentTime = new Date();
         const waitDurationMs = 1.5 * 60 * 1000;
@@ -446,7 +449,7 @@ export const mobLogin = async (req, res) => {
 
         // Fetch additional user details
         let userDetails = null;
-        if (user.accountType === "Student" && !["amit3.230101023@iiitbh.ac.in", "utkarsh2.230101147@iiitbh.ac.in"].includes(user.email)) {
+        if (user.accountType === "Student") {
             userDetails = await Student.findOne({ userId: user._id })
                 .populate("subjects")
                 .lean();
@@ -458,10 +461,12 @@ export const mobLogin = async (req, res) => {
                 });
             }
 
+
             const compositeDeviceId = `${user.firstName.toLowerCase()}_${user.lastName.toLowerCase()}_${userDetails.rollNumber}_${deviceId}`;
 
-
+// console.log("compositeDeviceId:-",compositeDeviceId)
             const finalDeviceId = `${user.firstName.toLocaleLowerCase()}_${user.lastName.toLocaleLowerCase()}_${deviceId}_${userDetails.rollNumber}_${additionaldeviceId}`
+// console.log("finalDeviceId:-",finalDeviceId)
 
 
             if (userDetails.deviceId !== compositeDeviceId && userDetails.deviceId !== finalDeviceId) {

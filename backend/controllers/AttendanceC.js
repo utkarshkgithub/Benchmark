@@ -210,7 +210,7 @@ export const getAttendanceDetails = async (req, res) => {
             : entry.student.toString();
           return [studentId, entry.markedAt];
         })
-    );g
+    );
 
     // 5️⃣ Build student status list with present/absent and markedAt if present
     const studentStatusList = students.map((student) => {
