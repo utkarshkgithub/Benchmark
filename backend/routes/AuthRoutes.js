@@ -39,11 +39,9 @@ const authValidation = {
       'string.email': 'Please provide a valid email address',
       'any.required': 'Email is required'
     }),
-    password: Joi.string().required().min(6).max(128).pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/).messages({
+    password: Joi.string().required().min(6).messages({
       'any.required': 'Password is required',
-      'string.min': 'Password must be at least 6 characters long',
-      'string.max': 'Password cannot exceed 128 characters',
-      'string.pattern.base': 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+      'string.min': 'Password must be at least 6 characters long'
     }),
     confirmPassword: Joi.string().required().valid(Joi.ref('password')).messages({
       'any.only': 'Passwords do not match'
@@ -141,11 +139,9 @@ const authValidation = {
       'string.length': 'OTP must be exactly 6 digits',
       'string.pattern.base': 'OTP must contain only numbers'
     }),
-    password: Joi.string().required().min(8).max(128).pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/).messages({
+    password: Joi.string().required().min(6).messages({
       'any.required': 'New password is required',
-      'string.min': 'Password must be at least 8 characters long',
-      'string.max': 'Password cannot exceed 128 characters',
-      'string.pattern.base': 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+      'string.min': 'Password must be at least 6 characters long'
     }),
     email: Joi.string().email().required().lowercase().messages({
       'string.email': 'Please provide a valid email address',
