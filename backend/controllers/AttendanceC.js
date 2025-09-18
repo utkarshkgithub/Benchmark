@@ -47,7 +47,7 @@ export const generateQr = async (req, res) => {
       subjectId: subjectDetails._id.toString(),
       attendanceId: attendance._id.toString(),
     };
-    const jwtToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "2m" });
+    const jwtToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
     // shortId generate karo
     const shortId = crypto.randomBytes(4).toString("hex").slice(0, 7);
@@ -55,7 +55,7 @@ export const generateQr = async (req, res) => {
     await Token.create({
       shortId,
       jwt: jwtToken,
-      expireAt: Date.now() + 2 * 60 * 1000, // auto-expire 2 min
+      expireAt: Date.now() + 60 * 60 * 1000, // auto-expire 1 hour
     });
 
     return res.status(200).json({

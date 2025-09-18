@@ -13,7 +13,7 @@ import {
 } from "../../../../services/opretions/Subject";
 import { Link } from "react-router-dom";
 
-const TWO_MIN = 119;
+const ONE_HOUR = 3599; // 1 hour = 3600 seconds, minus 1 for display purposes
 
 export default function InstructorQR() {
     const { token, user } = useSelector((s) => s.auth);
@@ -26,7 +26,7 @@ export default function InstructorQR() {
 
     const [qrData, setQrData] = useState("");
     const [currentAttendanceId, setCurrentAttendanceId] = useState(null);
-    const [remaining, setRemaining] = useState(TWO_MIN);
+    const [remaining, setRemaining] = useState(ONE_HOUR);
     const timerRef = useRef(null);
 
     const [students, setStudents] = useState([]);
@@ -94,7 +94,7 @@ export default function InstructorQR() {
             setQrData(code);
             setCurrentAttendanceId(attendanceId);
             setViewMode("qr");
-            setRemaining(TWO_MIN);
+            setRemaining(ONE_HOUR);
             startCountdown();
         } catch (e) {
             console.error("Generate QR failed:", e);
@@ -237,7 +237,7 @@ export default function InstructorQR() {
         setInitialAttendance({});
         setCurrentAttendanceId(null);
         setSearchTerm("");
-        setRemaining(TWO_MIN);
+        setRemaining(ONE_HOUR);
         setError(null);
         setSuccessMessage(null);
         setAllSelected(false);
@@ -295,8 +295,8 @@ export default function InstructorQR() {
     }, [students, attendance]);
 
     const getTimerColor = () => {
-        if (remaining <= 30) return "text-red-600 border-red-500 bg-gradient-to-r from-red-50 to-pink-50";
-        if (remaining <= 60) return "text-orange-600 border-orange-500 bg-gradient-to-r from-orange-50 to-yellow-50";
+        if (remaining <= 300) return "text-red-600 border-red-500 bg-gradient-to-r from-red-50 to-pink-50"; // Last 5 minutes
+        if (remaining <= 600) return "text-orange-600 border-orange-500 bg-gradient-to-r from-orange-50 to-yellow-50"; // Last 10 minutes
         return "text-green-600 border-green-500 bg-gradient-to-r from-green-50 to-emerald-50";
     };
 

@@ -14,7 +14,7 @@ const tokenSchema = new mongoose.Schema({
   expireAt: {
     type: Date,
     default: Date.now,
-    index: { expires: "2m" }, // auto-delete after 2 minutes
+    index: { expires: "1h" }, // auto-delete after 1 hour
   }
 });
 
