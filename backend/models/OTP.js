@@ -23,7 +23,7 @@ const OTPSchema = new mongoose.Schema({
 });
 
 async function sendVerificationEmail(email, otp, extra) {
-  try {
+    try {
     // console.log("extra",extra)
     if(extra == "Forgot-Password"){
       const mailResponse = await mailSender(
@@ -40,16 +40,21 @@ async function sendVerificationEmail(email, otp, extra) {
    }
   } catch (error) {
     console.log("Error occured while sending emails: ", error);
-   
 
-    throw error;
+    // Don't throw error to prevent blocking the response
+    // Just log it for debugging
   }
 }
 
-
-OTPSchema.post("save", async function (next) {
+OTPSchema.pre("save", async function (next) {
   if(this.isNew){
-    await sendVerificationEmail(this.email,this.otp , this.extra);
+     setImmediate(async () => {
+      try {
+        await sendVerificationEmail(this.email, this.otp, this.extra);
+      } catch (error) {
+        console.log("Background email sending failed:", error);
+      }
+    });
     
   }
   next();
