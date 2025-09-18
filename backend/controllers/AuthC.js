@@ -29,6 +29,8 @@ export const sendOTP = async (req, res) => {
             }
         }
 
+        // Clean up any existing OTPs for this email before generating new one
+        await OTP.deleteMany({ email });
 
         //generate otp
 
@@ -118,11 +120,15 @@ export const signUp = async (req, res) => {
             accountType === "Student" &&
             (!rollNumber || !branch || !semester || !deviceId)
         ) {
+            // Clean up OTP since signup failed due to missing required fields
+            await OTP.deleteMany({ email });
             return res.status(403).json({
                 success: false,
-                message: "Student account requires rollNumber, branch, semester",
+                message: "Student account requires rollNumber, branch, semester, and deviceId",
             });
         } else if (accountType === "Instructor" && !department) {
+            // Clean up OTP since signup failed due to missing required fields
+            await OTP.deleteMany({ email });
             return res.status(403).json({
                 success: false,
                 message: "Instructor account requires department",
@@ -131,6 +137,8 @@ export const signUp = async (req, res) => {
 
         const existingUser = await User.findOne({ email });
         if (existingUser) {
+            // Clean up OTP since user already exists
+            await OTP.deleteMany({ email });
             return res.status(400).json({
                 success: false,
                 message: "User already registered with this email.",
@@ -143,6 +151,8 @@ export const signUp = async (req, res) => {
 
             const deviceDetails = await Student.findOne({ deviceId: compositeDeviceId });
             if (deviceDetails) {
+                // Clean up OTP since device is already assigned
+                await OTP.deleteMany({ email });
                 return res.status(400).json({
                     success: false,
                     message: "Device already assigned to other.",
@@ -150,6 +160,8 @@ export const signUp = async (req, res) => {
             }
             const rollDetails = await Student.findOne({ rollNumber });
             if (rollDetails) {
+                // Clean up OTP since roll number already exists
+                await OTP.deleteMany({ email });
                 return res.status(400).json({
                     success: false,
                     message: "ROLL NUMBER should must be Unique",
@@ -172,6 +184,9 @@ export const signUp = async (req, res) => {
                 message: "Invalid OTP.",
             });
         }
+
+        // Clean up the verified OTP immediately after successful verification
+        await OTP.deleteMany({ email });
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -223,6 +238,8 @@ export const signUp = async (req, res) => {
             }
         } catch (error) {
             await User.findByIdAndDelete(userDetails._id);
+            // Clean up OTP in case of error during user creation
+            await OTP.deleteMany({ email });
             console.error("Error during student/instructor creation:", error);
             return res.status(500).json({
                 success: false,
@@ -238,6 +255,10 @@ export const signUp = async (req, res) => {
         });
     } catch (error) {
         console.error(error);
+        // Clean up any OTPs for this email in case of unexpected error
+        if (req.body.email) {
+            await OTP.deleteMany({ email: req.body.email });
+        }
         return res.status(500).json({
             success: false,
             message: "User could not be registered, please try again.",
