@@ -40,17 +40,22 @@ async function sendVerificationEmail(email, otp, extra) {
    }
   } catch (error) {
     console.log("Error occured while sending emails: ", error);
-   
-
-    throw error;
+    // Don't throw error to prevent blocking the response
+    // Just log it for debugging
   }
 }
 
 
 OTPSchema.pre("save", async function (next) {
   if(this.isNew){
-    await sendVerificationEmail(this.email,this.otp , this.extra);
-    
+    // Send email asynchronously without blocking the response
+    setImmediate(async () => {
+      try {
+        await sendVerificationEmail(this.email, this.otp, this.extra);
+      } catch (error) {
+        console.log("Background email sending failed:", error);
+      }
+    });
   }
   next();
 });

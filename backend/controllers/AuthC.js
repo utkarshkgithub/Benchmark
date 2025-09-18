@@ -15,63 +15,81 @@ import crypto from 'crypto';
 
 //send otp
 export const sendOTP = async (req, res) => {
+    const startTime = Date.now();
+    
     try {
         const { email, extra = "" } = req.body;
 
-        if (extra == "") {
-            const chackUserPreSent = await User.findOne({ email });
+        console.log(`🚀 Starting OTP generation for: ${email}`);
 
-            if (chackUserPreSent) {
-                return res.status(401).json({
-                    success: false,
-                    message: "User already registered",
-                });
-            }
+        // Perform user check and OTP cleanup in parallel for better performance
+        const [existingUser] = await Promise.all([
+            extra === "" ? User.findOne({ email }).lean() : Promise.resolve(null),
+            OTP.deleteMany({ email }) // Clean up existing OTPs
+        ]);
+
+        if (extra === "" && existingUser) {
+            console.log(`⚠️ User already exists: ${email}`);
+            return res.status(401).json({
+                success: false,
+                message: "User already registered",
+            });
         }
 
-        // Clean up any existing OTPs for this email before generating new one
-        await OTP.deleteMany({ email });
+        console.log(`🔄 Generating unique OTP...`);
 
-        //generate otp
-
-        var otp = otpGenerator.generate(6, {
-            upperCaseAlphabets: false,
-            lowerCaseAlphabets: false,
-            specialChars: false,
-        });
-
-        // console.log("OTP generated:-", otp);
-
-        let result = await OTP.findOne({ otp: otp });
-
-        while (result) {
+        // Generate unique OTP more efficiently
+        let otp;
+        let attempts = 0;
+        const maxAttempts = 10;
+        
+        do {
             otp = otpGenerator.generate(6, {
                 upperCaseAlphabets: false,
                 lowerCaseAlphabets: false,
                 specialChars: false,
             });
-
-            result = await OTP.findOne({ otp: otp });
+            attempts++;
+            
+            // Add timestamp to make it more unique
+            if (attempts > 5) {
+                const timestamp = Date.now().toString().slice(-2);
+                otp = otp.slice(0, 4) + timestamp;
+            }
+            
+            const existingOtp = await OTP.findOne({ otp });
+            if (!existingOtp) break;
+            
+        } while (attempts < maxAttempts);
+        
+        if (attempts >= maxAttempts) {
+            // Fallback: use timestamp-based OTP
+            otp = Math.floor(100000 + Math.random() * 900000).toString();
         }
 
+        console.log(`✅ Unique OTP generated after ${attempts} attempts`);
 
         // console.log("Result is Generate OTP Func");
         // console.log("Result", result);
 
         const otpPayload = { email, otp, extra };
 
-
+        console.log(`💾 Saving OTP to database...`);
         const otpBody = await OTP.create(otpPayload);
         // console.log("OTP body:-",otpBody);
 
-        // return response successfully
+        const responseTime = Date.now() - startTime;
+        console.log(`🎯 OTP process completed in ${responseTime}ms for: ${email}`);
 
+        // return response successfully
         res.status(200).json({
             success: true,
             message: "OTP sent Successfully.",
             // otp,
         });
     } catch (error) {
+        const responseTime = Date.now() - startTime;
+        console.log(`❌ OTP generation failed after ${responseTime}ms`);
         console.log("Issues Occure in generate Otp");
         console.error(error.message);
         return res.status(500).json({
