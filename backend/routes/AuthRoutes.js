@@ -158,7 +158,7 @@ const authValidation = {
 
 // OTP routes (high risk for spam)
 router.post("/sendOTP", 
-  validateRequest(authValidation.sendOTP),
+  // validateRequest(authValidation.sendOTP),
   sendOTP
 );
 
