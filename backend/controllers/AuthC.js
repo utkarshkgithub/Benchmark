@@ -187,21 +187,21 @@ export const signUp = async (req, res) => {
             }
         }
 
-        const recentOtp = await OTP.find({ email })
-            .sort({ createdAt: -1 })
-            .limit(1);
+        // const recentOtp = await OTP.find({ email })
+        //     .sort({ createdAt: -1 })
+        //     .limit(1);
 
-        if (recentOtp.length === 0) {
-            return res.status(400).json({
-                success: false,
-                message: "OTP not found.",
-            });
-        } else if (otp !== recentOtp[0].otp) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid OTP.",
-            });
-        }
+        // if (recentOtp.length === 0) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: "OTP not found.",
+        //     });
+        // } else if (otp !== recentOtp[0].otp) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: "Invalid OTP.",
+        //     });
+        // }
 
         // Clean up the verified OTP immediately after successful verification
         await OTP.deleteMany({ email });
