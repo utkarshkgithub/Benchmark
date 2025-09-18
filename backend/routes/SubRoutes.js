@@ -114,14 +114,14 @@ const attendanceValidation = {
 router.post("/create-subject", 
   auth, 
   isAdmin, 
-  validateRequest(attendanceValidation.createSubject),
+  // validateRequest(attendanceValidation.createSubject),
   createSubject
 );
 
 router.delete("/delete-subject", 
   auth, 
   isAdmin, 
-  validateRequest(attendanceValidation.deleteSubject),
+  // validateRequest(attendanceValidation.deleteSubject),
   deleteSubject
 );
 
@@ -129,28 +129,28 @@ router.delete("/delete-subject",
 router.post("/qrcode", 
   auth, 
   isInstructor, 
-  validateRequest(attendanceValidation.generateQR),
+  // validateRequest(attendanceValidation.generateQR),
   generateQr
 );
 
 router.put("/updateAttendance", 
   auth, 
   isInstructor, 
-  validateRequest(attendanceValidation.updateAttendance),
+  // validateRequest(attendanceValidation.updateAttendance),
   updateAttendance
 );
 
 router.post("/getSubjectStudents", 
   auth, 
   isInstructor, 
-  validateRequest(attendanceValidation.getSubjectStudents),
+  // validateRequest(attendanceValidation.getSubjectStudents),
   getSubjectStudents
 );
 
 router.post("/getAttendanceDetails", 
   auth, 
   isInstructor, 
-  validateRequest(attendanceValidation.getAttendanceDetails),
+  // validateRequest(attendanceValidation.getAttendanceDetails),
   getAttendanceDetails
 );
  

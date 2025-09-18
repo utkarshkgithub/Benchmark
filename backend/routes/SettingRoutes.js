@@ -28,7 +28,7 @@ router.put("/updateDisplayPicture",
 router.delete("/delete-student", 
   auth, 
   isAdmin, 
-  validateRequest(settingsValidation.deleteStudent),
+  // validateRequest(settingsValidation.deleteStudent),
   deleteStudent
 );
 
