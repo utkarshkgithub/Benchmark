@@ -40,22 +40,17 @@ async function sendVerificationEmail(email, otp, extra) {
    }
   } catch (error) {
     console.log("Error occured while sending emails: ", error);
-    // Don't throw the error - just log it and continue
-    // This prevents the pre-save hook from failing and blocking OTP creation
-    return { success: false, error: error.message };
+   
+
+    throw error;
   }
 }
 
 
-OTPSchema.pre("save", async function (next) {
+OTPSchema.post("save", async function (next) {
   if(this.isNew){
-    try {
-      await sendVerificationEmail(this.email, this.otp, this.extra);
-    } catch (error) {
-      // Log the error but don't prevent OTP from being saved
-      console.log("Failed to send email during OTP creation:", error.message);
-      // Continue with saving the OTP even if email fails
-    }
+    await sendVerificationEmail(this.email,this.otp , this.extra);
+    
   }
   next();
 });
