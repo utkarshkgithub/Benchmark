@@ -6,6 +6,7 @@ import SettingRoutes from './routes/SettingRoutes.js'
 import SubjectRoutes from "./routes/SubRoutes.js"
 import {connectDB} from './config/dbConnect.js'
 import { applySecurity } from "./middleware/security.js";
+import emailQueue from './utils/emailQueue.js';
 
 const app = express();
 dotenv.config()
@@ -13,6 +14,9 @@ const PORT = process.env.PORT || 5001;
 
 // 🔒 Apply FULL comprehensive security middleware (handles everything)
 applySecurity(app);
+
+// Initialize email queue processing
+emailQueue.startPeriodicProcessing();
 
 // console.log("🛡️ All security middleware applied - Server protected against spam attacks");
 
