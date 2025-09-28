@@ -92,18 +92,18 @@ function Home() {
                             </div>
                             
                             <h1 className='text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight'>
-                                <span className='bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent animate-gradient-x'>
+                                <span className='bg-[#1197a8] bg-clip-text text-transparent animate-gradient-x'>
                                     Modern Attendance
                                 </span>
                                 <br />
-                                <span className='bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent animate-gradient-x' style={{ animationDelay: '0.5s' }}>
+                                <span className='bg-[#1197a8] bg-clip-text text-transparent animate-gradient-x' style={{ animationDelay: '0.5s' }}>
                                     System Revolution
                                 </span>
                             </h1>
                             
-                            <p className='text-xl md:text-2xl text-gray-600 mb-10 max-w-4xl mx-auto leading-relaxed animate-slide-up' style={{ animationDelay: '0.3s' }}>
+                            <p className='text-xl md:text-2xl text-gray-500 mb-10 max-w-4xl mx-auto leading-relaxed animate-slide-up' style={{ animationDelay: '0.3s' }}>
                                 Streamline attendance tracking for students, instructors, and administrators with our 
-                                <span className='font-semibold text-blue-600'> comprehensive digital solution</span>. 
+                                <span className='font-semibold text-gray-500'> comprehensive digital solution</span>. 
                                 Experience the future of education technology.
                             </p>
                         </div>

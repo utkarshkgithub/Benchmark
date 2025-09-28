@@ -13,7 +13,7 @@ import {
 } from "../../../../services/opretions/Subject";
 import { Link } from "react-router-dom";
 
-const ONE_HOUR = 3599; // 1 hour = 3600 seconds, minus 1 for display purposes
+const TWO_MINUTES = 119; // 2 minutes = 120 seconds, minus 1 for display purposes
 
 export default function InstructorQR() {
     const { token, user } = useSelector((s) => s.auth);
@@ -26,7 +26,7 @@ export default function InstructorQR() {
 
     const [qrData, setQrData] = useState("");
     const [currentAttendanceId, setCurrentAttendanceId] = useState(null);
-    const [remaining, setRemaining] = useState(ONE_HOUR);
+    const [remaining, setRemaining] = useState(TWO_MINUTES);
     const timerRef = useRef(null);
 
     const [students, setStudents] = useState([]);
@@ -94,7 +94,7 @@ export default function InstructorQR() {
             setQrData(code);
             setCurrentAttendanceId(attendanceId);
             setViewMode("qr");
-            setRemaining(ONE_HOUR);
+            setRemaining(TWO_MINUTES);
             startCountdown();
         } catch (e) {
             console.error("Generate QR failed:", e);
@@ -237,7 +237,7 @@ export default function InstructorQR() {
         setInitialAttendance({});
         setCurrentAttendanceId(null);
         setSearchTerm("");
-        setRemaining(ONE_HOUR);
+        setRemaining(TWO_MINUTES);
         setError(null);
         setSuccessMessage(null);
         setAllSelected(false);
@@ -295,8 +295,8 @@ export default function InstructorQR() {
     }, [students, attendance]);
 
     const getTimerColor = () => {
-        if (remaining <= 300) return "text-red-600 border-red-500 bg-gradient-to-r from-red-50 to-pink-50"; // Last 5 minutes
-        if (remaining <= 600) return "text-orange-600 border-orange-500 bg-gradient-to-r from-orange-50 to-yellow-50"; // Last 10 minutes
+        if (remaining <= 15) return "text-red-600 border-red-500 bg-gradient-to-r from-red-50 to-pink-50"; // Last 5 minutes
+        if (remaining <= 30) return "text-orange-600 border-orange-500 bg-gradient-to-r from-orange-50 to-yellow-50"; // Last 10 minutes
         return "text-green-600 border-green-500 bg-gradient-to-r from-green-50 to-emerald-50";
     };
 
@@ -423,8 +423,9 @@ export default function InstructorQR() {
                 {/* QR View */}
                 {viewMode === "qr" && (
                     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4 animate-fade-in">
-                        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-3xl w-full max-w-md md:max-w-xl lg:max-w-2xl space-y-6 text-center animate-scale-in">
-                            <div className="relative">
+                        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-3xl w-full max-w-md md:max-w-xl lg:max-w-3xl space-y-6 text-center animate-scale-in">
+                            <div className="flex justify-evenly mt-4">
+                                <div className="relative">
                                 <h3 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                                     {selectedSubject?.subjectName}
                                 </h3>
@@ -439,14 +440,15 @@ export default function InstructorQR() {
                                 </svg>
                                 <span>{timeLabel}</span>
                             </div>
+                            </div>
 
                             <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl flex justify-center shadow-inner">
                                 <div className="relative">
-                                    <div className="absolute -inset-4 bg-gradient-to-r from-blue-400 to-purple-400 rounded-2xl opacity-20 blur-lg animate-pulse"></div>
+                                    <div className="absolute -inset-4  rounded-2xl opacity-20 blur-lg animate-pulse"></div>
                                     <div className="relative bg-white rounded-2xl shadow-lg">
                                         <QRCodeCanvas 
                                             value={qrData} 
-                                            size={400} 
+                                            size={620} 
                                             style={{ width: "100%", height: "auto" }}
                                             className="animate-fade-in" 
                                         />
