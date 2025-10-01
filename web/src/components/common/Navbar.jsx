@@ -5,6 +5,7 @@ import { FaBars, FaTimes } from 'react-icons/fa'
 import { VscSignOut } from "react-icons/vsc"
 import { useSelector, useDispatch } from 'react-redux'
 import { logout } from "../../services/opretions/Auth.js"
+import { NavLink, MobileNavLink } from './NavLink'
 
 function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -95,7 +96,8 @@ function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-8 animate-fade-in-down">
             {!token ? (
-              <div className="flex items-center space-x-4 animate-fade-in-right" style={{ animationDelay: '0.2s' }}>
+              <div className="flex items-center space-x-6 animate-fade-in-right" style={{ animationDelay: '0.2s' }}>
+                <NavLink to="/learn">About</NavLink>
                 <Link to='/login' className="transform hover:scale-105 transition-transform duration-200">
                   <CTAButton text="Login" active={false} />
                 </Link>
@@ -107,81 +109,22 @@ function Navbar() {
               <>
                 {/* Desktop Navigation Links */}
                 <div className="flex items-center space-x-6">
-                  <Link
-                    to="/dashboard/my-profile"
-                    className={`relative px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 transform hover:scale-105 group ${
-                      isActive("/dashboard/my-profile") 
-                        ? "text-white bg-gradient-to-r from-blue-500 to-purple-500 shadow-lg" 
-                        : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-                    }`}
-                  >
-                    Profile
-                    {!isActive("/dashboard/my-profile") && (
-                      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-                    )}
-                  </Link>
+                  <NavLink to="/learn">About</NavLink>
+                  <NavLink to="/dashboard/my-profile">Profile</NavLink>
 
                   {user?.accountType === "Student" && (
-                    <Link
-                      to="/dashboard/student"
-                      className={`relative px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 transform hover:scale-105 group ${
-                        isActive("/dashboard/student") 
-                          ? "text-white bg-gradient-to-r from-green-500 to-teal-500 shadow-lg" 
-                          : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-                      }`}
-                    >
-                      Dashboard
-                      {!isActive("/dashboard/student") && (
-                        <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-                      )}
-                    </Link>
+                    <NavLink to="/dashboard/student">Dashboard</NavLink>
                   )}
 
                   {user?.accountType === "Instructor" && (
                     <>
-                      <Link
-                        to="/dashboard/genrate-qr"
-                        className={`relative px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 transform hover:scale-105 group ${
-                          isActive("/dashboard/genrate-qr") 
-                            ? "text-white bg-gradient-to-r from-orange-500 to-red-500 shadow-lg" 
-                            : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-                        }`}
-                      >
-                        ShowQR
-                        {!isActive("/dashboard/genrate-qr") && (
-                          <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-                        )}
-                      </Link>
-                      <Link
-                        to="/dashboard/instructor"
-                        className={`relative px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 transform hover:scale-105 group ${
-                          isActive("/dashboard/instructor") 
-                            ? "text-white bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg" 
-                            : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-                        }`}
-                      >
-                        Dashboard
-                        {!isActive("/dashboard/instructor") && (
-                          <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-                        )}
-                      </Link>
+                      <NavLink to="/dashboard/genrate-qr">ShowQR</NavLink>
+                      <NavLink to="/dashboard/instructor">Dashboard</NavLink>
                     </>
                   )}
 
                   {user?.accountType === "Admin" && (
-                    <Link
-                      to="/dashboard/admin"
-                      className={`relative px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 transform hover:scale-105 group ${
-                        isActive("/dashboard/admin") 
-                          ? "text-white bg-gradient-to-r from-indigo-500 to-purple-500 shadow-lg" 
-                          : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-                      }`}
-                    >
-                      Dashboard
-                      {!isActive("/dashboard/admin") && (
-                        <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-                      )}
-                    </Link>
+                    <NavLink to="/dashboard/admin">Dashboard</NavLink>
                   )}
                 </div>
 
@@ -306,86 +249,30 @@ function Navbar() {
                     </div>
 
                     <div className="py-2">
-                      <Link
-                        to="/dashboard/my-profile"
-                        onClick={closeMobileMenu}
-                        className={`block px-5 py-3 text-sm font-medium transition-all duration-200 ${
-                          isActive("/dashboard/my-profile") 
-                            ? "text-blue-600 bg-gradient-to-r from-blue-50 to-purple-50 border-l-4 border-blue-500" 
-                            : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
-                        }`}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
-                          <span>Profile</span>
-                        </div>
-                      </Link>
+                      <MobileNavLink to="/learn" onClick={closeMobileMenu}>About</MobileNavLink>
+                      <MobileNavLink to="/dashboard/my-profile" onClick={closeMobileMenu}>Profile</MobileNavLink>
 
                       {user?.accountType === "Student" && (
-                        <Link
-                          to="/dashboard/student"
-                          onClick={closeMobileMenu}
-                          className={`block px-5 py-3 text-sm font-medium transition-all duration-200 ${
-                            isActive("/dashboard/student") 
-                              ? "text-green-600 bg-gradient-to-r from-green-50 to-teal-50 border-l-4 border-green-500" 
-                              : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
-                          }`}
-                        >
-                          <div className="flex items-center space-x-3">
-                            <div className="w-2 h-2 bg-gradient-to-r from-green-400 to-teal-400 rounded-full"></div>
-                            <span>Dashboard</span>
-                          </div>
-                        </Link>
+                        <MobileNavLink to="/dashboard/student" onClick={closeMobileMenu}>
+                          Dashboard
+                        </MobileNavLink>
                       )}
 
                       {user?.accountType === "Instructor" && (
                         <>
-                          <Link
-                            to="/dashboard/genrate-qr"
-                            onClick={closeMobileMenu}
-                            className={`block px-5 py-3 text-sm font-medium transition-all duration-200 ${
-                              isActive("/dashboard/genrate-qr") 
-                                ? "text-orange-600 bg-gradient-to-r from-orange-50 to-red-50 border-l-4 border-orange-500" 
-                                : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
-                            }`}
-                          >
-                            <div className="flex items-center space-x-3">
-                              <div className="w-2 h-2 bg-gradient-to-r from-orange-400 to-red-400 rounded-full"></div>
-                              <span>ShowQR</span>
-                            </div>
-                          </Link>
-                          <Link
-                            to="/dashboard/instructor"
-                            onClick={closeMobileMenu}
-                            className={`block px-5 py-3 text-sm font-medium transition-all duration-200 ${
-                              isActive("/dashboard/instructor") 
-                                ? "text-purple-600 bg-gradient-to-r from-purple-50 to-pink-50 border-l-4 border-purple-500" 
-                                : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
-                            }`}
-                          >
-                            <div className="flex items-center space-x-3">
-                              <div className="w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"></div>
-                              <span>Dashboard</span>
-                            </div>
-                          </Link>
+                          <MobileNavLink to="/dashboard/genrate-qr" onClick={closeMobileMenu}>
+                            ShowQR
+                          </MobileNavLink>
+                          <MobileNavLink to="/dashboard/instructor" onClick={closeMobileMenu}>
+                            Dashboard
+                          </MobileNavLink>
                         </>
                       )}
 
                       {user?.accountType === "Admin" && (
-                        <Link
-                          to="/dashboard/admin"
-                          onClick={closeMobileMenu}
-                          className={`block px-5 py-3 text-sm font-medium transition-all duration-200 ${
-                            isActive("/dashboard/admin") 
-                              ? "text-indigo-600 bg-gradient-to-r from-indigo-50 to-purple-50 border-l-4 border-indigo-500" 
-                              : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
-                          }`}
-                        >
-                          <div className="flex items-center space-x-3">
-                            <div className="w-2 h-2 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full"></div>
-                            <span>Dashboard</span>
-                          </div>
-                        </Link>
+                        <MobileNavLink to="/dashboard/admin" onClick={closeMobileMenu}>
+                          Dashboard
+                        </MobileNavLink>
                       )}
                     </div>
 
