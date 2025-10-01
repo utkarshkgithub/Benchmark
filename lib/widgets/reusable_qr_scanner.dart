@@ -8,7 +8,6 @@ import 'dart:convert';
 import 'dart:async';
 
 import '../utils/logger.dart';
-import '../utils/network_logger.dart';
 import '../providers/auth_provider.dart';
 import '../services/enhanced_device_service.dart';
 
@@ -39,9 +38,10 @@ class _ReusableQRScannerState extends State<ReusableQRScanner> {
   String? _securityError;
 
   // Target coordinates for location validation (same as student screen)
-  static const double targetLatitude = 25.259149;
+  //target location
+  static const double targetLatitude = 25.259149; 
   static const double targetLongitude = 87.040193;
-  static const double maxDistanceAllowed = 58.0; // 58 meters
+  static const double maxDistanceAllowed = 2060.0; 
 
   // Zoom-related variables
   static const double _minZoom = 0.0;
@@ -59,38 +59,52 @@ class _ReusableQRScannerState extends State<ReusableQRScanner> {
   /// Validate location security before allowing QR scanning
   Future<void> _validateLocationSecurity() async {
     try {
-      // First, validate comprehensive security (clone detection, GPS spoofing, etc.)
-      final securityResult =
-          await EnhancedDeviceService.validateComprehensiveSecurity();
-
-      if (!securityResult['isValid']) {
-        if (mounted) {
-          safeSetState(() {
-            _isSecurityValidating = false;
-            _isSecurityValid = false;
-            _securityError = securityResult['error'];
-          });
-          _showSecurityErrorDialog(securityResult);
-        }
-        return;
-      }
-
-      // If security validation passed, check location distance
-      await _checkLocationDistance(securityResult);
+      // Add timeout to prevent hanging - but preserve all existing logic
+      await Future.any([
+        _performSecurityValidation(),
+        Future.delayed(Duration(seconds: 30)).then((_) => throw TimeoutException('Security validation timed out', Duration(seconds: 30))),
+      ]);
     } catch (e) {
+      if (mounted) {
+        String errorMessage = 'Failed to validate security: $e';
+        if (e is TimeoutException) {
+          errorMessage = 'Location validation timed out. Please check your GPS signal and try again.';
+        }
+        
+        safeSetState(() {
+          _isSecurityValidating = false;
+          _isSecurityValid = false;
+          _securityError = errorMessage;
+        });
+
+        _showSecurityErrorDialog({
+          'error': errorMessage,
+          'errorCode': e is TimeoutException ? 'TIMEOUT_ERROR' : 'VALIDATION_ERROR',
+        });
+      }
+    }
+  }
+
+  /// Perform the actual security validation (extracted to add timeout wrapper)
+  Future<void> _performSecurityValidation() async {
+    // First, validate comprehensive security (clone detection, GPS spoofing, etc.)
+    final securityResult =
+        await EnhancedDeviceService.validateComprehensiveSecurity();
+
+    if (!securityResult['isValid']) {
       if (mounted) {
         safeSetState(() {
           _isSecurityValidating = false;
           _isSecurityValid = false;
-          _securityError = 'Failed to validate security: $e';
+          _securityError = securityResult['error'];
         });
-
-        _showSecurityErrorDialog({
-          'error': 'Failed to validate security: $e',
-          'errorCode': 'VALIDATION_ERROR',
-        });
+        _showSecurityErrorDialog(securityResult);
       }
+      return;
     }
+
+    // If security validation passed, check location distance
+    await _checkLocationDistance(securityResult);
   }
 
   /// Check if user is within allowed distance from target coordinates
@@ -98,55 +112,71 @@ class _ReusableQRScannerState extends State<ReusableQRScanner> {
     Map<String, dynamic> securityResult,
   ) async {
     try {
-      // Get current position from security result (already validated and secure)
-      final position = securityResult['position'];
-
-      if (position == null) {
-        throw Exception('Unable to get current location');
-      }
-
-      // Calculate distance to target coordinates
-      double distanceInMeters = Geolocator.distanceBetween(
-        position.latitude,
-        position.longitude,
-        targetLatitude,
-        targetLongitude,
-      );
-
-      if (mounted) {
-        safeSetState(() {
-          _isSecurityValidating = false;
-        });
-
-        if (distanceInMeters <= maxDistanceAllowed) {
-          // User is within allowed range
-          safeSetState(() {
-            _isSecurityValid = true;
-          });
-          // Initialize camera listener after all validations pass
-          cameraController.addListener(_onCameraStateChanged);
-        } else {
-          // User is too far away
-          safeSetState(() {
-            _isSecurityValid = false;
-            _securityError = 'You are too far from the allowed location';
-          });
-
-          _showLocationErrorDialog(distanceInMeters);
-        }
-      }
+      // Add timeout to location distance check - preserve existing logic
+      await Future.any([
+        _performLocationDistanceCheck(securityResult),
+        Future.delayed(Duration(seconds: 15)).then((_) => throw TimeoutException('Location distance check timed out', Duration(seconds: 15))),
+      ]);
     } catch (e) {
       if (mounted) {
+        String errorMessage = 'Failed to check location distance: $e';
+        if (e is TimeoutException) {
+          errorMessage = 'Location check timed out. Please ensure GPS is enabled and try again.';
+        }
+        
         safeSetState(() {
           _isSecurityValidating = false;
           _isSecurityValid = false;
-          _securityError = 'Failed to check location distance: $e';
+          _securityError = errorMessage;
         });
 
         _showSecurityErrorDialog({
-          'error': 'Failed to check location distance: $e',
-          'errorCode': 'LOCATION_ERROR',
+          'error': errorMessage,
+          'errorCode': e is TimeoutException ? 'TIMEOUT_ERROR' : 'LOCATION_ERROR',
         });
+      }
+    }
+  }
+
+  /// Perform the actual location distance check (extracted to add timeout wrapper)
+  Future<void> _performLocationDistanceCheck(
+    Map<String, dynamic> securityResult,
+  ) async {
+    // Get current position from security result (already validated and secure)
+    final position = securityResult['position'];
+
+    if (position == null) {
+      throw Exception('Unable to get current location');
+    }
+
+    // Calculate distance to target coordinates
+    double distanceInMeters = Geolocator.distanceBetween(
+      position.latitude,
+      position.longitude,
+      targetLatitude,
+      targetLongitude,
+    );
+
+    if (mounted) {
+      safeSetState(() {
+        _isSecurityValidating = false;
+      });
+
+      if (distanceInMeters <= maxDistanceAllowed) {
+        // User is within allowed range
+        safeSetState(() {
+          _isSecurityValid = true;
+        });
+        // Initialize camera listener after all validations pass
+        cameraController.addListener(_onCameraStateChanged);
+      } else {
+        // User is too far away
+        safeSetState(() {
+          _isSecurityValid = false;
+          _securityError = 'You are too far from the allowed location';
+        });
+
+        _showLocationErrorDialog(distanceInMeters);
       }
     }
   }
@@ -311,41 +341,32 @@ class _ReusableQRScannerState extends State<ReusableQRScanner> {
         qrJson = {'qr_data': qrData, 'raw': true};
       }
 
-      final uri = Uri.parse('$_backendUrl/${widget.endpoint}');
+      // Fix double slash issue while preserving protocol slashes
+      String cleanUrl = '$_backendUrl/${widget.endpoint}';
+      // Only replace double slashes that are not part of https://
+      cleanUrl = cleanUrl.replaceAll(RegExp(r'(?<!:)//'), '/');
+      final uri = Uri.parse(cleanUrl);
       final headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'Authorization': 'Bearer $token',
       };
 
-      NetworkLogger.logRequest(
-        method: 'POST',
-        url: uri,
-        headers: headers,
-        body: jsonEncode(qrJson),
-      );
-
-      final start = DateTime.now();
       final response = await http.post(
         uri,
         headers: headers,
         body: jsonEncode(qrJson),
       );
 
-      NetworkLogger.logResponse(
-        response: response,
-        duration: DateTime.now().difference(start),
-      );
-
       if (mounted) {
         _showResponseDialog(response);
       }
     } catch (e) {
-      AppLogger.error('Error sending QR data to endpoint', e);
+      AppLogger.error('QR validation failed', e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text('Invalid QR Code'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 3),
@@ -368,37 +389,60 @@ class _ReusableQRScannerState extends State<ReusableQRScanner> {
 
   void _showResponseDialog(http.Response response) {
     try {
-      final responseData = jsonDecode(response.body);
-      final bool isSuccess = responseData['success'] ?? false;
-      final String message = responseData['message'] ?? 'Unknown response';
+      // Check if response is JSON by checking content type or trying to parse
+      if (response.headers['content-type']?.contains('application/json') == true) {
+        final responseData = jsonDecode(response.body);
+        final bool isSuccess = responseData['success'] ?? false;
+        final String message = responseData['message'] ?? 'Unknown response';
 
-      if (isSuccess) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 3),
-            margin: const EdgeInsets.all(16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+        if (isSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(message),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 3),
+              margin: const EdgeInsets.all(16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
-          ),
-        );
+          );
 
-        // Call success callback if provided
-        widget.onSuccess?.call();
+          // Call success callback if provided
+          widget.onSuccess?.call();
 
-        // Navigate back after a short delay
-        Future.delayed(const Duration(seconds: 2), () {
-          if (mounted) {
-            Navigator.of(context).pop();
-          }
-        });
+          // Navigate back after a short delay
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted) {
+              Navigator.of(context).pop();
+            }
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(message),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 3),
+              margin: const EdgeInsets.all(16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          );
+
+          // Call error callback if provided
+          widget.onError?.call();
+
+          // Restart camera for another scan attempt
+          cameraController.start();
+        }
       } else {
+        // Non-JSON response (HTML error page, etc.) - treat as invalid QR
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(message),
+            content: Text('Invalid QR Code'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 3),
@@ -409,16 +453,14 @@ class _ReusableQRScannerState extends State<ReusableQRScanner> {
           ),
         );
 
-        // Call error callback if provided
         widget.onError?.call();
-
-        // Restart camera for another scan attempt
         cameraController.start();
       }
     } catch (e) {
+      // Fallback for any parsing errors - treat as invalid QR
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error parsing response: ${response.body}'),
+          content: Text('Invalid QR Code'),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 3),

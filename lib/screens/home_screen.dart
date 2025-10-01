@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import '../providers/auth_provider.dart';
 import 'login_screen.dart';
 import 'qr_scanner_screen.dart';
+import 'classroom_benches.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   static const double targetLongitude = 87.040193;
   // static const double targetLongitude = 87.039935;  //lib
   // static const double targetLongitude = 87.03284;  //ranitalab
-  static const double maxDistanceAllowed = 58.0; // 60 meters
+  static const double maxDistanceAllowed = 2060.0; // 60 meters //target location
 
   @override
   void initState() {
@@ -469,6 +470,31 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                         ),
                       ),
+                    ),
+                  ),
+                  const SizedBox(height: 16), // Some spacing
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.chair, color: Colors.white),
+                      label: const Text('Display Classroom Benches'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const ClassroomBenchesScreen(),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ],

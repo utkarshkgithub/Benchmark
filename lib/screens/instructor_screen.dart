@@ -323,7 +323,7 @@ class _InstructorPageState extends State<InstructorPage> {
       }
 
       final url =
-          'https://benchmark-official.onrender.com/api/v2/subject/getAttendanceDetails';
+          'https://benchmark-official.onrender.com/subject/getAttendanceDetails';
 
       final response = await http.post(
         Uri.parse(url),
@@ -644,8 +644,7 @@ class _InstructorPageState extends State<InstructorPage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => ReusableQRScanner(
-                              endpoint:
-                                  '/api/v2/subject/verifyqrcodeInstructor',
+                              endpoint: '/subject/verifyqrcodeinstructor',
                               title: 'Instructor QR Scanner',
                             ),
                           ),
