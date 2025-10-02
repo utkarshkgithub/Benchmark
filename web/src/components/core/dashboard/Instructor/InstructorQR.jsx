@@ -12,6 +12,7 @@ import {
     updateAttendance,
 } from "../../../../services/opretions/Subject";
 import { Link } from "react-router-dom";
+import Button from "../../../common/Button";
 
 const TWO_MINUTES = 119; // 2 minutes = 120 seconds, minus 1 for display purposes
 
@@ -398,24 +399,16 @@ export default function InstructorQR() {
                                 </div>
                             </div>
 
-                            <button
+                            <Button
                                 onClick={onGenerate}
-                                disabled={!selectedSubject || loading}
-                                className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl ${
-                                    !selectedSubject || loading
-                                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                        : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
-                                }`}
+                                disabled={!selectedSubject}
+                                loading={loading}
+                                variant="primary"
+                                size="lg"
+                                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl"
                             >
-                                {loading ? (
-                                    <div className="flex items-center justify-center">
-                                        <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                                        Generating QR...
-                                    </div>
-                                ) : (
-                                    "Generate QR Code"
-                                )}
-                            </button>
+                                Generate QR Code
+                            </Button>
                         </div>
                     </div>
                 )}

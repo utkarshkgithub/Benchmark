@@ -4,13 +4,16 @@ import { FaGraduationCap } from 'react-icons/fa';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../services/opretions/Auth';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import Button from '../components/common/Button';
 
 const SignIn = () => {
   // State to manage password visibility
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const { loading } = useSelector((state) => state.auth)
+  
   // Initialize react-hook-form
   const {
     register,
@@ -75,19 +78,27 @@ const SignIn = () => {
 
             {/* Forgot Password Link */}
             <div className="text-right">
-              <button type='button' onClick={handleForgotPassword} className="text-sm font-medium text-teal-600 hover:underline">
+              <Button 
+                type='button' 
+                onClick={handleForgotPassword} 
+                variant="outline" 
+                size="sm"
+                className="text-sm font-medium text-teal-600 hover:underline border-none bg-transparent p-0 hover:bg-transparent hover:scale-100"
+              >
                 Forgot password?
-              </button>
+              </Button>
             </div>
 
             {/* Submit Button */}
             <div>
-              <button
+              <Button
                 type="submit"
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-150"
+                variant="primary"
+                size="lg"
+                className="w-full bg-teal-600 hover:bg-teal-700 focus:ring-teal-500"
               >
                 Sign In
-              </button>
+              </Button>
             </div>
           </form>
 

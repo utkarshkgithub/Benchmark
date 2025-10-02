@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -8,10 +8,12 @@ import toast from 'react-hot-toast';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { setSignupData } from '../Slices/authSlice.js';
 import { sendOtp } from '../services/opretions/Auth.js';
+import Button from '../components/common/Button.jsx';
 
 const Signup = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { loading } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
     accountType: "Instructor",
@@ -160,19 +162,26 @@ const Signup = () => {
               </select>
             </div>  */}
 
-            <button
+            <Button
               type="submit"
-              className="w-full py-3 px-4 rounded-md text-lg font-medium text-white bg-teal-600 hover:bg-teal-700"
+              variant="primary"
+              size="lg"
+              className="w-full bg-teal-600 hover:bg-teal-700"
             >
               Create Account
-            </button>
+            </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-600">
             Already have an account?{" "}
-            <button onClick={() => navigate("/login")} className="text-teal-600 hover:text-teal-500">
+            <Button 
+              onClick={() => navigate("/login")} 
+              variant="outline"
+              size="sm"
+              className="text-teal-600 hover:text-teal-500 border-none bg-transparent p-0 hover:bg-transparent hover:scale-100"
+            >
               Sign in here
-            </button>
+            </Button>
           </p>
         </div>
       </div>
