@@ -35,7 +35,7 @@ export function applySecurity(app) {
     cors({
       origin: function (origin, callback) {
         const allowedOrigins = [
-          "https://benchmarkofficial.vercel.app",
+          "https://iiitbh-benchmark.vercel.app",
           "http://localhost:5173",
         ];
         
