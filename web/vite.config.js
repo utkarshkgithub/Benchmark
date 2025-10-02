@@ -12,6 +12,12 @@ export default defineConfig({
   ],
   server: {
     historyApiFallback: true, // 👈 this makes dev server handle SPA routing
+    headers: {
+      'X-Frame-Options': 'DENY',
+      'X-Content-Type-Options': 'nosniff',
+      'X-XSS-Protection': '1; mode=block',
+      'Referrer-Policy': 'strict-origin-when-cross-origin'
+    }
   },
   build: {
     rollupOptions: {
@@ -35,5 +41,7 @@ export default defineConfig({
       }
     },
     chunkSizeWarningLimit: 1000, // Increase limit to 1000kb to reduce warnings
+    // Security: Minify for production
+    minify: true
   }
 })

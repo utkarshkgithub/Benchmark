@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+Allow: /learn
+Allow: /login
+Allow: /signup
+Allow: /contact
+
+# Block access to sensitive areas
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /verify-email
+Disallow: /forgot-password
+Disallow: /update-password
+
+# Sitemap location
+Sitemap: https://benchmarkofficial.vercel.app/sitemap.xml
+
+# Crawl delay to prevent aggressive crawling
+Crawl-delay: 1

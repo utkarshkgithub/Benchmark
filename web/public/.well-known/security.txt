@@ -1,0 +1,11 @@
+Contact: mailto:amit3.230101023@iiitbh.ac.in
+Contact: mailto:utkarsh2.230101147@iiitbh.ac.in
+Expires: 2025-12-31T23:59:59.000Z
+Preferred-Languages: en
+Canonical: https://benchmarkofficial.vercel.app/.well-known/security.txt
+Policy: https://benchmarkofficial.vercel.app/security-policy
+Acknowledgments: https://benchmarkofficial.vercel.app/security-acknowledgments
+
+# Security Policy
+# This application implements secure attendance management for educational institutions
+# We take security seriously and welcome responsible disclosure of vulnerabilities
