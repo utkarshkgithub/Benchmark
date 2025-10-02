@@ -217,6 +217,7 @@ function Navbar() {
               <div className="absolute right-4 top-16 w-72 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 py-3 z-50 animate-mobile-menu-in">
                 {!token ? (
                   <div className="px-5 py-4 space-y-4">
+                    <MobileNavLink to="/learn" onClick={closeMobileMenu}>About</MobileNavLink>
                     <Link to='/login' onClick={closeMobileMenu} className="block transform hover:scale-105 transition-transform duration-200">
                       <CTAButton text="Login" active={false} />
                     </Link>
