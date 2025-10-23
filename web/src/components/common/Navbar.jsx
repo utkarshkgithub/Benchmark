@@ -6,6 +6,7 @@ import { VscSignOut } from "react-icons/vsc"
 import { useSelector, useDispatch } from 'react-redux'
 import { logout } from "../../services/opretions/Auth.js"
 import { NavLink, MobileNavLink } from './NavLink'
+import ThemeToggle from './ThemeToggle'
 
 function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -97,6 +98,7 @@ function Navbar() {
           <div className="hidden lg:flex items-center space-x-8 animate-fade-in-down">
             {!token ? (
               <div className="flex items-center space-x-6 animate-fade-in-right" style={{ animationDelay: '0.2s' }}>
+                <ThemeToggle />
                 <NavLink to="/learn">About</NavLink>
                 <Link to='/login' className="transform hover:scale-105 transition-transform duration-200">
                   <CTAButton text="Login" active={false} />
@@ -109,6 +111,7 @@ function Navbar() {
               <>
                 {/* Desktop Navigation Links */}
                 <div className="flex items-center space-x-6">
+                  <ThemeToggle />
                   <NavLink to="/learn">About</NavLink>
                   <NavLink to="/dashboard/my-profile">Profile</NavLink>
 
@@ -183,6 +186,7 @@ function Navbar() {
           <div className="lg:hidden animate-fade-in-right" ref={mobileMenuRef}>
             {token ? (
               <div className="flex items-center space-x-4">
+                <ThemeToggle />
                 <div className="relative">
                   <img
                     src={user?.image}
@@ -202,15 +206,18 @@ function Navbar() {
                 </button>
               </div>
             ) : (
-              <button
-                onClick={toggleMobileMenu}
-                className="inline-flex items-center justify-center p-2 rounded-lg text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none transform hover:scale-105 transition-all duration-200"
-              >
-                <div className="relative w-6 h-6">
-                  <FaBars className={`absolute inset-0 h-5 w-5 transition-all duration-300 transform ${isMobileMenuOpen ? 'opacity-0 rotate-180' : 'opacity-100 rotate-0'}`} />
-                  <FaTimes className={`absolute inset-0 h-5 w-5 transition-all duration-300 transform ${isMobileMenuOpen ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-180'}`} />
-                </div>
-              </button>
+              <div className="flex items-center space-x-4">
+                <ThemeToggle />
+                <button
+                  onClick={toggleMobileMenu}
+                  className="inline-flex items-center justify-center p-2 rounded-lg text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none transform hover:scale-105 transition-all duration-200"
+                >
+                  <div className="relative w-6 h-6">
+                    <FaBars className={`absolute inset-0 h-5 w-5 transition-all duration-300 transform ${isMobileMenuOpen ? 'opacity-0 rotate-180' : 'opacity-100 rotate-0'}`} />
+                    <FaTimes className={`absolute inset-0 h-5 w-5 transition-all duration-300 transform ${isMobileMenuOpen ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-180'}`} />
+                  </div>
+                </button>
+              </div>
             )}
 
             {isMobileMenuOpen && (

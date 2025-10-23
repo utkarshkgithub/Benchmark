@@ -92,7 +92,7 @@ export function applySecurity(app) {
         styleSrc: ["'self'", "'unsafe-inline'"], // CSS ke liye
         scriptSrc: ["'self'"], // JavaScript ke liye
         imgSrc: ["'self'", "data:", "https:"], // Images ke liye
-        connectSrc: ["'self'"], // AJAX calls ke liye
+        connectSrc: ["'self'", "http:", "https:"], // AJAX calls ke liye (allowing both HTTP and HTTPS for development)
       },
     },
     // Hide X-Powered-By header (attackers ko framework nahi pata chalega)

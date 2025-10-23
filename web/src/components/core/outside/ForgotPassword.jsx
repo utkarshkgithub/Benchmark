@@ -37,13 +37,13 @@ function ForgotPassword() {
         <div className="text-center text-lg font-semibold">Loading...</div>
       ) : !emailSent ? (
         <div className="px-4 rounded flex flex-col gap-[12px] shadow-md w-full max-w-md bg-white">
-          <h1 className="text-2xl text-black font-bold">Reset Your Password</h1>
-          <p className="text-black font-normal text-[18px] leading-[26px]">
+          <h1 className="text-2xl text-black dark:text-white font-bold">Reset Your Password</h1>
+          <p className="text-black dark:text-white font-normal text-[18px] leading-[26px]">
             Have no fear. We’ll email you instructions to reset your password.
           </p>
           <form onSubmit={handleOnSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-black ">
+              <label htmlFor="email" className="block text-sm font-medium text-black dark:text-white ">
                 Email Address
               </label>
               <input
@@ -53,7 +53,7 @@ function ForgotPassword() {
                 placeholder="myemailaddress@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full px-4 py-2 text-black border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-md"
+                className="mt-1 block w-full px-4 py-2 text-black dark:text-white border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-md"
               />
             </div>
             <button
@@ -70,13 +70,13 @@ function ForgotPassword() {
         </div>
       ) : (
         <div className="px-4 py-6 rounded shadow-md w-full max-w-md flex flex-col gap-4 bg-white">
-          <h1 className="text-2xl text-black font-bold">Enter OTP</h1>
-          <p className="text-black text-[16px]">
+          <h1 className="text-2xl text-black dark:text-white font-bold">Enter OTP</h1>
+          <p className="text-black dark:text-white text-[16px]">
             Enter the OTP sent to your email and set a new password.
           </p>
           <form onSubmit={handlePasswordReset} className="space-y-4">
             <div>
-              <label htmlFor="otp" className="block text-sm font-medium text-black">
+              <label htmlFor="otp" className="block text-sm font-medium text-black dark:text-white">
                 OTP
               </label>
               <input
@@ -86,11 +86,11 @@ function ForgotPassword() {
                 placeholder="Enter OTP"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
-                className="mt-1 block w-full px-4 py-2 text-black border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-md"
+                className="mt-1 block w-full px-4 py-2 text-black dark:text-white border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-md"
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-black">
+              <label htmlFor="password" className="block text-sm font-medium text-black dark:text-white">
                 New Password
               </label>
               <input
@@ -100,11 +100,11 @@ function ForgotPassword() {
                 placeholder="Enter new password"
                 value={password}
                 onChange={(e) => setpassword(e.target.value)}
-                className="mt-1 block w-full px-4 py-2 text-black border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-md"
+                className="mt-1 block w-full px-4 py-2 text-black dark:text-white border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-md"
               />
             </div>
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-black">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-black dark:text-white">
                 Confirm Password
               </label>
               <input
@@ -114,7 +114,7 @@ function ForgotPassword() {
                 placeholder="Confirm new password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-1 block w-full px-4 py-2 text-black border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-md"
+                className="mt-1 block w-full px-4 py-2 text-black dark:text-white border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-md"
               />
             </div>
             <button

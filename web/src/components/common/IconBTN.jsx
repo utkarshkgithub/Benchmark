@@ -27,7 +27,7 @@ function IconBTN(
     className={`${
       isDisabled
         ? "bg-gray-300 text-gray-500 cursor-not-allowed opacity-50"
-        : `text-black ${active ? "bg-yellow-500" : "bg-pure-greys-200"}`
+        : `text-black dark:text-white ${active ? "bg-yellow-500" : "bg-pure-greys-200"}`
     } ${customClasses} py-2 font-medium text-xl px-4 rounded-lg transition-all duration-300 relative ${
       !isDisabled ? "hover:scale-105 transform" : ""
     }`}

@@ -1,7 +1,7 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
 
-function CTAButton({ text, active, onClick, disabled = false, loading = false, type = "button" }) {
+function CTAButton({ children, text, active, onClick, disabled = false, loading = false, type = "button" }) {
   const { loading: globalLoading } = useSelector((state) => state.auth)
   const { loading: profileLoading } = useSelector((state) => state.profile)
   
@@ -18,7 +18,7 @@ function CTAButton({ text, active, onClick, disabled = false, loading = false, t
           ? "bg-gray-300 text-gray-500 cursor-not-allowed opacity-50"
           : active
           ? "text-white bg-[#1197a8] hover:bg-[#0faabe] transform hover:scale-105"
-          : "bg-transparent text-black hover:text-white hover:bg-blue-400 border-[1px] border-black/20 transform hover:scale-105"
+          : "bg-transparent text-black dark:text-white hover:text-white hover:bg-blue-400 border-[1px] border-black/20 transform hover:scale-105"
       }`}
     >
       {(loading || globalLoading || profileLoading) ? (
@@ -27,7 +27,10 @@ function CTAButton({ text, active, onClick, disabled = false, loading = false, t
           <span>Loading...</span>
         </div>
       ) : (
-        text
+        <p className='flex justify-center items-center gap-2'>
+          {children} {text}
+        </p>
+        
       )}
     </button>
   )

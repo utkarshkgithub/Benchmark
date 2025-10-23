@@ -5,9 +5,10 @@ import { Route, Routes } from 'react-router-dom'
 import OpenRoute from './components/common/OpenRoute.jsx'
 import ProtectedRoute from './components/common/ProtectedRoute.jsx'
 import { ACCOUNT_TYPE } from './utils/constants.js'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
+import { initializeTheme } from './Slices/themeSlice.js'
 import Error from './components/common/Error.jsx'
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 
 // Lazy load heavy components
 const About = lazy(() => import('./page/About.jsx'))
@@ -37,9 +38,30 @@ const LoadingSpinner = () => (
 function App() {
 
 const { user } = useSelector((state) => state.auth);
-// /
+const themeState = useSelector((state) => state.theme);
+const darkMode = themeState?.darkMode || false;
+const dispatch = useDispatch();
+
+// Initialize theme on app load
+useEffect(() => {
+  dispatch(initializeTheme());
+}, [dispatch]);
+
+// Apply dark class to html element
+useEffect(() => {
+  if (darkMode) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+}, [darkMode]);
+
   return (
-    <div >
+    <div className="bg-white dark:bg-gray-900 min-h-screen transition-colors duration-300">
+      {/* Debug indicator - remove this later */}
+      <div className="fixed top-0 right-0 z-50 bg-red-500 text-white p-2 text-xs">
+        Theme: {darkMode ? 'Dark' : 'Light'}
+      </div>
       <Navbar />
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
