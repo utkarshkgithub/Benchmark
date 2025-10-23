@@ -156,7 +156,7 @@ function Navbar() {
                         className="h-10 w-10 rounded-full object-cover border-2 border-transparent group-hover:border-blue-400 transition-all duration-300 transform group-hover:scale-110"
                       />
                       <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full border-2 border-white shadow-sm"></div>
+                  
                     </div>
                   </button>
 
@@ -205,7 +205,6 @@ function Navbar() {
                     alt={`${user?.firstName}`}
                     className="h-10 w-10 rounded-full object-cover border-2 border-gray-300"
                   />
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full border-2 border-white dark:border-gray-900 shadow-sm"></div>
                 </div>
                 <button
                   onClick={toggleMobileMenu}
@@ -239,7 +238,13 @@ function Navbar() {
             )}
 
             {isMobileMenuOpen && (
-              <div className="absolute right-4 top-16 w-72 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-gray-700/20 py-3 z-50 animate-mobile-menu-in">
+              <div 
+                className="absolute right-4 top-16 w-72 backdrop-blur-xl rounded-2xl shadow-2xl border py-3 z-50 animate-mobile-menu-in"
+                style={{
+                  backgroundColor: darkMode ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                  borderColor: darkMode ? 'rgba(75, 85, 99, 0.2)' : 'rgba(255, 255, 255, 0.2)'
+                }}
+              >
                 {!token ? (
                   <div className="px-5 py-4 space-y-4">
                     <MobileNavLink to="/learn" onClick={closeMobileMenu}>About</MobileNavLink>
@@ -252,22 +257,46 @@ function Navbar() {
                   </div>
                 ) : (
                   <div>
-                    <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+                    <div 
+                      className="px-5 py-4 border-b"
+                      style={{
+                        borderColor: darkMode ? 'rgba(75, 85, 99, 0.5)' : 'rgba(229, 231, 235, 0.5)'
+                      }}
+                    >
                       <div className="flex items-center space-x-4">
                         <div className="relative">
                           <img
                             src={user?.image}
                             alt={`${user?.firstName}`}
-                            className="h-14 w-14 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600"
+                            className="h-14 w-14 rounded-full object-cover border-2"
+                            style={{
+                              borderColor: darkMode ? 'rgba(75, 85, 99, 0.6)' : 'rgba(209, 213, 219, 0.6)'
+                            }}
                           />
-                          <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full border-2 border-white dark:border-gray-900 shadow-sm"></div>
+                          
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-base font-bold text-gray-900 dark:text-white truncate">
+                          <p 
+                            className="text-base font-bold truncate"
+                            style={{ color: darkMode ? '#ffffff' : '#111827' }}
+                          >
                             {user?.firstName} {user?.lastName}
                           </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{user?.email}</p>
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 text-blue-800 dark:text-blue-200 mt-2">
+                          <p 
+                            className="text-sm truncate"
+                            style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}
+                          >
+                            {user?.email}
+                          </p>
+                          <span 
+                            className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium mt-2"
+                            style={{
+                              background: darkMode 
+                                ? 'linear-gradient(to right, rgb(30, 58, 138), rgb(76, 29, 149))' 
+                                : 'linear-gradient(to right, rgb(219, 234, 254), rgb(243, 232, 255))',
+                              color: darkMode ? '#93c5fd' : '#1e40af'
+                            }}
+                          >
                             {user?.accountType}
                           </span>
                         </div>
@@ -302,10 +331,27 @@ function Navbar() {
                       )}
                     </div>
 
-                    <div className="border-t border-gray-100 pt-2">
+                    <div 
+                      className="border-t pt-2"
+                      style={{
+                        borderColor: darkMode ? 'rgba(75, 85, 99, 0.5)' : 'rgba(229, 231, 235, 0.5)'
+                      }}
+                    >
                       <button
                         onClick={handleLogout}
-                        className="flex items-center gap-4 w-full px-5 py-3 text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200 group"
+                        className="flex items-center gap-4 w-full px-5 py-3 text-sm font-medium transition-all duration-200 group hover:bg-opacity-10"
+                        style={{
+                          color: '#dc2626', // red-600
+                          backgroundColor: 'transparent'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = darkMode ? 'rgba(220, 38, 38, 0.1)' : 'rgba(254, 242, 242, 1)';
+                          e.target.style.color = '#b91c1c'; // red-700
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = 'transparent';
+                          e.target.style.color = '#dc2626'; // red-600
+                        }}
                       >
                         <VscSignOut className="text-lg group-hover:scale-110 transition-transform duration-200" />
                         <span>Logout</span>
