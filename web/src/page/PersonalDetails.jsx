@@ -9,6 +9,10 @@ function PersonalDetails() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { signupData } = useSelector((state) => state.auth);
+  
+  // Get theme state
+  const themeState = useSelector((state) => state.theme)
+  const darkMode = themeState?.darkMode || false
 
   const [loading, setLoading] = useState(false);
   const [subjects, setSubjects] = useState([]);
@@ -142,12 +146,37 @@ function PersonalDetails() {
   };
 
   return (
-    <div className="min-h-screen mt-20 flex items-center justify-center bg-gray-900 text-white">
+    <div 
+      className="min-h-screen mt-20 flex items-center justify-center bg-gray-900 text-white"
+      style={{
+        backgroundColor: darkMode ? '#111827' : '#f9fafb',
+        color: darkMode ? '#ffffff' : '#111827'
+      }}
+    >
       {loading ? (
-        <div className="text-xl">Loading...</div>
+        <div 
+          className="text-xl"
+          style={{
+            color: darkMode ? '#ffffff' : '#111827'
+          }}
+        >
+          Loading...
+        </div>
       ) : (
-        <div className="w-full max-w-md p-6 bg-gray-800 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold mb-4">Provide Additional Details</h1>
+        <div 
+          className="w-full max-w-md p-6 bg-gray-800 rounded-lg shadow-md"
+          style={{
+            backgroundColor: darkMode ? '#1f2937' : '#ffffff'
+          }}
+        >
+          <h1 
+            className="text-2xl font-bold mb-4"
+            style={{
+              color: darkMode ? '#f9fafb' : '#111827'
+            }}
+          >
+            Provide Additional Details
+          </h1>
 
           {signupData?.accountType === "Student" && (
             <form onSubmit={handleOnSubmit} className="space-y-5">

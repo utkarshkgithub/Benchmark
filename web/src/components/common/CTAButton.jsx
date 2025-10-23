@@ -4,22 +4,43 @@ import { useSelector } from 'react-redux'
 function CTAButton({ children, text, active, onClick, disabled = false, loading = false, type = "button" }) {
   const { loading: globalLoading } = useSelector((state) => state.auth)
   const { loading: profileLoading } = useSelector((state) => state.profile)
+  const themeState = useSelector((state) => state.theme)
+  const darkMode = themeState?.darkMode || false
   
   // Button is disabled if any loading state is true or explicitly disabled
   const isDisabled = disabled || loading || globalLoading || profileLoading
+
+  const getButtonStyles = () => {
+    if (isDisabled) {
+      return {
+        backgroundColor: '#d1d5db',
+        color: '#6b7280',
+        cursor: 'not-allowed',
+        opacity: '0.5'
+      }
+    }
+    
+    if (active) {
+      return {
+        backgroundColor: '#1197a8',
+        color: '#ffffff'
+      }
+    }
+    
+    return {
+      backgroundColor: 'transparent',
+      color: darkMode ? '#ffffff' : '#000000',
+      border: `1px solid ${darkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`
+    }
+  }
 
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={isDisabled}
-      className={`px-4 py-2 rounded font-medium transition-all duration-300 relative ${
-        isDisabled
-          ? "bg-gray-300 text-gray-500 cursor-not-allowed opacity-50"
-          : active
-          ? "text-white bg-[#1197a8] hover:bg-[#0faabe] transform hover:scale-105"
-          : "bg-transparent text-black dark:text-white hover:text-white hover:bg-blue-400 border-[1px] border-black/20 transform hover:scale-105"
-      }`}
+      className="px-4 py-2 rounded font-medium transition-all duration-300 relative transform hover:scale-105"
+      style={getButtonStyles()}
     >
       {(loading || globalLoading || profileLoading) ? (
         <div className="flex items-center gap-2">

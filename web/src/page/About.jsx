@@ -1,8 +1,12 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 
 function About() {
+  // Get theme state
+  const themeState = useSelector((state) => state.theme)
+  const darkMode = themeState?.darkMode || false
   const fadeInUp = {
     initial: { opacity: 0, y: 60 },
     animate: { opacity: 1, y: 0 },
@@ -73,7 +77,14 @@ function About() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
+    <div 
+      className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100"
+      style={{
+        background: darkMode 
+          ? 'linear-gradient(to bottom right, #1f2937, #111827, #0f172a)'
+          : 'linear-gradient(to bottom right, #f9fafb, #ffffff, #f3f4f6)'
+      }}
+    >
       {/* Hero Section */}
       <motion.section 
         className="pt-24 pb-16 px-4 sm:px-6 lg:px-8"
@@ -83,14 +94,24 @@ function About() {
       >
         <div className="max-w-7xl mx-auto text-center">
           <motion.div variants={fadeInUp} className="mb-8">
-            <span className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 rounded-full text-sm font-semibold mb-6">
+            <span 
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 rounded-full text-sm font-semibold mb-6"
+              style={{
+                background: darkMode 
+                  ? 'linear-gradient(to right, #1e40af, #7c3aed)'
+                  : 'linear-gradient(to right, #dbeafe, #e9d5ff)',
+                color: darkMode ? '#e0e7ff' : '#1e40af'
+              }}
+            >
               🏛️ About IIITBH Benchmark
             </span>
           </motion.div>
           
           <motion.h1 
-            variants={fadeInUp}
-            className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-6"
+            className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-green-500 to-indigo-800 bg-clip-text text-transparent mb-6"
+            style={{
+              lineHeight: '1.2'
+            }}
           >
             Transforming Education Through Technology
           </motion.h1>
@@ -98,6 +119,9 @@ function About() {
           <motion.p 
             variants={fadeInUp}
             className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed"
+            style={{
+              color: darkMode ? '#d1d5db' : '#4b5563'
+            }}
           >
             The IIITBH Benchmark project represents a revolutionary cross-platform approach to attendance management, 
             combining innovative QR code technology with real-time analytics to create a seamless 
@@ -110,6 +134,9 @@ function About() {
       {/* Stats Section */}
       <motion.section 
         className="py-16 bg-white/50 backdrop-blur-sm"
+        style={{
+          backgroundColor: darkMode ? 'rgba(31, 41, 55, 0.5)' : 'rgba(255, 255, 255, 0.5)'
+        }}
         initial="initial"
         whileInView="animate"
         viewport={{ once: true }}
@@ -126,10 +153,17 @@ function About() {
                 <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">
                   {stat.icon}
                 </div>
-                <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-                  {stat.number}
+                <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-green-500 to-indigo-800 bg-clip-text text-transparent mb-2">
+                  {stat.value}
                 </div>
-                <div className="text-gray-600 font-medium">{stat.label}</div>
+                <div 
+                  className="text-gray-600 font-medium"
+                  style={{
+                    color: darkMode ? '#d1d5db' : '#4b5563'
+                  }}
+                >
+                  {stat.label}
+                </div>
               </motion.div>
             ))}
           </div>
@@ -146,7 +180,12 @@ function About() {
       >
         <div className="max-w-7xl mx-auto">
           <motion.div variants={fadeInUp} className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 
+              className="text-3xl md:text-4xl font-bold text-gray-900 mb-4"
+              style={{
+                color: darkMode ? '#f9fafb' : '#111827'
+              }}
+            >
               Our Foundation
             </h2>
             <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
@@ -158,12 +197,30 @@ function About() {
                 key={index}
                 variants={fadeInUp}
                 className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-200/50 hover:shadow-xl hover:scale-105 transition-all duration-300 group"
+                style={{
+                  backgroundColor: darkMode ? 'rgba(31, 41, 55, 0.7)' : 'rgba(255, 255, 255, 0.7)',
+                  borderColor: darkMode ? 'rgba(75, 85, 99, 0.5)' : 'rgba(229, 231, 235, 0.5)'
+                }}
               >
                 <div className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-300">
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">{feature.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                <h3 
+                  className="text-xl font-bold text-gray-900 mb-4"
+                  style={{
+                    color: darkMode ? '#f9fafb' : '#111827'
+                  }}
+                >
+                  {feature.title}
+                </h3>
+                <p 
+                  className="text-gray-600 leading-relaxed"
+                  style={{
+                    color: darkMode ? '#d1d5db' : '#4b5563'
+                  }}
+                >
+                  {feature.description}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -173,6 +230,11 @@ function About() {
       {/* Team Section */}
       <motion.section 
         className="py-20 bg-gradient-to-br from-blue-50 to-purple-50"
+        style={{
+          background: darkMode 
+            ? 'linear-gradient(to bottom right, #1e3a8a, #581c87)'
+            : 'linear-gradient(to bottom right, #eff6ff, #faf5ff)'
+        }}
         initial="initial"
         whileInView="animate"
         viewport={{ once: true }}
@@ -180,13 +242,31 @@ function About() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div variants={fadeInUp} className="text-center mb-16">
-            <span className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 rounded-full text-sm font-semibold mb-6">
+            <span 
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 rounded-full text-sm font-semibold mb-6"
+              style={{
+                background: darkMode 
+                  ? 'linear-gradient(to right, #1e40af, #7c3aed)'
+                  : 'linear-gradient(to right, #dbeafe, #e9d5ff)',
+                color: darkMode ? '#e0e7ff' : '#1e40af'
+              }}
+            >
               👥 Meet Our Team
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 
+              className="text-3xl md:text-4xl font-bold text-gray-900 mb-4"
+              style={{
+                color: darkMode ? '#f9fafb' : '#111827'
+              }}
+            >
               The Minds Behind the Innovation
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p 
+              className="text-xl text-gray-600 max-w-3xl mx-auto"
+              style={{
+                color: darkMode ? '#d1d5db' : '#4b5563'
+              }}
+            >
               A dedicated team of educators, developers, and innovators working together 
               to transform the educational experience at IIIT Bhagalpur.
             </p>
@@ -198,6 +278,10 @@ function About() {
                 key={index}
                 variants={fadeInUp}
                 className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/50 hover:shadow-2xl hover:scale-105 transition-all duration-300 group"
+                style={{
+                  backgroundColor: darkMode ? 'rgba(31, 41, 55, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+                  borderColor: darkMode ? 'rgba(75, 85, 99, 0.5)' : 'rgba(255, 255, 255, 0.5)'
+                }}
               >
                 <div className="text-center mb-6">
                   <div className="relative inline-block">
@@ -211,10 +295,31 @@ function About() {
                 </div>
 
                 <div className="text-center">
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">{member.name}</h3>
+                  <h3 
+                    className="text-xl font-bold text-gray-900 mb-1"
+                    style={{
+                      color: darkMode ? '#f9fafb' : '#111827'
+                    }}
+                  >
+                    {member.name}
+                  </h3>
                   <p className="text-blue-600 font-semibold mb-2">{member.role}</p>
-                  <p className="text-sm text-gray-500 mb-4">{member.department}</p>
-                  <p className="text-gray-600 text-sm leading-relaxed mb-4">{member.bio}</p>
+                  <p 
+                    className="text-sm text-gray-500 mb-4"
+                    style={{
+                      color: darkMode ? '#9ca3af' : '#6b7280'
+                    }}
+                  >
+                    {member.department}
+                  </p>
+                  <p 
+                    className="text-gray-600 text-sm leading-relaxed mb-4"
+                    style={{
+                      color: darkMode ? '#d1d5db' : '#4b5563'
+                    }}
+                  >
+                    {member.bio}
+                  </p>
                   
                   <div className="mb-4">
                     <div className="flex flex-wrap gap-1 justify-center">
@@ -277,10 +382,20 @@ function About() {
       >
         <div className="max-w-7xl mx-auto">
           <motion.div variants={fadeInUp} className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 
+              className="text-3xl md:text-4xl font-bold text-gray-900 mb-4"
+              style={{
+                color: darkMode ? '#f9fafb' : '#111827'
+              }}
+            >
               Cross-Platform Technology Stack
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p 
+              className="text-xl text-gray-600 max-w-3xl mx-auto"
+              style={{
+                color: darkMode ? '#d1d5db' : '#4b5563'
+              }}
+            >
               Our comprehensive platform leverages cutting-edge technologies to deliver a robust, 
               scalable experience across web and mobile platforms. Available as both a responsive 
               web application and native mobile app for iOS and Android.
@@ -346,8 +461,20 @@ function About() {
 
           {/* Mobile Technologies Section */}
           <motion.div variants={fadeInUp} className="text-center mb-8">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Mobile App Technologies</h3>
-            <p className="text-lg text-gray-600 mb-8">
+            <h3 
+              className="text-2xl font-bold text-gray-900 mb-4"
+              style={{
+                color: darkMode ? '#f9fafb' : '#111827'
+              }}
+            >
+              Mobile App Technologies
+            </h3>
+            <p 
+              className="text-lg text-gray-600 mb-8"
+              style={{
+                color: darkMode ? '#d1d5db' : '#4b5563'
+              }}
+            >
               Native mobile experience powered by Flutter and Dart
             </p>
           </motion.div>
@@ -409,7 +536,12 @@ function About() {
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Ready to Experience the Future of Attendance?
           </h2>
-          <p className="text-xl text-blue-100 mb-8 leading-relaxed">
+          <p 
+            className="text-xl text-blue-100 mb-8 leading-relaxed"
+            style={{
+              color: darkMode ? '#c7d2fe' : '#bfdbfe'
+            }}
+          >
             Join hundreds of students and faculty members who are already using 
             our innovative attendance management system.
           </p>

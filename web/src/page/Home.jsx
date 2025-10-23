@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import CTAButton from '../components/common/CTAButton'
 import { Link } from 'react-router-dom'
 import AnimatText from '../components/common/animatText'
+import { useSelector } from 'react-redux'
 import secanQr from '../assets/Student_Attendance_QR_Code_Scan.mp4'
 import quScanImage from '../assets/Gemini_Generated_Image_lftu38lftu38lftu.png'
 import multirole from '../assets/Gemini_Generated_Image_83bpgh83bpgh83bp.png'
@@ -13,6 +14,10 @@ import { AnimatedTestimonialsDemo } from '../components/AnimatedTestimonialsDemo
 function Home() {
     const [currentFeature, setCurrentFeature] = useState(0)
     const [isVisible, setIsVisible] = useState(false)
+    
+    // Get theme state
+    const themeState = useSelector((state) => state.theme)
+    const darkMode = themeState?.darkMode || false
 
     const features = [
         {
@@ -69,7 +74,15 @@ function Home() {
     }, [])
 
     return (
-        <div className='relative min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-hidden'>
+        <div 
+            className='relative min-h-screen overflow-hidden'
+            style={{
+                background: darkMode 
+                    ? 'linear-gradient(to bottom right, #111827, #1f2937, #111827)'
+                    : 'linear-gradient(to bottom right, #f8fafc, #dbeafe, #faf5ff)',
+                color: darkMode ? '#ffffff' : '#111827'
+            }}
+        >
             {/* Background Elements */}
 
 
@@ -79,16 +92,28 @@ function Home() {
                     {/* Main Content */}
                     <div className='flex flex-col justify-center items-center'>
                         <div className='w-10/12 flex flex-col justify-center items-center'>
-                            <div className='inline text-center p-4 sm:text-2xl text-lg bg-black/10 dark:text-white rounded-4xl my-5 font-medium '>
+                            <div 
+                                className='inline text-center p-4 sm:text-2xl text-lg rounded-4xl my-5 font-medium'
+                                style={{
+                                    backgroundColor: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                                    color: darkMode ? '#ffffff' : '#111827'
+                                }}
+                            >
                                 <span>🎓</span>
                                 <span>IIIT Bhagalpur Digital Initiative</span>
                             </div>
                             <div className='grid grid-cols-1 gap-10 mb-4'>
-                                <p className='flex flex-col justify-center items-center'>
-                                    <span className='lg:text-7xl sm:text-5xl text-2xl font-bold'>
+                                <div className='flex flex-col justify-center items-center'>
+                                    <span 
+                                        className='lg:text-7xl sm:text-5xl text-2xl font-bold'
+                                        style={{ color: darkMode ? '#ffffff' : '#111827' }}
+                                    >
                                         <AnimatText text='Modern Attendance' />
                                     </span>
-                                    <span className='lg:text-7xl sm:text-5xl text-2xl font-bold'>
+                                    <span 
+                                        className='lg:text-7xl sm:text-5xl text-2xl font-bold'
+                                        style={{ color: darkMode ? '#ffffff' : '#111827' }}
+                                    >
                                         <AnimatText text="System Revolution" />
                                     </span>
                                     <div className='flex gap-10 mt-10'>
@@ -103,14 +128,17 @@ function Home() {
                                             <CTAButton text="View Demo" active={false} />
                                         </Link>
                                     </div>
-                                </p>
+                                </div>
                                 <div className='rounded-2xl w-full'>
                                     <video src={secanQr} autoPlay loop muted alt="" className='rounded-2xl'></video>
                                 </div>
                             </div>
 
 
-                            <p className='flex flex-col dark:text-white text-black xl:text-5xl lg:text-4xl sm:text-2xl md:text-3xl text-xl font-bold justify-center items-center'>
+                            <div 
+                                className='flex flex-col xl:text-5xl lg:text-4xl sm:text-2xl md:text-3xl text-xl font-bold justify-center items-center'
+                                style={{ color: darkMode ? '#ffffff' : '#111827' }}
+                            >
                                 <div className=' flex gap-2'>
                                     Streamline attendance tracking for <AnimatText text="students," />
                                 </div>
@@ -127,7 +155,7 @@ function Home() {
                                     <AnimatText text="education technology."></AnimatText>
                                 </div>
 
-                            </p>
+                            </div>
                         </div>
 
 
@@ -135,7 +163,12 @@ function Home() {
 
                         {/* Feature Carousel */}
                         <div className='relative mt-10 flex justify-center items-center flex-col'>
-                            <h3 className=' text-center p-4 sm:text-2xl text-lg dark:text-white text-black/10 rounded-4xl my-5 font-semibold'><AnimatText text="*" />Key Features<AnimatText text="*" /></h3>
+                            <h3 
+                                className=' text-center p-4 sm:text-2xl text-lg rounded-4xl my-5 font-semibold'
+                                style={{ color: darkMode ? '#ffffff' : '#111827' }}
+                            >
+                                <AnimatText text="*" />Key Features<AnimatText text="*" />
+                            </h3>
                             <div className='grid grid-cols-1 md:grid-cols-2 gap-10 w-11/12'>
                                 {features.map((feature, index) => (
                                     <div
@@ -145,7 +178,10 @@ function Home() {
                                         <div className='w-40 '>
                                             <img src={feature.icon} alt="" className='rounded-2xl'/>
                                         </div>
-                                        <div className='font-bold text-lg text-white'>
+                                        <div 
+                                            className='font-bold text-lg'
+                                            style={{ color: darkMode ? '#ffffff' : '#ffffff' }}
+                                        >
                                             <h4>
                                                 {feature.title}
                                             </h4>
@@ -165,7 +201,12 @@ function Home() {
             <section>
                 <div className='flex flex-col justify-center items-center'>
                     <div className='w-10/12 flex flex-col justify-center items-center'>
-                    <h3 className=' text-center p-4 sm:text-2xl text-lg dark:text-white text-black/10 rounded-4xl my-5 font-semibold'><AnimatText text="*" />Trusted by Hundreds<AnimatText text="*" /></h3>
+                    <h3 
+                        className=' text-center p-4 sm:text-2xl text-lg rounded-4xl my-5 font-semibold'
+                        style={{ color: darkMode ? '#ffffff' : '#111827' }}
+                    >
+                        <AnimatText text="*" />Trusted by Hundreds<AnimatText text="*" />
+                    </h3>
                     
                     <div className='flex'>
                         <AnimatedTestimonialsDemo />

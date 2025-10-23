@@ -15,6 +15,10 @@ function ForgotPassword() {
   const { loading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  
+  // Get theme state
+  const themeState = useSelector((state) => state.theme)
+  const darkMode = themeState?.darkMode || false
   const handleOnSubmit = (e) => {
     e.preventDefault();
     const extra = "Forgot-Password";
@@ -32,18 +36,53 @@ function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div 
+      className="min-h-screen flex items-center justify-center bg-gray-50 p-4"
+      style={{
+        backgroundColor: darkMode ? '#111827' : '#f9fafb'
+      }}
+    >
       {loading ? (
-        <div className="text-center text-lg font-semibold">Loading...</div>
+        <div 
+          className="text-center text-lg font-semibold"
+          style={{
+            color: darkMode ? '#f9fafb' : '#111827'
+          }}
+        >
+          Loading...
+        </div>
       ) : !emailSent ? (
-        <div className="px-4 rounded flex flex-col gap-[12px] shadow-md w-full max-w-md bg-white">
-          <h1 className="text-2xl text-black dark:text-white font-bold">Reset Your Password</h1>
-          <p className="text-black dark:text-white font-normal text-[18px] leading-[26px]">
-            Have no fear. We’ll email you instructions to reset your password.
+        <div 
+          className="sm:p-6 p-4  rounded-xl flex flex-col gap-[12px] shadow-md w-full max-w-md bg-white"
+          style={{
+            backgroundColor: darkMode ? '#1f2937' : '#ffffff'
+          }}
+        >
+          <h1 
+            className="text-2xl text-black dark:text-white font-bold"
+            style={{
+              color: darkMode ? '#f9fafb' : '#111827'
+            }}
+          >
+            Reset Your Password
+          </h1>
+          <p 
+            className="text-black dark:text-white font-normal text-[18px] leading-[26px]"
+            style={{
+              color: darkMode ? '#e5e7eb' : '#1f2937'
+            }}
+          >
+            Have no fear. We'll email you instructions to reset your password.
           </p>
           <form onSubmit={handleOnSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-black dark:text-white ">
+              <label 
+                htmlFor="email" 
+                className="block text-sm font-medium text-black dark:text-white "
+                style={{
+                  color: darkMode ? '#f9fafb' : '#111827'
+                }}
+              >
                 Email Address
               </label>
               <input
@@ -54,6 +93,11 @@ function ForgotPassword() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="mt-1 block w-full px-4 py-2 text-black dark:text-white border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-md"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#f9fafb' : '#111827',
+                  borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                }}
               />
             </div>
             <button
@@ -69,14 +113,37 @@ function ForgotPassword() {
           </div>
         </div>
       ) : (
-        <div className="px-4 py-6 rounded shadow-md w-full max-w-md flex flex-col gap-4 bg-white">
-          <h1 className="text-2xl text-black dark:text-white font-bold">Enter OTP</h1>
-          <p className="text-black dark:text-white text-[16px]">
+        <div 
+          className="px-4 py-6 rounded shadow-md w-full max-w-md flex flex-col gap-4 bg-white"
+          style={{
+            backgroundColor: darkMode ? '#1f2937' : '#ffffff'
+          }}
+        >
+          <h1 
+            className="text-2xl text-black dark:text-white font-bold"
+            style={{
+              color: darkMode ? '#f9fafb' : '#111827'
+            }}
+          >
+            Enter OTP
+          </h1>
+          <p 
+            className="text-black dark:text-white text-[16px]"
+            style={{
+              color: darkMode ? '#e5e7eb' : '#1f2937'
+            }}
+          >
             Enter the OTP sent to your email and set a new password.
           </p>
           <form onSubmit={handlePasswordReset} className="space-y-4">
             <div>
-              <label htmlFor="otp" className="block text-sm font-medium text-black dark:text-white">
+              <label 
+                htmlFor="otp" 
+                className="block text-sm font-medium text-black dark:text-white"
+                style={{
+                  color: darkMode ? '#f9fafb' : '#111827'
+                }}
+              >
                 OTP
               </label>
               <input
@@ -87,10 +154,21 @@ function ForgotPassword() {
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
                 className="mt-1 block w-full px-4 py-2 text-black dark:text-white border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-md"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#f9fafb' : '#111827',
+                  borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                }}
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-black dark:text-white">
+              <label 
+                htmlFor="password" 
+                className="block text-sm font-medium text-black dark:text-white"
+                style={{
+                  color: darkMode ? '#f9fafb' : '#111827'
+                }}
+              >
                 New Password
               </label>
               <input
@@ -101,10 +179,21 @@ function ForgotPassword() {
                 value={password}
                 onChange={(e) => setpassword(e.target.value)}
                 className="mt-1 block w-full px-4 py-2 text-black dark:text-white border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-md"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#f9fafb' : '#111827',
+                  borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                }}
               />
             </div>
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-black dark:text-white">
+              <label 
+                htmlFor="confirmPassword" 
+                className="block text-sm font-medium text-black dark:text-white"
+                style={{
+                  color: darkMode ? '#f9fafb' : '#111827'
+                }}
+              >
                 Confirm Password
               </label>
               <input
@@ -115,6 +204,11 @@ function ForgotPassword() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="mt-1 block w-full px-4 py-2 text-black dark:text-white border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-md"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#f9fafb' : '#111827',
+                  borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                }}
               />
             </div>
             <button

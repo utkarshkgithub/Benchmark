@@ -15,6 +15,10 @@ const Signup = () => {
   const dispatch = useDispatch();
   const { loading } = useSelector((state) => state.auth);
 
+  // Get theme state
+  const themeState = useSelector((state) => state.theme)
+  const darkMode = themeState?.darkMode || false
+
   const [formData, setFormData] = useState({
     accountType: "Instructor",
     firstName: "",
@@ -54,21 +58,67 @@ const Signup = () => {
   };
 
   return (
-    <div className="flex items-center justify-center  bg-gray-100 font-sans h-[calc(100vh-100px)]">
+    <div 
+      className="flex items-center justify-center  bg-gray-100 font-sans h-[calc(100vh-100px)]"
+      style={{
+        backgroundColor: darkMode ? '#111827' : '#f3f4f6'
+      }}
+    >
       <div className="w-full max-w-2xl space-y-6">
         <div className="text-center">
-          <h1 className="text-4xl font-bold mt-4 text-gray-800">Create Faculty Account</h1>
-          <p className="mt-2 text-lg text-gray-600">Join IIITBGP attendance management platform</p>
+          <h1 
+            className="text-4xl font-bold mt-4 text-gray-800"
+            style={{
+              color: darkMode ? '#f9fafb' : '#1f2937'
+            }}
+          >
+            Create Faculty Account
+          </h1>
+          <p 
+            className="mt-2 text-lg text-gray-600"
+            style={{
+              color: darkMode ? '#d1d5db' : '#4b5563'
+            }}
+          >
+            Join IIITBGP attendance management platform
+          </p>
         </div>
 
-        <div className="bg-white p-8 rounded-lg shadow-lg border border-gray-200">
-          <h2 className="text-2xl font-semibold">Sign Up</h2>
-          <p className="text-gray-500 mb-6">Fill in your details to create your account</p>
+        <div 
+          className="bg-white p-8 rounded-lg shadow-lg border border-gray-200"
+          style={{
+            backgroundColor: darkMode ? '#1f2937' : '#ffffff',
+            borderColor: darkMode ? '#374151' : '#e5e7eb'
+          }}
+        >
+          <h2 
+            className="text-2xl font-semibold"
+            style={{
+              color: darkMode ? '#f9fafb' : '#111827'
+            }}
+          >
+            Sign Up
+          </h2>
+          <p 
+            className="text-gray-500 mb-6"
+            style={{
+              color: darkMode ? '#9ca3af' : '#6b7280'
+            }}
+          >
+            Fill in your details to create your account
+          </p>
 
           <form onSubmit={handleOnSubmit} className="space-y-5">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="w-full">
-                <label className="block text-sm font-medium text-gray-700">First Name</label>
+                <label 
+                  className="block text-sm font-medium text-gray-700"
+                  style={{
+                    color: darkMode ? '#e5e7eb' : '#374151'
+                  }}
+                >
+                  First Name
+                </label>
                 <input
                   type="text"
                   name="firstName"
@@ -77,10 +127,22 @@ const Signup = () => {
                   required
                   placeholder="Enter First Name"
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                  style={{
+                    backgroundColor: darkMode ? '#374151' : '#ffffff',
+                    color: darkMode ? '#f9fafb' : '#111827',
+                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                  }}
                 />
               </div>
               <div className="w-full">
-                <label className="block text-sm font-medium text-gray-700">Last Name</label>
+                <label 
+                  className="block text-sm font-medium text-gray-700"
+                  style={{
+                    color: darkMode ? '#e5e7eb' : '#374151'
+                  }}
+                >
+                  Last Name
+                </label>
                 <input
                   type="text"
                   name="lastName"
@@ -89,12 +151,24 @@ const Signup = () => {
                   required
                   placeholder="Enter Last Name"
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                  style={{
+                    backgroundColor: darkMode ? '#374151' : '#ffffff',
+                    color: darkMode ? '#f9fafb' : '#111827',
+                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                  }}
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Email</label>
+              <label 
+                className="block text-sm font-medium text-gray-700"
+                style={{
+                  color: darkMode ? '#e5e7eb' : '#374151'
+                }}
+              >
+                Email
+              </label>
               <input
                 type="email"
                 name="email"
@@ -103,11 +177,23 @@ const Signup = () => {
                 required
                 placeholder="user@iiitbh.ac.in"
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#f9fafb' : '#111827',
+                  borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                }}
               />
             </div>
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative w-full">
-              <label className="block text-sm font-medium text-gray-700">Password</label>
+              <label 
+                className="block text-sm font-medium text-gray-700"
+                style={{
+                  color: darkMode ? '#e5e7eb' : '#374151'
+                }}
+              >
+                Password
+              </label>
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
@@ -116,18 +202,33 @@ const Signup = () => {
                 required
                 placeholder="Create a strong password"
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#f9fafb' : '#111827',
+                  borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                }}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
                 className="absolute inset-y-0 right-0 top-6 pr-3 flex items-center"
+                style={{
+                  color: darkMode ? '#9ca3af' : '#6b7280'
+                }}
               >
                 {showPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
               </button>
             </div>
 
             <div className="relative w-full">
-              <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
+              <label 
+                className="block text-sm font-medium text-gray-700"
+                style={{
+                  color: darkMode ? '#e5e7eb' : '#374151'
+                }}
+              >
+                Confirm Password
+              </label>
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 name="confirmPassword"
@@ -136,11 +237,19 @@ const Signup = () => {
                 required
                 placeholder="Confirm your password"
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#f9fafb' : '#111827',
+                  borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                }}
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword((prev) => !prev)}
                 className="absolute inset-y-0 right-0 top-6 pr-3 flex items-center"
+                style={{
+                  color: darkMode ? '#9ca3af' : '#6b7280'
+                }}
               >
                 {showConfirmPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
               </button>
@@ -172,7 +281,12 @@ const Signup = () => {
             </Button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-gray-600">
+          <p 
+            className="mt-6 text-center text-sm text-gray-600 flex justify-center items-center"
+            style={{
+              color: darkMode ? '#d1d5db' : '#4b5563'
+            }}
+          >
             Already have an account?{" "}
             <Button 
               onClick={() => navigate("/login")} 

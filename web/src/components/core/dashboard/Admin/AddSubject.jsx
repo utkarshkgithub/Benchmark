@@ -11,6 +11,7 @@ const AddSubject = () => {
   const [allInstructor, setAllInstructor] = useState([]);
   const { register, handleSubmit, reset } = useForm();
   const { token } = useSelector((state) => state.auth);
+  const { darkMode } = useSelector((state) => state.theme);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
@@ -55,13 +56,25 @@ const AddSubject = () => {
     }
   };
 
-  const handleCancel = () => reset();
+  const handleCancel = () => {
+    reset();
+    toast.success("Form cancelled");
+    navigate("/dashboard/admin");
+  };
 
   return (
-    <div className="flex justify-center w-[calc(100vw-70px)] items-center p-4">
-      <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-2xl">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Add New Subject</h2>
-        <p className="text-sm text-gray-500 mb-6">
+    <div className="flex justify-center w-[calc(100vw-70px)] items-center p-4" style={{
+      backgroundColor: darkMode ? '#111827' : '#f9fafb'
+    }}>
+      <div className="rounded-lg shadow-lg p-8 w-full max-w-2xl" style={{
+        backgroundColor: darkMode ? '#1f2937' : '#ffffff'
+      }}>
+        <h2 className="text-2xl font-bold mb-2" style={{
+          color: darkMode ? '#ffffff' : '#1f2937'
+        }}>Add New Subject</h2>
+        <p className="text-sm mb-6" style={{
+          color: darkMode ? '#d1d5db' : '#6b7280'
+        }}>
           Fill in the details below to create a new subject for the curriculum.
         </p>
 
@@ -69,31 +82,52 @@ const AddSubject = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Subject Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Subject Name</label>
+              <label className="block text-sm font-medium mb-1" style={{
+                color: darkMode ? '#d1d5db' : '#374151'
+              }}>Subject Name</label>
               <input
                 type="text"
                 placeholder="e.g., Advanced Calculus"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500"
+                className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring focus:ring-blue-500 focus:outline-none"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  borderColor: darkMode ? '#4b5563' : '#d1d5db',
+                  color: darkMode ? '#ffffff' : '#1f2937'
+                }}
                 {...register('subjectName', { required: true })}
               />
             </div>
 
             {/* Subject Code */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Subject Code</label>
+              <label className="block text-sm font-medium mb-1" style={{
+                color: darkMode ? '#d1d5db' : '#374151'
+              }}>Subject Code</label>
               <input
                 type="text"
                 placeholder="e.g., MATH301"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500"
+                className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring focus:ring-blue-500 focus:outline-none"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  borderColor: darkMode ? '#4b5563' : '#d1d5db',
+                  color: darkMode ? '#ffffff' : '#1f2937'
+                }}
                 {...register('subjectCode', { required: true })}
               />
             </div>
 
             {/* Instructor */}
             <div className="col-span-full">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Instructor</label>
+              <label className="block text-sm font-medium mb-1" style={{
+                color: darkMode ? '#d1d5db' : '#374151'
+              }}>Instructor</label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white focus:ring focus:ring-blue-500"
+                className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring focus:ring-blue-500 focus:outline-none"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  borderColor: darkMode ? '#4b5563' : '#d1d5db',
+                  color: darkMode ? '#ffffff' : '#1f2937'
+                }}
                 {...register('instructor', { required: true })}
               >
                 <option value="">Select an instructor</option>
@@ -107,9 +141,16 @@ const AddSubject = () => {
 
             {/* Semester */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+              <label className="block text-sm font-medium mb-1" style={{
+                color: darkMode ? '#d1d5db' : '#374151'
+              }}>Semester</label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white focus:ring focus:ring-blue-500"
+                className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring focus:ring-blue-500 focus:outline-none"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  borderColor: darkMode ? '#4b5563' : '#d1d5db',
+                  color: darkMode ? '#ffffff' : '#1f2937'
+                }}
                 {...register('semester', { required: true })}
               >
                 <option value="">Select a semester</option>
@@ -126,7 +167,9 @@ const AddSubject = () => {
 
             {/* Branches */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Branches</label>
+              <label className="block text-sm font-medium mb-1" style={{
+                color: darkMode ? '#d1d5db' : '#374151'
+              }}>Branches</label>
               <div className="space-y-2 mt-1">
                 {["CSE", "ECE", "MNC", "MAE", "PG"].map((branch) => (
                   <label key={branch} className="flex items-center space-x-2">
@@ -134,9 +177,15 @@ const AddSubject = () => {
                       type="checkbox"
                       value={branch}
                       {...register('branches', { required: "Please select at least one branch" })}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="rounded text-blue-600 focus:ring-blue-500"
+                      style={{
+                        backgroundColor: darkMode ? '#374151' : '#ffffff',
+                        borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                      }}
                     />
-                    <span className="text-sm text-gray-700">{branch}</span>
+                    <span className="text-sm" style={{
+                      color: darkMode ? '#d1d5db' : '#374151'
+                    }}>{branch}</span>
                   </label>
                 ))}
               </div>
@@ -144,11 +193,17 @@ const AddSubject = () => {
 
             {/* Is Minor */}
             <div className="col-span-full">
-              <label className="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-1">
+              <label className="flex items-center space-x-2 text-sm font-medium mb-1" style={{
+                color: darkMode ? '#d1d5db' : '#374151'
+              }}>
                 <input
                   type="checkbox"
                   {...register('isMinor')}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded text-blue-600 focus:ring-blue-500"
+                  style={{
+                    backgroundColor: darkMode ? '#374151' : '#ffffff',
+                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                  }}
                 />
                 <span>Is this a Minor Subject?</span>
               </label>
@@ -160,14 +215,19 @@ const AddSubject = () => {
             <button
               type="button"
               onClick={handleCancel}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50"
+              className="px-4 py-2 border rounded-md font-medium hover:opacity-80"
+              style={{
+                backgroundColor: darkMode ? '#374151' : '#f9fafb',
+                borderColor: darkMode ? '#4b5563' : '#d1d5db',
+                color: darkMode ? '#ffffff' : '#374151'
+              }}
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 rounded-md shadow-sm text-white bg-blue-600 font-medium hover:bg-blue-700"
+              className="px-4 py-2 rounded-md shadow-sm text-white bg-blue-600 font-medium hover:bg-blue-700 disabled:opacity-50"
             >
               {loading ? "Saving..." : "Save Subject"}
             </button>

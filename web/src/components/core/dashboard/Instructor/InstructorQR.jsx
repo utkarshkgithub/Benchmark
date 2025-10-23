@@ -18,6 +18,7 @@ const TWO_MINUTES = 119; // 2 minutes = 120 seconds, minus 1 for display purpose
 
 export default function InstructorQR() {
     const { token, user } = useSelector((s) => s.auth);
+    const { darkMode } = useSelector((s) => s.theme);
 
     const [subjects, setSubjects] = useState([]);
     const [selectedSubject, setSelectedSubject] = useState(null);
@@ -302,11 +303,15 @@ export default function InstructorQR() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-6">
+        <div className="min-h-screen p-6" style={{
+            background: darkMode 
+                ? 'linear-gradient(to bottom right, #111827, #1f2937, #374151)' 
+                : 'linear-gradient(to bottom right, #f8fafc, #eff6ff, #faf5ff)'
+        }}>
             <div className="max-w-7xl mx-auto space-y-8">
                 {/* Header */}
                 <div className="animate-fade-in">
-                    <h1 className="font-extrabold text-4xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                    <h1 className="font-extrabold text-4xl bg-gradient-to-r from-blue-600 via-green-500 to-indigo-800 bg-clip-text text-transparent mb-2">
                         QR Attendance System
                     </h1>
                     <div className="w-32 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
@@ -357,7 +362,10 @@ export default function InstructorQR() {
                                         className="group relative"
                                     >
                                         <div className="absolute -inset-1 bg-gradient-to-r from-white/20 to-white/40 rounded-2xl blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
-                                        <button className="relative bg-white text-indigo-600 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg">
+                                        <button className="relative px-8 py-4 rounded-2xl font-bold text-lg transition-all transform hover:scale-105 shadow-lg" style={{
+                                            backgroundColor: darkMode ? '#1f2937' : '#ffffff',
+                                            color: darkMode ? '#ffffff' : '#4f46e5'
+                                        }}>
                                             View Summary
                                         </button>
                                     </Link>
@@ -366,13 +374,21 @@ export default function InstructorQR() {
                         </div>
 
                         {/* Select Subject Card */}
-                        <div className="bg-white/90 backdrop-blur-sm border border-white/20 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 p-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-                            <h3 className="text-2xl font-bold text-gray-800 mb-6 relative">
+                        <div className="backdrop-blur-sm border rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 p-8 animate-slide-up" style={{ 
+                            animationDelay: '0.2s',
+                            backgroundColor: darkMode ? 'rgba(31, 41, 55, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+                            borderColor: darkMode ? 'rgba(75, 85, 99, 0.2)' : 'rgba(255, 255, 255, 0.2)'
+                        }}>
+                            <h3 className="text-2xl font-bold mb-6 relative" style={{
+                                color: darkMode ? '#ffffff' : '#1f2937'
+                            }}>
                                 Generate QR Code
                                 <div className="absolute -bottom-2 left-0 w-20 h-1 bg-gradient-to-r from-green-500 to-teal-500 rounded-full"></div>
                             </h3>
                             
-                            <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">
+                            <label className="block text-sm font-bold mb-3 uppercase tracking-wider" style={{
+                                color: darkMode ? '#d1d5db' : '#374151'
+                            }}>
                                 Select Subject
                             </label>
                             
@@ -416,13 +432,24 @@ export default function InstructorQR() {
                 {/* QR View */}
                 {viewMode === "qr" && (
                     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4 animate-fade-in">
-                        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-3xl w-full max-w-md md:max-w-xl lg:max-w-3xl space-y-6 text-center animate-scale-in">
+                        <div 
+                            style={{
+                                backgroundColor: darkMode ? 'rgba(31, 41, 55, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                                color: darkMode ? '#e5e7eb' : '#374151'
+                            }}
+                            className="backdrop-blur-xl rounded-3xl shadow-3xl w-full max-w-md md:max-w-xl lg:max-w-3xl space-y-6 text-center animate-scale-in"
+                        >
                             <div className="flex justify-evenly mt-4">
                                 <div className="relative">
-                                <h3 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                <h3 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 via-green-500 to-indigo-800 bg-clip-text text-transparent">
                                     {selectedSubject?.subjectName}
                                 </h3>
-                                <p className="text-lg text-gray-600 font-semibold">
+                                <p 
+                                    style={{
+                                        color: darkMode ? '#9ca3af' : '#6b7280'
+                                    }}
+                                    className="text-lg font-semibold"
+                                >
                                     {selectedSubject?.subjectCode}
                                 </p>
                             </div>
@@ -435,10 +462,22 @@ export default function InstructorQR() {
                             </div>
                             </div>
 
-                            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl flex justify-center shadow-inner">
+                            <div 
+                                style={{
+                                    background: darkMode 
+                                        ? 'linear-gradient(to bottom right, rgba(55, 65, 81, 0.8), rgba(75, 85, 99, 0.8))'
+                                        : 'linear-gradient(to bottom right, rgba(249, 250, 251, 1), rgba(243, 244, 246, 1))'
+                                }}
+                                className="rounded-2xl flex justify-center shadow-inner"
+                            >
                                 <div className="relative">
-                                    <div className="absolute -inset-4  rounded-2xl opacity-20 blur-lg animate-pulse"></div>
-                                    <div className="relative bg-white rounded-2xl shadow-lg">
+                                    <div className="absolute -inset-4 rounded-2xl opacity-20 blur-lg animate-pulse"></div>
+                                    <div 
+                                        style={{
+                                            backgroundColor: darkMode ? '#374151' : '#ffffff'
+                                        }}
+                                        className="relative rounded-2xl shadow-lg"
+                                    >
                                         <QRCodeCanvas 
                                             value={qrData} 
                                             size={620} 
@@ -452,7 +491,12 @@ export default function InstructorQR() {
                             <div className="flex justify-center">
                                 <button
                                     onClick={closeQR}
-                                    className="w-fit p-4 rounded-xl border-2 border-blue-500 text-blue-600 bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 font-bold"
+                                    style={{
+                                        backgroundColor: darkMode ? 'rgba(55, 65, 81, 0.8)' : 'rgba(219, 234, 254, 0.8)',
+                                        borderColor: darkMode ? '#6366f1' : '#3b82f6',
+                                        color: darkMode ? '#a5b4fc' : '#2563eb'
+                                    }}
+                                    className="w-fit p-4 rounded-xl border-2 font-bold hover:scale-105 transition-all duration-200"
                                 >
                                     📋 Close & Review Attendance
                                 </button>
@@ -466,11 +510,24 @@ export default function InstructorQR() {
                     <div className="space-y-8">
                         {/* Stats */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 animate-slide-up">
-                            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg text-center hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                            <div 
+                                style={{
+                                    backgroundColor: darkMode ? 'rgba(55, 65, 81, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+                                    borderColor: darkMode ? 'rgba(75, 85, 99, 0.5)' : 'rgba(255, 255, 255, 0.2)'
+                                }}
+                                className="backdrop-blur-sm rounded-2xl p-6 border shadow-lg text-center hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                            >
                                 <div className="w-12 h-12 bg-gradient-to-r from-gray-400 to-gray-600 rounded-full flex items-center justify-center mx-auto mb-3">
                                     <span className="text-white text-xl font-bold">{attendanceStats.totalStudents}</span>
                                 </div>
-                                <p className="text-sm text-gray-600 font-semibold">Total Students</p>
+                                <p 
+                                    style={{
+                                        color: darkMode ? '#9ca3af' : '#6b7280'
+                                    }}
+                                    className="text-sm font-semibold"
+                                >
+                                    Total Students
+                                </p>
                             </div>
                             <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border-2 border-green-200 shadow-lg text-center hover:shadow-xl transition-all duration-300 transform hover:scale-105">
                                 <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -493,14 +550,39 @@ export default function InstructorQR() {
                         </div>
 
                         {/* Toggle All Button */}
-                        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg animate-slide-up">
+                        <div 
+                            style={{
+                                backgroundColor: darkMode ? 'rgba(55, 65, 81, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+                                borderColor: darkMode ? 'rgba(75, 85, 99, 0.5)' : 'rgba(255, 255, 255, 0.2)'
+                            }}
+                            className="backdrop-blur-sm rounded-2xl p-6 border shadow-lg animate-slide-up"
+                        >
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                 <div>
-                                    <h4 className="text-lg font-bold text-gray-800 mb-1">Mark All Students</h4>
-                                    <p className="text-sm text-gray-600">Toggle all students as present or absent</p>
+                                    <h4 
+                                        style={{
+                                            color: darkMode ? '#e5e7eb' : '#1f2937'
+                                        }}
+                                        className="text-lg font-bold mb-1"
+                                    >
+                                        Mark All Students
+                                    </h4>
+                                    <p 
+                                        style={{
+                                            color: darkMode ? '#9ca3af' : '#6b7280'
+                                        }}
+                                        className="text-sm"
+                                    >
+                                        Toggle all students as present or absent
+                                    </p>
                                 </div>
                                 <div className="flex items-center">
-                                    <span className="mr-3 text-sm font-medium text-gray-700">
+                                    <span 
+                                        style={{
+                                            color: darkMode ? '#d1d5db' : '#374151'
+                                        }}
+                                        className="mr-3 text-sm font-medium"
+                                    >
                                         {allSelected ? 'All Present' : 'All Absent'}
                                     </span>
                                     <label className="relative inline-flex items-center cursor-pointer">
@@ -517,7 +599,14 @@ export default function InstructorQR() {
                         </div>
 
                         {/* Search + Sort */}
-                        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg animate-slide-up" style={{ animationDelay: '0.1s' }}>
+                        <div 
+                            style={{
+                                backgroundColor: darkMode ? 'rgba(55, 65, 81, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+                                borderColor: darkMode ? 'rgba(75, 85, 99, 0.5)' : 'rgba(255, 255, 255, 0.2)',
+                                animationDelay: '0.1s'
+                            }}
+                            className="backdrop-blur-sm rounded-2xl p-6 border shadow-lg animate-slide-up"
+                        >
                             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                                 <div className="relative flex-1 group">
                                     <input
@@ -525,7 +614,12 @@ export default function InstructorQR() {
                                         placeholder="🔍 Search students by name or roll number..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="w-full bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-gray-200 rounded-xl px-6 py-4 text-gray-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 font-medium"
+                                        style={{
+                                            backgroundColor: darkMode ? 'rgba(55, 65, 81, 0.8)' : 'linear-gradient(to right, rgba(219, 234, 254, 1), rgba(237, 233, 254, 1))',
+                                            borderColor: darkMode ? '#4b5563' : '#d1d5db',
+                                            color: darkMode ? '#e5e7eb' : '#374151'
+                                        }}
+                                        className="w-full border-2 rounded-xl px-6 py-4 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 font-medium"
                                     />
                                 </div>
 
@@ -533,7 +627,12 @@ export default function InstructorQR() {
                                     <select
                                         value={sortBy}
                                         onChange={(e) => setSortBy(e.target.value)}
-                                        className="w-full lg:w-56 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-gray-200 rounded-xl px-6 py-4 text-gray-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 focus:outline-none transition-all duration-300 font-medium"
+                                        style={{
+                                            backgroundColor: darkMode ? 'rgba(55, 65, 81, 0.8)' : 'linear-gradient(to right, rgba(243, 232, 255, 1), rgba(252, 231, 243, 1))',
+                                            borderColor: darkMode ? '#4b5563' : '#d1d5db',
+                                            color: darkMode ? '#e5e7eb' : '#374151'
+                                        }}
+                                        className="w-full lg:w-56 border-2 rounded-xl px-6 py-4 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 focus:outline-none transition-all duration-300 font-medium"
                                     >
                                         <option value="name">📝 Sort by Name</option>
                                         <option value="rollNumber">🔢 Sort by Roll</option>
@@ -544,35 +643,107 @@ export default function InstructorQR() {
                         </div>
 
                         {/* Students Table */}
-                        <div className="bg-white/90 backdrop-blur-sm border border-white/20 rounded-2xl shadow-lg overflow-hidden animate-slide-up" style={{ animationDelay: '0.2s' }}>
+                        <div 
+                            style={{
+                                backgroundColor: darkMode ? 'rgba(55, 65, 81, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+                                borderColor: darkMode ? 'rgba(75, 85, 99, 0.5)' : 'rgba(255, 255, 255, 0.2)',
+                                animationDelay: '0.2s'
+                            }}
+                            className="backdrop-blur-sm border rounded-2xl shadow-lg overflow-hidden animate-slide-up"
+                        >
                             {sortedStudents.length === 0 ? (
                                 <div className="p-12 text-center">
-                                    <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <div 
+                                        style={{
+                                            backgroundColor: darkMode ? 'rgba(75, 85, 99, 0.5)' : '#f3f4f6'
+                                        }}
+                                        className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4"
+                                    >
                                         <span className="text-4xl">😔</span>
                                     </div>
-                                    <p className="text-xl text-gray-500 font-semibold">No students found</p>
-                                    <p className="text-gray-400">Try adjusting your search criteria</p>
+                                    <p 
+                                        style={{
+                                            color: darkMode ? '#9ca3af' : '#6b7280'
+                                        }}
+                                        className="text-xl font-semibold"
+                                    >
+                                        No students found
+                                    </p>
+                                    <p 
+                                        style={{
+                                            color: darkMode ? '#6b7280' : '#9ca3af'
+                                        }}
+                                    >
+                                        Try adjusting your search criteria
+                                    </p>
                                 </div>
                             ) : (
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-sm">
-                                        <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
+                                        <thead 
+                                            style={{
+                                                background: darkMode 
+                                                    ? 'linear-gradient(to right, rgba(75, 85, 99, 0.8), rgba(55, 65, 81, 0.8))'
+                                                    : 'linear-gradient(to right, rgba(249, 250, 251, 1), rgba(243, 244, 246, 1))',
+                                                borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                                            }}
+                                            className="border-b-2"
+                                        >
                                             <tr>
-                                                <th className="p-6 text-left font-bold text-gray-800">Student Name</th>
-                                                <th className="p-6 text-left font-bold text-gray-800">Roll Number</th>
-                                                <th className="p-6 text-center font-bold text-gray-800">Status</th>
-                                                <th className="p-6 text-center font-bold text-gray-800">Marked At</th>
-                                                <th className="p-6 text-center font-bold text-gray-800">Mark Present</th>
+                                                <th 
+                                                    style={{
+                                                        color: darkMode ? '#e5e7eb' : '#1f2937'
+                                                    }}
+                                                    className="p-6 text-left font-bold"
+                                                >
+                                                    Student Name
+                                                </th>
+                                                <th 
+                                                    style={{
+                                                        color: darkMode ? '#e5e7eb' : '#1f2937'
+                                                    }}
+                                                    className="p-6 text-left font-bold"
+                                                >
+                                                    Roll Number
+                                                </th>
+                                                <th 
+                                                    style={{
+                                                        color: darkMode ? '#e5e7eb' : '#1f2937'
+                                                    }}
+                                                    className="p-6 text-center font-bold"
+                                                >
+                                                    Status
+                                                </th>
+                                                <th 
+                                                    style={{
+                                                        color: darkMode ? '#e5e7eb' : '#1f2937'
+                                                    }}
+                                                    className="p-6 text-center font-bold"
+                                                >
+                                                    Marked At
+                                                </th>
+                                                <th 
+                                                    style={{
+                                                        color: darkMode ? '#e5e7eb' : '#1f2937'
+                                                    }}
+                                                    className="p-6 text-center font-bold"
+                                                >
+                                                    Mark Present
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {sortedStudents.map((s, i) => (
                                                 <tr
                                                     key={s._id}
-                                                    className={`transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-25 hover:to-purple-25 animate-fade-in-row border-b border-gray-100 ${
-                                                        i % 2 === 0 ? "bg-white" : "bg-gray-50/50"
-                                                    }`}
-                                                    style={{ animationDelay: `${i * 0.05}s` }}
+                                                    style={{
+                                                        backgroundColor: i % 2 === 0 
+                                                            ? (darkMode ? 'rgba(55, 65, 81, 0.3)' : '#ffffff')
+                                                            : (darkMode ? 'rgba(75, 85, 99, 0.3)' : 'rgba(249, 250, 251, 0.5)'),
+                                                        borderColor: darkMode ? '#4b5563' : '#f3f4f6',
+                                                        animationDelay: `${i * 0.05}s`
+                                                    }}
+                                                    className="transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-25 hover:to-purple-25 animate-fade-in-row border-b"
                                                 >
                                                     <td className="p-6">
                                                         <div className="flex items-center">
@@ -580,14 +751,33 @@ export default function InstructorQR() {
                                                                 {s.userId.firstName.charAt(0).toUpperCase()}
                                                             </div>
                                                             <div>
-                                                                <p className="font-semibold text-gray-900">
+                                                                <p 
+                                                                    style={{
+                                                                        color: darkMode ? '#e5e7eb' : '#111827'
+                                                                    }}
+                                                                    className="font-semibold"
+                                                                >
                                                                     {s.userId.firstName} {s.userId.lastName}
                                                                 </p>
-                                                                <p className="text-xs text-gray-500">{s.userId.email}</p>
+                                                                <p 
+                                                                    style={{
+                                                                        color: darkMode ? '#9ca3af' : '#6b7280'
+                                                                    }}
+                                                                    className="text-xs"
+                                                                >
+                                                                    {s.userId.email}
+                                                                </p>
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td className="p-6 font-medium text-gray-700">{s.rollNumber}</td>
+                                                    <td 
+                                                        style={{
+                                                            color: darkMode ? '#d1d5db' : '#374151'
+                                                        }}
+                                                        className="p-6 font-medium"
+                                                    >
+                                                        {s.rollNumber}
+                                                    </td>
                                                     <td className="p-6 text-center">
                                                         <span
                                                             className={`px-4 py-2 rounded-full text-xs font-bold shadow-md ${
@@ -602,15 +792,31 @@ export default function InstructorQR() {
                                                     <td className="p-6 text-center">
                                                         {s.markedAt ? (
                                                             <div className="text-xs">
-                                                                <div className="font-medium text-gray-700">
+                                                                <div 
+                                                                    style={{
+                                                                        color: darkMode ? '#d1d5db' : '#374151'
+                                                                    }}
+                                                                    className="font-medium"
+                                                                >
                                                                     {new Date(s.markedAt).toLocaleDateString()}
                                                                 </div>
-                                                                <div className="text-gray-500">
+                                                                <div 
+                                                                    style={{
+                                                                        color: darkMode ? '#9ca3af' : '#6b7280'
+                                                                    }}
+                                                                >
                                                                     {new Date(s.markedAt).toLocaleTimeString()}
                                                                 </div>
                                                             </div>
                                                         ) : (
-                                                            <span className="text-gray-400 text-xs">—</span>
+                                                            <span 
+                                                                style={{
+                                                                    color: darkMode ? '#6b7280' : '#9ca3af'
+                                                                }}
+                                                                className="text-xs"
+                                                            >
+                                                                —
+                                                            </span>
                                                         )}
                                                     </td>
                                                     <td className="p-6 text-center">
@@ -632,10 +838,20 @@ export default function InstructorQR() {
                             )}
                         </div>
 
-                        <div className="flex flex-col sm:flex-row justify-end gap-4 animate-slide-up" style={{ animationDelay: '0.3s' }}>
+                        <div 
+                            style={{
+                                animationDelay: '0.3s'
+                            }}
+                            className="flex flex-col sm:flex-row justify-end gap-4 animate-slide-up"
+                        >
                             <button
                                 onClick={resetToInitial}
-                                className="px-6 py-3 rounded-xl border-2 border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400 font-medium transition-all transform hover:scale-105"
+                                style={{
+                                    backgroundColor: darkMode ? 'rgba(55, 65, 81, 0.8)' : '#f9fafb',
+                                    borderColor: darkMode ? '#6b7280' : '#d1d5db',
+                                    color: darkMode ? '#d1d5db' : '#4b5563'
+                                }}
+                                className="px-6 py-3 rounded-xl border-2 font-medium transition-all transform hover:scale-105"
                             >
                                 Back
                             </button>
@@ -670,18 +886,29 @@ export default function InstructorQR() {
                 {/* Submitted View */}
                 {viewMode === "submitted" && (
                     <div className="text-center space-y-8 animate-scale-in">
-                        <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-12 shadow-2xl border border-white/20 max-w-2xl mx-auto">
+                        <div 
+                            style={{
+                                backgroundColor: darkMode ? 'rgba(55, 65, 81, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+                                borderColor: darkMode ? 'rgba(75, 85, 99, 0.5)' : 'rgba(255, 255, 255, 0.2)'
+                            }}
+                            className="backdrop-blur-sm rounded-3xl p-12 shadow-2xl border max-w-2xl mx-auto"
+                        >
                             <div className="w-24 h-24 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce-celebration">
                                 <svg className="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                 </svg>
                             </div>
                             
-                            <h3 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-4">
+                            <h3 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-green-500 to-indigo-800 bg-clip-text text-transparent mb-4">
                                 Attendance Updated Successfully!
                             </h3>
                             
-                            <p className="text-xl text-gray-600 mb-8">
+                            <p 
+                                style={{
+                                    color: darkMode ? '#9ca3af' : '#4b5563'
+                                }}
+                                className="text-xl mb-8"
+                            >
                                 All changes have been saved and synchronized across the system.
                             </p>
                             

@@ -1,7 +1,7 @@
 "use client";;
 import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "motion/react";
-
+import { useSelector } from 'react-redux';
 import { useEffect, useState } from "react";
 
 export const AnimatedTestimonials = ({
@@ -9,6 +9,10 @@ export const AnimatedTestimonials = ({
   autoplay = false
 }) => {
   const [active, setActive] = useState(0);
+  
+  // Get theme state
+  const themeState = useSelector((state) => state.theme);
+  const darkMode = themeState?.darkMode || false;
 
   const handleNext = () => {
     setActive((prev) => (prev + 1) % testimonials.length);
@@ -100,13 +104,22 @@ export const AnimatedTestimonials = ({
               duration: 0.2,
               ease: "easeInOut",
             }}>
-            <h3 className="text-2xl font-bold text-black dark:text-white">
+            <h3 
+              className="text-2xl font-bold" 
+              style={{ color: darkMode ? '#ffffff' : '#000000' }}
+            >
               {testimonials[active].name}
             </h3>
-            <p className="text-sm text-gray-500 dark:text-neutral-500">
+            <p 
+              className="text-sm" 
+              style={{ color: darkMode ? '#a3a3a3' : '#6b7280' }}
+            >
               {testimonials[active].designation}
             </p>
-            <motion.p className="mt-8 text-lg text-gray-500 dark:text-neutral-300">
+            <motion.p 
+              className="mt-8 text-lg" 
+              style={{ color: darkMode ? '#d1d5db' : '#6b7280' }}
+            >
               {testimonials[active].quote.split(" ").map((word, index) => (
                 <motion.span
                   key={index}
@@ -134,15 +147,23 @@ export const AnimatedTestimonials = ({
           <div className="flex gap-4 pt-12 md:pt-0">
             <button
               onClick={handlePrev}
-              className="group/button flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800">
+              className="group/button flex h-7 w-7 items-center justify-center rounded-full"
+              style={{ backgroundColor: darkMode ? '#374151' : '#f3f4f6' }}
+            >
               <IconArrowLeft
-                className="h-5 w-5 text-black transition-transform duration-300 group-hover/button:rotate-12 dark:text-neutral-400" />
+                className="h-5 w-5 transition-transform duration-300 group-hover/button:rotate-12" 
+                style={{ color: darkMode ? '#9ca3af' : '#000000' }}
+              />
             </button>
             <button
               onClick={handleNext}
-              className="group/button flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800">
+              className="group/button flex h-7 w-7 items-center justify-center rounded-full"
+              style={{ backgroundColor: darkMode ? '#374151' : '#f3f4f6' }}
+            >
               <IconArrowRight
-                className="h-5 w-5 text-black transition-transform duration-300 group-hover/button:-rotate-12 dark:text-neutral-400" />
+                className="h-5 w-5 transition-transform duration-300 group-hover/button:-rotate-12" 
+                style={{ color: darkMode ? '#9ca3af' : '#000000' }}
+              />
             </button>
           </div>
         </div>

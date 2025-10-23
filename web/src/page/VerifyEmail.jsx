@@ -11,6 +11,10 @@ function VerifyEmail() {
   const navigate = useNavigate();
   const { signupData, loading } = useSelector((state) => state.auth);
 
+  // Get theme state
+  const themeState = useSelector((state) => state.theme)
+  const darkMode = themeState?.darkMode || false
+
   const [otp, setOtp] = useState("");
   const [error, setError] = useState(null);
 
@@ -45,13 +49,45 @@ function VerifyEmail() {
   };
 
   return (
-    <div className="min-h-screen mt-20 flex items-center justify-center bg-gray-900 text-white">
+    <div 
+      className="min-h-screen mt-20 flex items-center justify-center bg-gray-900 text-white"
+      style={{
+        backgroundColor: darkMode ? '#111827' : '#f9fafb',
+        color: darkMode ? '#ffffff' : '#111827'
+      }}
+    >
       {loading ? (
-        <div className="text-xl">Loading...</div>
+        <div 
+          className="text-xl"
+          style={{
+            color: darkMode ? '#ffffff' : '#111827'
+          }}
+        >
+          Loading...
+        </div>
       ) : (
-        <div className="w-full max-w-md p-6 bg-gray-800 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold mb-4">Verify Email</h1>
-          <p className="mb-4">A verification code has been sent to your email. Enter the code below:</p>
+        <div 
+          className="w-full max-w-md p-6 bg-gray-800 rounded-lg shadow-md"
+          style={{
+            backgroundColor: darkMode ? '#1f2937' : '#ffffff'
+          }}
+        >
+          <h1 
+            className="text-2xl font-bold mb-4"
+            style={{
+              color: darkMode ? '#f9fafb' : '#111827'
+            }}
+          >
+            Verify Email
+          </h1>
+          <p 
+            className="mb-4"
+            style={{
+              color: darkMode ? '#e5e7eb' : '#374151'
+            }}
+          >
+            A verification code has been sent to your email. Enter the code below:
+          </p>
           {error && <div className="text-red-500 mb-4">{error}</div>}
 
           <form onSubmit={onSubmitHandle} className="space-y-4">
@@ -61,7 +97,15 @@ function VerifyEmail() {
               numInputs={6}
               renderSeparator={<span>-</span>}
               renderInput={(props) => (
-                <input {...props} className="text-center border-2 mx-2 rounded-md text-white" />
+                <input 
+                  {...props} 
+                  className="text-center border-2 mx-2 rounded-md text-white" 
+                  style={{
+                    backgroundColor: darkMode ? '#374151' : '#ffffff',
+                    color: darkMode ? '#f9fafb' : '#111827',
+                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                  }}
+                />
               )}
             />
             <button

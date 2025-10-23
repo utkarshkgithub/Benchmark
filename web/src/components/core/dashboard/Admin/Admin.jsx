@@ -21,6 +21,10 @@ const Admin = () => {
   const [subjectSortOrder, setSubjectSortOrder] = useState("asc");
   const [studentSortField, setStudentSortField] = useState(null);
   const [studentSortOrder, setStudentSortOrder] = useState("asc");
+  
+  // Get theme state
+  const themeState = useSelector((state) => state.theme)
+  const darkMode = themeState?.darkMode || false
 
   const navigate = useNavigate();
 
@@ -141,119 +145,399 @@ const Admin = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen w-full bg-gray-100">
-        <p className="text-gray-600 text-lg">Loading...</p>
+      <div className="flex justify-center items-center h-screen" style={{
+        background: darkMode 
+          ? 'linear-gradient(to bottom right, #111827, #1f2937, #374151)' 
+          : 'linear-gradient(to bottom right, #f8fafc, #eff6ff, #faf5ff)'
+      }}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-lg font-medium" style={{
+            color: darkMode ? '#d1d5db' : '#6b7280'
+          }}>Loading admin dashboard...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gray-100">
-        <p className="text-red-500 text-lg">{error}</p>
+      <div className="flex justify-center items-center h-screen" style={{
+        background: darkMode 
+          ? 'linear-gradient(to bottom right, #111827, #1f2937, #374151)' 
+          : 'linear-gradient(to bottom right, #f8fafc, #eff6ff, #faf5ff)'
+      }}>
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.732 15.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <p className="text-lg font-medium text-red-500">{error}</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-h-[calc(100vh-70px)] w-[calc(100vw-100px)] overflow-hidden">
-      <div className="overflow-scroll max-h-[calc(100vh-70px)] p-4 space-y-8">
-
-        {/* Subjects Section */}
-        <div>
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">Manage Subjects</h1>
-            <button onClick={handleAddSubject} className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors mt-2">
-              + Add Subject
-            </button>
-          </div>
-          <input
-            type="text"
-            placeholder="Search by subject code..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full md:w-64 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4"
-          />
-          <div className="bg-white rounded-lg shadow-md overflow-scroll max-h-96">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSubjectSort("subjectName")}>
-                    SUBJECT NAME
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSubjectSort("subjectCode")}>
-                    CODE
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    INSTRUCTOR
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSubjectSort("semester")}>
-                    SEMESTER
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    BRANCH
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {sortSubjects().map((subject) => (
-                  <tr key={subject._id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-bold">{subject.subjectName}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{subject.subjectCode}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{subject.instructor?.firstName} {subject.instructor?.lastName}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{subject.semester}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{subject.branches?.join(", ")}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button className="text-blue-600 hover:text-blue-900 mr-4">Edit</button>
-                      <button className="text-red-600 hover:text-red-900" onClick={() => handleDeleteSubject(subject._id)}>Delete</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+    <div className="min-h-screen p-6" style={{
+      background: darkMode 
+        ? 'linear-gradient(to bottom right, #111827, #1f2937, #374151)' 
+        : 'linear-gradient(to bottom right, #f8fafc, #eff6ff, #faf5ff)'
+    }}>
+      <div className="max-w-7xl mx-auto space-y-8">
+        
+        {/* Header with Animation */}
+        <div className="animate-fade-in">
+          <div className="backdrop-blur-sm rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 p-8 mb-8 border" style={{
+            backgroundColor: darkMode ? 'rgba(31, 41, 55, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+            borderColor: darkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.2)'
+          }}>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="font-extrabold text-4xl bg-gradient-to-r from-blue-600 via-green-500 to-indigo-800 bg-clip-text text-transparent mb-2">
+                  Admin Dashboard
+                </h1>
+                <div className="w-32 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mb-4"></div>
+                <p className="text-2xl font-semibold" style={{
+                  color: darkMode ? '#d1d5db' : '#374151'
+                }}>
+                  Manage Subjects & Students
+                </p>
+              </div>
+              <div className="hidden md:block">
+                <div className="text-right">
+                  <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-green-500 to-indigo-800 bg-clip-text text-transparent">
+                    {subjects.length + students.length}
+                  </div>
+                  <div className="text-sm font-medium" style={{
+                    color: darkMode ? '#9ca3af' : '#6b7280'
+                  }}>Total Records</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Students Section */}
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">Manage Students</h1>
-          <div className="bg-white rounded-lg shadow-md overflow-scroll max-h-96">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+          {/* Total Subjects Card */}
+          <div className="backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border transform hover:scale-105" style={{
+            backgroundColor: darkMode ? 'rgba(31, 41, 55, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+            borderColor: darkMode ? '#374151' : 'rgba(255, 255, 255, 0.2)'
+          }}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium" style={{
+                  color: darkMode ? '#9ca3af' : '#6b7280'
+                }}>Total Subjects</p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-green-500 to-indigo-800 bg-clip-text text-transparent">
+                  {subjects.length}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C20.832 18.477 19.246 18 17.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Total Students Card */}
+          <div className="backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border transform hover:scale-105" style={{
+            backgroundColor: darkMode ? 'rgba(31, 41, 55, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+            borderColor: darkMode ? '#374151' : 'rgba(255, 255, 255, 0.2)'
+          }}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium" style={{
+                  color: darkMode ? '#9ca3af' : '#6b7280'
+                }}>Total Students</p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-green-500 to-indigo-800 bg-clip-text text-transparent">
+                  {students.length}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Active Branches Card */}
+          <div className="backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border transform hover:scale-105" style={{
+            backgroundColor: darkMode ? 'rgba(31, 41, 55, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+            borderColor: darkMode ? '#374151' : 'rgba(255, 255, 255, 0.2)'
+          }}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium" style={{
+                  color: darkMode ? '#9ca3af' : '#6b7280'
+                }}>Active Branches</p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-green-500 to-indigo-800 bg-clip-text text-transparent">
+                  {new Set(students.map(s => s.branch)).size}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Total Semesters Card */}
+          <div className="backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border transform hover:scale-105" style={{
+            backgroundColor: darkMode ? 'rgba(31, 41, 55, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+            borderColor: darkMode ? '#374151' : 'rgba(255, 255, 255, 0.2)'
+          }}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium" style={{
+                  color: darkMode ? '#9ca3af' : '#6b7280'
+                }}>Active Semesters</p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-green-500 to-indigo-800 bg-clip-text text-transparent">
+                  {new Set(students.map(s => s.semester)).size}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Subjects Management Section */}
+        <div className="backdrop-blur-sm rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden border animate-slide-up" 
+             style={{ 
+               animationDelay: '0.2s',
+               backgroundColor: darkMode ? 'rgba(31, 41, 55, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+               borderColor: darkMode ? '#374151' : 'rgba(255, 255, 255, 0.2)'
+             }}>
+          <div className="px-8 py-6 border-b" style={{
+            backgroundColor: darkMode ? '#374151' : '#f9fafb',
+            borderColor: darkMode ? '#4b5563' : '#e5e7eb'
+          }}>
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold relative" style={{
+                  color: darkMode ? '#ffffff' : '#1f2937'
+                }}>
+                  Manage Subjects
+                  <div className="absolute -bottom-2 left-0 w-24 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+                </h2>
+                <p className="text-sm mt-3 font-medium" style={{
+                  color: darkMode ? '#d1d5db' : '#6b7280'
+                }}>
+                  {filteredSubjects.length} subject{filteredSubjects.length !== 1 ? 's' : ''} found
+                </p>
+              </div>
+              <button onClick={handleAddSubject} className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105">
+                + Add Subject
+              </button>
+            </div>
+          </div>
+          
+          <div className="p-6">
+            <input
+              type="text"
+              placeholder="🔍 Search by subject code..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full md:w-64 px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-6 shadow-sm"
+              style={{
+                backgroundColor: darkMode ? '#374151' : '#ffffff',
+                borderColor: darkMode ? '#4b5563' : '#d1d5db',
+                color: darkMode ? '#ffffff' : '#1f2937'
+              }}
+            />
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead style={{
+                  backgroundColor: darkMode ? '#374151' : '#f8fafc'
+                }}>
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider" style={{
+                      color: darkMode ? '#d1d5db' : '#374151'
+                    }}>
+                      Subject Name
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider cursor-pointer" 
+                        onClick={() => handleSubjectSort("subjectCode")}
+                        style={{
+                          color: darkMode ? '#d1d5db' : '#374151'
+                        }}>
+                      Code
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider"
+                        style={{
+                          color: darkMode ? '#d1d5db' : '#374151'
+                        }}>
+                      Instructor
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider cursor-pointer" 
+                        onClick={() => handleSubjectSort("semester")}
+                        style={{
+                          color: darkMode ? '#d1d5db' : '#374151'
+                        }}>
+                      Semester
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider"
+                        style={{
+                          color: darkMode ? '#d1d5db' : '#374151'
+                        }}>
+                      Branch
+                    </th>
+                    <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider"
+                        style={{
+                          color: darkMode ? '#d1d5db' : '#374151'
+                        }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y" style={{
+                  borderColor: darkMode ? '#374151' : '#e5e7eb'
+                }}>
+                  {sortSubjects().map((subject) => (
+                    <tr key={subject._id} 
+                        className="transition-all duration-300"
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = darkMode ? '#374151' : '#f9fafb';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold" style={{
+                        color: darkMode ? '#ffffff' : '#1f2937'
+                      }}>{subject.subjectName}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm" style={{
+                        color: darkMode ? '#d1d5db' : '#6b7280'
+                      }}>{subject.subjectCode}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm" style={{
+                        color: darkMode ? '#d1d5db' : '#6b7280'
+                      }}>{subject.instructor?.firstName} {subject.instructor?.lastName}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm" style={{
+                        color: darkMode ? '#d1d5db' : '#6b7280'
+                      }}>{subject.semester}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm" style={{
+                        color: darkMode ? '#d1d5db' : '#6b7280'
+                      }}>{subject.branches?.join(", ")}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                        <button className="text-blue-600 hover:text-blue-900 mr-4 px-3 py-1 rounded transition-colors">Edit</button>
+                        <button className="text-red-600 hover:text-red-900 px-3 py-1 rounded transition-colors" onClick={() => handleDeleteSubject(subject._id)}>Delete</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Students Management Section */}
+        <div className="backdrop-blur-sm rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden border animate-slide-up" 
+             style={{ 
+               animationDelay: '0.3s',
+               backgroundColor: darkMode ? 'rgba(31, 41, 55, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+               borderColor: darkMode ? '#374151' : 'rgba(255, 255, 255, 0.2)'
+             }}>
+          <div className="px-8 py-6 border-b" style={{
+            backgroundColor: darkMode ? '#374151' : '#f9fafb',
+            borderColor: darkMode ? '#4b5563' : '#e5e7eb'
+          }}>
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold relative" style={{
+                  color: darkMode ? '#ffffff' : '#1f2937'
+                }}>
+                  Manage Students
+                  <div className="absolute -bottom-2 left-0 w-24 h-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"></div>
+                </h2>
+                <p className="text-sm mt-3 font-medium" style={{
+                  color: darkMode ? '#d1d5db' : '#6b7280'
+                }}>
+                  {students.length} student{students.length !== 1 ? 's' : ''} registered
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead style={{
+                backgroundColor: darkMode ? '#374151' : '#f8fafc'
+              }}>
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleStudentSort("userId.firstName")}>
-                    NAME
+                  <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider cursor-pointer" 
+                      onClick={() => handleStudentSort("userId.firstName")}
+                      style={{
+                        color: darkMode ? '#d1d5db' : '#374151'
+                      }}>
+                    Name
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleStudentSort("rollNumber")}>
-                    ROLL NUMBER
+                  <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider cursor-pointer" 
+                      onClick={() => handleStudentSort("rollNumber")}
+                      style={{
+                        color: darkMode ? '#d1d5db' : '#374151'
+                      }}>
+                    Roll Number
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleStudentSort("branch")}>
-                    BRANCH
+                  <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider cursor-pointer" 
+                      onClick={() => handleStudentSort("branch")}
+                      style={{
+                        color: darkMode ? '#d1d5db' : '#374151'
+                      }}>
+                    Branch
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleStudentSort("semester")}>
-                    SEMESTER
+                  <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider cursor-pointer" 
+                      onClick={() => handleStudentSort("semester")}
+                      style={{
+                        color: darkMode ? '#d1d5db' : '#374151'
+                      }}>
+                    Semester
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTIONS</th>
+                  <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider"
+                      style={{
+                        color: darkMode ? '#d1d5db' : '#374151'
+                      }}>Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y" style={{
+                borderColor: darkMode ? '#374151' : '#e5e7eb'
+              }}>
                 {sortStudents().map((student) => (
-                  <tr key={student._id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <tr key={student._id}
+                      className="transition-all duration-300"
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = darkMode ? '#374151' : '#f9fafb';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium" style={{
+                      color: darkMode ? '#ffffff' : '#1f2937'
+                    }}>
                       {student.userId?.firstName} {student.userId?.lastName}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{
+                      color: darkMode ? '#d1d5db' : '#6b7280'
+                    }}>
                       {student.rollNumber}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{
+                      color: darkMode ? '#d1d5db' : '#6b7280'
+                    }}>
                       {student.branch}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{
+                      color: darkMode ? '#d1d5db' : '#6b7280'
+                    }}>
                       {student.semester}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button className="text-red-600 hover:text-red-900" onClick={() => handleDeleteStudent(student._id)}>Delete</button>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                      <button className="text-red-600 hover:text-red-900 px-3 py-1 rounded transition-colors" onClick={() => handleDeleteStudent(student._id)}>Delete</button>
                     </td>
                   </tr>
                 ))}
@@ -263,6 +547,40 @@ const Admin = () => {
         </div>
 
       </div>
+
+      {/* Add CSS animations */}
+      <style jsx>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes slide-up {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-fade-in {
+          animation: fade-in 0.8s ease-out forwards;
+        }
+
+        .animate-slide-up {
+          opacity: 0;
+          animation: slide-up 0.8s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 };

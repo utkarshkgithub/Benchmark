@@ -14,6 +14,10 @@ const SignIn = () => {
   const navigate = useNavigate()
   const { loading } = useSelector((state) => state.auth)
   
+  // Get theme state
+  const themeState = useSelector((state) => state.theme)
+  const darkMode = themeState?.darkMode || false
+  
   // Initialize react-hook-form
   const {
     register,
@@ -32,44 +36,103 @@ const SignIn = () => {
   };
 
   return (
-    <div className="flex items-center justify-center bg-gray-100 font-sans h-[calc(100vh-100px)]">
+    <div 
+      className="flex items-center justify-center bg-gray-100 font-sans h-[calc(100vh-100px)]"
+      style={{
+        backgroundColor: darkMode ? '#111827' : '#f3f4f6'
+      }}
+    >
       <div className="w-full max-w-md p-8 space-y-6">
         {/* Header Section */}
         <div>
- <h1 className="text-4xl text-center font-bold  text-gray-800">Welcome Back</h1>
-          <p className="text-lg text-center text-gray-600">Sign in to your account to continue</p>
+ <h1 
+   className="text-4xl text-center font-bold  text-gray-800"
+   style={{
+     color: darkMode ? '#f9fafb' : '#1f2937'
+   }}
+ >
+   Welcome Back
+ </h1>
+          <p 
+            className="text-lg text-center text-gray-600"
+            style={{
+              color: darkMode ? '#d1d5db' : '#4b5563'
+            }}
+          >
+            Sign in to your account to continue
+          </p>
         </div>
        
         {/* Form Container */}
-        <div className="bg-white p-8 rounded-lg shadow-lg border border-gray-200">
-          <h2 className="text-2xl font-semibold">Sign In</h2>
+        <div 
+          className="bg-white p-8 rounded-lg shadow-lg border border-gray-200"
+          style={{
+            backgroundColor: darkMode ? '#1f2937' : '#ffffff',
+            borderColor: darkMode ? '#374151' : '#e5e7eb'
+          }}
+        >
+          <h2 
+            className="text-2xl font-semibold"
+            style={{
+              color: darkMode ? '#f9fafb' : '#111827'
+            }}
+          >
+            Sign In
+          </h2>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Username or Email Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">Username or Email</label>
+              <label 
+                className="block text-sm font-medium text-gray-700"
+                style={{
+                  color: darkMode ? '#e5e7eb' : '#374151'
+                }}
+              >
+                Username or Email
+              </label>
               <input
                 type="email"
                 placeholder="Enter your email"
                 {...register('email', { required: 'Username or email is required' })}
                 className={`mt-1 block w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500`}
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#f9fafb' : '#111827',
+                  borderColor: errors.email ? '#ef4444' : (darkMode ? '#4b5563' : '#d1d5db')
+                }}
               />
               {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
             </div>
 
             {/* Password Field */}
             <div className="relative">
-              <label className="block text-sm font-medium text-gray-700">Password</label>
+              <label 
+                className="block text-sm font-medium text-gray-700"
+                style={{
+                  color: darkMode ? '#e5e7eb' : '#374151'
+                }}
+              >
+                Password
+              </label>
               <input
                 type={isPasswordVisible ? 'text' : 'password'}
                 placeholder="Enter your password"
                 {...register('password', { required: 'Password is required' })}
                 className={`mt-1 block w-full px-3 py-2 border ${errors.password ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500`}
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#f9fafb' : '#111827',
+                  borderColor: errors.password ? '#ef4444' : (darkMode ? '#4b5563' : '#d1d5db')
+                }}
               />
               <button
                 type="button"
                 onClick={() => setIsPasswordVisible(!isPasswordVisible)}
                 className="absolute inset-y-0 right-0 top-6 pr-3 flex items-center text-gray-500"
+                style={{
+                  color: darkMode ? '#9ca3af' : '#6b7280'
+                }}
               >
                 {isPasswordVisible ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
               </button>
@@ -103,7 +166,12 @@ const SignIn = () => {
           </form>
 
           {/* Sign Up Link */}
-          <p className="mt-8 text-center text-sm text-gray-600">
+          <p 
+            className="mt-8 text-center text-sm text-gray-600"
+            style={{
+              color: darkMode ? '#d1d5db' : '#4b5563'
+            }}
+          >
             Don't have an account?{' '}
             <Link to="/signup" className="font-medium text-teal-600 hover:text-teal-500">
               Sign up here

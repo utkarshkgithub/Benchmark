@@ -15,6 +15,10 @@ function Button({
   const { loading: globalLoading } = useSelector((state) => state.auth)
   const { loading: profileLoading } = useSelector((state) => state.profile)
   
+  // Get theme state
+  const themeState = useSelector((state) => state.theme)
+  const darkMode = themeState?.darkMode || false
+  
   // Button is disabled if any loading state is true or explicitly disabled
   const isDisabled = disabled || loading || globalLoading || profileLoading
 
@@ -22,20 +26,20 @@ function Button({
   
   const variants = {
     primary: isDisabled 
-      ? "bg-gray-300 text-gray-500 cursor-not-allowed opacity-50" 
+      ? (darkMode ? "bg-gray-600 text-gray-400 cursor-not-allowed opacity-50" : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-50")
       : "bg-blue-600 text-white hover:bg-blue-700 transform hover:scale-105",
     secondary: isDisabled 
-      ? "bg-gray-300 text-gray-500 cursor-not-allowed opacity-50" 
-      : "bg-gray-200 text-gray-800 hover:bg-gray-300 transform hover:scale-105",
+      ? (darkMode ? "bg-gray-600 text-gray-400 cursor-not-allowed opacity-50" : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-50")
+      : (darkMode ? "bg-gray-700 text-gray-200 hover:bg-gray-600 transform hover:scale-105" : "bg-gray-200 text-gray-800 hover:bg-gray-300 transform hover:scale-105"),
     danger: isDisabled 
-      ? "bg-gray-300 text-gray-500 cursor-not-allowed opacity-50" 
+      ? (darkMode ? "bg-gray-600 text-gray-400 cursor-not-allowed opacity-50" : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-50")
       : "bg-red-600 text-white hover:bg-red-700 transform hover:scale-105",
     success: isDisabled 
-      ? "bg-gray-300 text-gray-500 cursor-not-allowed opacity-50" 
+      ? (darkMode ? "bg-gray-600 text-gray-400 cursor-not-allowed opacity-50" : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-50")
       : "bg-green-600 text-white hover:bg-green-700 transform hover:scale-105",
     outline: isDisabled 
-      ? "border border-gray-300 text-gray-500 cursor-not-allowed opacity-50" 
-      : "border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transform hover:scale-105"
+      ? (darkMode ? "border border-gray-600 text-gray-400 cursor-not-allowed opacity-50" : "border border-gray-300 text-gray-500 cursor-not-allowed opacity-50")
+      : (darkMode ? "border border-blue-400 text-blue-400 hover:bg-blue-600 hover:text-white transform hover:scale-105" : "border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transform hover:scale-105")
   }
   
   const sizes = {

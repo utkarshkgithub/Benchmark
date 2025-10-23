@@ -23,8 +23,8 @@ const themeSlice = createSlice({
       if (savedTheme !== null) {
         state.darkMode = JSON.parse(savedTheme);
       } else {
-        // Check system preference
-        state.darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        // Default to light mode instead of system preference
+        state.darkMode = false;
       }
       localStorage.setItem('darkMode', JSON.stringify(state.darkMode));
     }

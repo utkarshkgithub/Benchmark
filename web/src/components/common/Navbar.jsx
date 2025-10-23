@@ -21,6 +21,8 @@ function Navbar() {
 
   const { token } = useSelector((state) => state.auth)
   const { user } = useSelector((state) => state.auth)
+  const themeState = useSelector((state) => state.theme)
+  const darkMode = themeState?.darkMode || false
 
   const isActive = (path) => location.pathname === path
 
@@ -65,11 +67,22 @@ function Navbar() {
   }
 
   return (
-    <nav className={`w-full sticky top-0 z-50 transition-all duration-500 ${
-      scrolled 
-        ? 'bg-white/90 backdrop-blur-xl shadow-xl border-b border-white/20' 
-        : 'bg-white/95 backdrop-blur-sm shadow-md border-b border-gray-200'
-    }`}>
+    <nav 
+      className={`w-full sticky top-0 z-50 transition-all duration-500 ${
+        scrolled 
+          ? 'backdrop-blur-xl shadow-xl border-b' 
+          : 'backdrop-blur-sm shadow-md border-b'
+      }`}
+      style={{
+        backgroundColor: darkMode 
+          ? (scrolled ? 'rgba(17, 24, 39, 0.9)' : 'rgba(17, 24, 39, 0.95)')
+          : (scrolled ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.95)'),
+        color: darkMode ? '#ffffff' : '#111827',
+        borderColor: darkMode 
+          ? (scrolled ? 'rgba(75, 85, 99, 0.2)' : 'rgba(75, 85, 99, 1)')
+          : (scrolled ? 'rgba(255, 255, 255, 0.2)' : 'rgba(229, 231, 235, 1)')
+      }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Brand with Animation */}
@@ -86,9 +99,8 @@ function Navbar() {
               <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-sm"></div>
             </div>
             <div className="relative">
-              <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent tracking-wide">
-                <span className="hidden sm:inline">IIITBH-BENCHMARK</span>
-                <span className="sm:hidden">IIITBH-BMK</span>
+                            <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold bg-gradient-to-r from-blue-600 via-green-500 to-indigo-800 bg-clip-text text-transparent tracking-wide">
+                BENCHMARK
               </h2>
               <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 group-hover:w-full transition-all duration-300"></div>
             </div>
@@ -193,11 +205,14 @@ function Navbar() {
                     alt={`${user?.firstName}`}
                     className="h-10 w-10 rounded-full object-cover border-2 border-gray-300"
                   />
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full border-2 border-white shadow-sm"></div>
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full border-2 border-white dark:border-gray-900 shadow-sm"></div>
                 </div>
                 <button
                   onClick={toggleMobileMenu}
-                  className="inline-flex items-center justify-center p-2 rounded-lg text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none transform hover:scale-105 transition-all duration-200"
+                  className="inline-flex items-center justify-center p-2 rounded-lg focus:outline-none transform hover:scale-105 transition-all duration-200"
+                  style={{
+                    color: darkMode ? '#d1d5db' : '#374151'
+                  }}
                 >
                   <div className="relative w-6 h-6">
                     <FaBars className={`absolute inset-0 h-5 w-5 transition-all duration-300 transform ${isMobileMenuOpen ? 'opacity-0 rotate-180' : 'opacity-100 rotate-0'}`} />
@@ -210,7 +225,10 @@ function Navbar() {
                 <ThemeToggle />
                 <button
                   onClick={toggleMobileMenu}
-                  className="inline-flex items-center justify-center p-2 rounded-lg text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none transform hover:scale-105 transition-all duration-200"
+                  className="inline-flex items-center justify-center p-2 rounded-lg focus:outline-none transform hover:scale-105 transition-all duration-200"
+                  style={{
+                    color: darkMode ? '#d1d5db' : '#374151'
+                  }}
                 >
                   <div className="relative w-6 h-6">
                     <FaBars className={`absolute inset-0 h-5 w-5 transition-all duration-300 transform ${isMobileMenuOpen ? 'opacity-0 rotate-180' : 'opacity-100 rotate-0'}`} />
@@ -221,7 +239,7 @@ function Navbar() {
             )}
 
             {isMobileMenuOpen && (
-              <div className="absolute right-4 top-16 w-72 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 py-3 z-50 animate-mobile-menu-in">
+              <div className="absolute right-4 top-16 w-72 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-gray-700/20 py-3 z-50 animate-mobile-menu-in">
                 {!token ? (
                   <div className="px-5 py-4 space-y-4">
                     <MobileNavLink to="/learn" onClick={closeMobileMenu}>About</MobileNavLink>
@@ -234,22 +252,22 @@ function Navbar() {
                   </div>
                 ) : (
                   <div>
-                    <div className="px-5 py-4 border-b border-gray-100">
+                    <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
                       <div className="flex items-center space-x-4">
                         <div className="relative">
                           <img
                             src={user?.image}
                             alt={`${user?.firstName}`}
-                            className="h-14 w-14 rounded-full object-cover border-2 border-gray-200"
+                            className="h-14 w-14 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600"
                           />
-                          <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full border-2 border-white shadow-sm"></div>
+                          <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full border-2 border-white dark:border-gray-900 shadow-sm"></div>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-base font-bold text-gray-900 truncate">
+                          <p className="text-base font-bold text-gray-900 dark:text-white truncate">
                             {user?.firstName} {user?.lastName}
                           </p>
-                          <p className="text-sm text-gray-500 truncate">{user?.email}</p>
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 mt-2">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{user?.email}</p>
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 text-blue-800 dark:text-blue-200 mt-2">
                             {user?.accountType}
                           </span>
                         </div>

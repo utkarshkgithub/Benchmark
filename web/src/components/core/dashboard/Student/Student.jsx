@@ -9,6 +9,10 @@ const Student = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  
+  // Get theme state
+  const themeState = useSelector((state) => state.theme)
+  const darkMode = themeState?.darkMode || false
 
   // Fetch attendance
   const getAttendance = async () => {
@@ -36,25 +40,52 @@ const Student = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen w-full bg-gray-100">
-        <p className="text-gray-600 text-lg">Loading attendance...</p>
+      <div 
+        className="flex justify-center items-center h-screen w-full bg-gray-100"
+        style={{
+          backgroundColor: darkMode ? '#111827' : '#f3f4f6'
+        }}
+      >
+        <p 
+          className="text-gray-600 text-lg"
+          style={{
+            color: darkMode ? '#d1d5db' : '#4b5563'
+          }}
+        >
+          Loading attendance...
+        </p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gray-100">
+      <div 
+        className="flex justify-center items-center h-screen bg-gray-100"
+        style={{
+          backgroundColor: darkMode ? '#111827' : '#f3f4f6'
+        }}
+      >
         <p className="text-red-500 text-lg">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="max-h-[calc(100vh-70px)] w-[calc(100vw-30px)] overflow-hidden mt-4">
+    <div 
+      className="max-h-[calc(100vh-70px)] w-[calc(100vw-30px)] overflow-hidden mt-4"
+      style={{
+        backgroundColor: darkMode ? '#111827' : 'transparent'
+      }}
+    >
       <div className="overflow-scroll max-h-[calc(100vh-70px)]">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">
+          <h1 
+            className="text-2xl font-bold text-gray-800"
+            style={{
+              color: darkMode ? '#f9fafb' : '#1f2937'
+            }}
+          >
             Welcome {user.firstName} {user.lastName} 👋
           </h1>
         </div>
@@ -68,9 +99,17 @@ const Student = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full md:w-64 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              style={{
+                backgroundColor: darkMode ? '#374151' : '#ffffff',
+                color: darkMode ? '#f9fafb' : '#111827',
+                borderColor: darkMode ? '#4b5563' : '#d1d5db'
+              }}
             />
             <svg
               className="absolute right-3 top-2.5 h-5 w-5 text-gray-400"
+              style={{
+                color: darkMode ? '#9ca3af' : '#6b7280'
+              }}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -93,22 +132,56 @@ const Student = () => {
               <div
                 key={index}
                 className="bg-gray-200 rounded-2xl shadow-lg p-6 flex flex-col items-start transition hover:shadow-xl"
+                style={{
+                  backgroundColor: darkMode ? '#1f2937' : '#e5e7eb'
+                }}
               >
-                <h2 className="text-lg font-bold text-gray-800 mb-1">
+                <h2 
+                  className="text-lg font-bold text-gray-800 mb-1"
+                  style={{
+                    color: darkMode ? '#f9fafb' : '#1f2937'
+                  }}
+                >
                   {record.subjectName}
                 </h2>
-                <p className="text-sm text-gray-500 mb-4">
+                <p 
+                  className="text-sm text-gray-500 mb-4"
+                  style={{
+                    color: darkMode ? '#9ca3af' : '#6b7280'
+                  }}
+                >
                   Total Classes: {record.totalClasses}
                 </p>
 
                 <div className="w-full flex justify-between items-center">
                   <div>
-                    <p className="text-gray-600 text-sm">Present</p>
-                    <p className="text-lg font-semibold">{record.presentCount}</p>
+                    <p 
+                      className="text-gray-600 text-sm"
+                      style={{
+                        color: darkMode ? '#d1d5db' : '#4b5563'
+                      }}
+                    >
+                      Present
+                    </p>
+                    <p 
+                      className="text-lg font-semibold"
+                      style={{
+                        color: darkMode ? '#f9fafb' : '#111827'
+                      }}
+                    >
+                      {record.presentCount}
+                    </p>
                   </div>
 
                   <div>
-                    <p className="text-gray-600 text-sm">Attendance</p>
+                    <p 
+                      className="text-gray-600 text-sm"
+                      style={{
+                        color: darkMode ? '#d1d5db' : '#4b5563'
+                      }}
+                    >
+                      Attendance
+                    </p>
                     <span
                       className={`px-3 py-1 rounded-lg font-semibold text-sm ${
                         parseFloat(record.percentage) >= 75
@@ -123,7 +196,12 @@ const Student = () => {
               </div>
             ))
           ) : (
-            <div className="col-span-full text-center text-gray-500">
+            <div 
+              className="col-span-full text-center text-gray-500"
+              style={{
+                color: darkMode ? '#9ca3af' : '#6b7280'
+              }}
+            >
               No attendance data available
             </div>
           )}

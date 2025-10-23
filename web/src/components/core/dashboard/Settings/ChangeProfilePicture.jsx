@@ -4,12 +4,10 @@ import { useDispatch, useSelector } from "react-redux"
 import { updateDisplayPicture } from "../../../../services/opretions/Settings"
 import IconBTN from "../../../common/IconBTN"
 
-
-
-
 export default function ChangeProfilePicture() {
   const { token } = useSelector((state) => state.auth)
   const { user } = useSelector((state) => state.auth)
+  const { darkMode } = useSelector((state) => state.theme)
   const dispatch = useDispatch()
   // console.log("11>>11:-",user);
   const [loading, setLoading] = useState(false)
@@ -63,7 +61,10 @@ export default function ChangeProfilePicture() {
 
   return (
   
-  <div className="flex items-center  lg:ml-[100px]  lg:w-[calc(100vw-450px)] justify-between rounded-md  p-4">
+  <div className="flex items-center lg:ml-[100px] lg:w-[calc(100vw-450px)] justify-between rounded-md p-4" style={{
+    backgroundColor: darkMode ? '#1f2937' : '#f9fafb',
+    borderColor: darkMode ? '#374151' : '#e5e7eb'
+  }}>
     <div className="flex gap-4">
       <img
         src={previewSource || user?.image || "/default-avatar.png"}
@@ -71,7 +72,9 @@ export default function ChangeProfilePicture() {
         className="w-24 h-24 rounded-full object-cover"
       />
       <div className="space-y-2">
-        <p className="font-medium">Change Profile Picture</p>
+        <p className="font-medium" style={{
+          color: darkMode ? '#ffffff' : '#1f2937'
+        }}>Change Profile Picture</p>
         <div className="flex gap-3">
           <input
             type="file"
@@ -83,7 +86,11 @@ export default function ChangeProfilePicture() {
           <button
             onClick={handleClick}
             disabled={loading}
-            className="rounded-md bg-gray-700 text-white py-1 px-3 hover:bg-gray-600 disabled:opacity-50"
+            className="rounded-md py-1 px-3 hover:opacity-80 disabled:opacity-50"
+            style={{
+              backgroundColor: darkMode ? '#374151' : '#6b7280',
+              color: '#ffffff'
+            }}
           >
             Select
           </button>

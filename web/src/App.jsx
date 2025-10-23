@@ -8,6 +8,7 @@ import { ACCOUNT_TYPE } from './utils/constants.js'
 import { useSelector, useDispatch } from 'react-redux'
 import { initializeTheme } from './Slices/themeSlice.js'
 import Error from './components/common/Error.jsx'
+import { ThemeProvider } from './context/ThemeContext.jsx'
 import { Suspense, lazy, useEffect } from 'react'
 
 // Lazy load heavy components
@@ -57,13 +58,16 @@ useEffect(() => {
 }, [darkMode]);
 
   return (
-    <div className="bg-white dark:bg-gray-900 min-h-screen transition-colors duration-300">
-      {/* Debug indicator - remove this later */}
-      <div className="fixed top-0 right-0 z-50 bg-red-500 text-white p-2 text-xs">
-        Theme: {darkMode ? 'Dark' : 'Light'}
-      </div>
-      <Navbar />
-      <Suspense fallback={<LoadingSpinner />}>
+    <ThemeProvider>
+      <div 
+        className="min-h-screen transition-colors duration-300" 
+        style={{
+          backgroundColor: darkMode ? '#111827' : '#ffffff',
+          color: darkMode ? '#ffffff' : '#111827'
+        }}
+      >
+        <Navbar />
+        <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="learn" element={<About />} />
@@ -112,7 +116,8 @@ useEffect(() => {
         
       {/* <PWABadge /> */}
       {/* <BackgroundBeams/> */}
-    </div>
+      </div>
+    </ThemeProvider>
   )
 }
 

@@ -9,6 +9,10 @@ import IconBTN from '../common/IconBTN'
 const LoadingDemo = () => {
   const dispatch = useDispatch()
   const { loading } = useSelector((state) => state.auth)
+  
+  // Get theme state
+  const themeState = useSelector((state) => state.theme)
+  const darkMode = themeState?.darkMode || false
 
   const simulateLoading = () => {
     dispatch(setLoading(true))
@@ -20,11 +24,29 @@ const LoadingDemo = () => {
   }
 
   return (
-    <div className="p-8 max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">Global Loading Button Demo</h2>
+    <div 
+      className="p-8 max-w-2xl mx-auto"
+      style={{
+        backgroundColor: darkMode ? '#111827' : '#ffffff',
+        color: darkMode ? '#f9fafb' : '#111827'
+      }}
+    >
+      <h2 
+        className="text-2xl font-bold mb-6"
+        style={{
+          color: darkMode ? '#f9fafb' : '#111827'
+        }}
+      >
+        Global Loading Button Demo
+      </h2>
       
       <div className="mb-6">
-        <p className="text-gray-600 mb-4">
+        <p 
+          className="text-gray-600 mb-4"
+          style={{
+            color: darkMode ? '#d1d5db' : '#4b5563'
+          }}
+        >
           Current loading state: <strong>{loading ? 'Loading...' : 'Not Loading'}</strong>
         </p>
         
@@ -38,7 +60,14 @@ const LoadingDemo = () => {
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">All buttons below will be disabled when loading is true:</h3>
+        <h3 
+          className="text-lg font-semibold"
+          style={{
+            color: darkMode ? '#f9fafb' : '#111827'
+          }}
+        >
+          All buttons below will be disabled when loading is true:
+        </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Button variant="primary">Primary Button</Button>
@@ -59,9 +88,26 @@ const LoadingDemo = () => {
           </IconBTN>
         </div>
 
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-          <h4 className="font-semibold text-blue-800 mb-2">How it works:</h4>
-          <ul className="text-blue-700 text-sm space-y-1">
+        <div 
+          className="mt-6 p-4 bg-blue-50 rounded-lg"
+          style={{
+            backgroundColor: darkMode ? '#1e3a8a' : '#eff6ff'
+          }}
+        >
+          <h4 
+            className="font-semibold text-blue-800 mb-2"
+            style={{
+              color: darkMode ? '#bfdbfe' : '#1e40af'
+            }}
+          >
+            How it works:
+          </h4>
+          <ul 
+            className="text-blue-700 text-sm space-y-1"
+            style={{
+              color: darkMode ? '#93c5fd' : '#1d4ed8'
+            }}
+          >
             <li>• All buttons automatically check the global loading state from Redux</li>
             <li>• When loading is true, buttons are disabled and show loading spinner</li>
             <li>• Individual buttons can also have their own loading prop</li>

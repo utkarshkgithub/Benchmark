@@ -10,6 +10,10 @@ function UpdatePassword() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Get theme state
+  const themeState = useSelector((state) => state.theme)
+  const darkMode = themeState?.darkMode || false
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -34,16 +38,43 @@ function UpdatePassword() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4">
+    <div 
+      className="flex items-center justify-center min-h-screen bg-gray-50 px-4"
+      style={{
+        backgroundColor: darkMode ? '#111827' : '#f9fafb'
+      }}
+    >
       {loading ? (
-        <div className="text-center text-lg font-medium text-gray-700">
+        <div 
+          className="text-center text-lg font-medium text-gray-700"
+          style={{
+            color: darkMode ? '#d1d5db' : '#374151'
+          }}
+        >
           Loading...
         </div>
       ) : (
-        <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-6">
+        <div 
+          className="w-full max-w-md bg-white shadow-lg rounded-lg p-6"
+          style={{
+            backgroundColor: darkMode ? '#1f2937' : '#ffffff'
+          }}
+        >
           <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Choose New Password</h1>
-            <p className="text-sm text-gray-600 mt-2">
+            <h1 
+              className="text-2xl font-bold text-gray-900"
+              style={{
+                color: darkMode ? '#f9fafb' : '#111827'
+              }}
+            >
+              Choose New Password
+            </h1>
+            <p 
+              className="text-sm text-gray-600 mt-2"
+              style={{
+                color: darkMode ? '#d1d5db' : '#4b5563'
+              }}
+            >
               Almost done. Enter your new password and you're all set.
             </p>
           </div>
