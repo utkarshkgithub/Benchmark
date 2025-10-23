@@ -91,9 +91,9 @@ function Home() {
                 <div>
                     {/* Main Content */}
                     <div className='flex flex-col justify-center items-center'>
-                        <div className='w-10/12 flex flex-col justify-center items-center'>
+                        <div className='w-10/12 flex flex-col justify-center items-center mt-10'>
                             <div 
-                                className='inline text-center p-4 sm:text-2xl text-lg rounded-4xl my-5 font-medium'
+                                className='inline text-center p-4 sm:text-2xl text-lg rounded-4xl my-10 font-medium'
                                 style={{
                                     backgroundColor: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
                                     color: darkMode ? '#ffffff' : '#111827'
@@ -102,7 +102,7 @@ function Home() {
                                 <span>🎓</span>
                                 <span>IIIT Bhagalpur Digital Initiative</span>
                             </div>
-                            <div className='grid grid-cols-1 gap-10 mb-4'>
+                            <div className='grid grid-cols-1 gap-10 my-4'>
                                 <div className='flex flex-col justify-center items-center'>
                                     <span 
                                         className='lg:text-7xl sm:text-5xl text-2xl font-bold'
@@ -129,7 +129,7 @@ function Home() {
                                         </Link>
                                     </div>
                                 </div>
-                                <div className='rounded-2xl w-full'>
+                                <div className='rounded-2xl w-full my-10'>
                                     <video src={secanQr} autoPlay loop muted alt="" className='rounded-2xl'></video>
                                 </div>
                             </div>
