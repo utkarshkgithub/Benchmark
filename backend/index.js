@@ -16,6 +16,11 @@ applySecurity(app);
 
 // console.log("🛡️ All security middleware applied - Server protected against spam attacks");
 
+// Explicit OPTIONS handler for all routes
+app.options('*', (req, res) => {
+  res.status(200).end();
+});
+
 app.use("/api/v3/auth", AuthRoutes);
 app.use("/api/v3/setting", SettingRoutes);
 app.use("/api/v3/subject", SubjectRoutes);
@@ -26,7 +31,17 @@ app.get("/", (req, res) => {
     message: "🚀 Attendance API is running securely...",
     timestamp: new Date().toISOString(),
     version: "3.0.0",
-    security: "Full protection active - Helmet, Rate Limiting, IP Blocking"
+    security: "Full protection active - Helmet, Rate Limiting, IP Blocking",
+    cors: "Enabled for https://iiitbh-benchmark.vercel.app"
+  });
+});
+
+// Health check endpoint for monitoring
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
   });
 });
 

@@ -30,16 +30,18 @@ export function applySecurity(app) {
   // 2. Cookie parser
   app.use(cookieParser());
   
-  // 3. CORS configuration
+  // 3. CORS configuration with enhanced preflight handling
   app.use(
     cors({
       origin: function (origin, callback) {
         const allowedOrigins = [
           "https://iiitbh-benchmark.vercel.app",
           "http://localhost:5173",
+          "http://localhost:3000",
+          "http://127.0.0.1:5173"
         ];
         
-        // Development mein origin null ho sakta hai
+        // Development mein origin null ho sakta hai (for tools like Postman)
         if (!origin) return callback(null, true);
         
         if (allowedOrigins.indexOf(origin) !== -1) {
@@ -56,10 +58,14 @@ export function applySecurity(app) {
         "Authorization", 
         "X-Requested-With",
         "Accept",
-        "Origin"
+        "Origin",
+        "Access-Control-Request-Method",
+        "Access-Control-Request-Headers"
       ],
       exposedHeaders: ["Set-Cookie"],
-      maxAge: 86400 // Preflight requests cache for 24 hours
+      maxAge: 86400, // Preflight requests cache for 24 hours
+      preflightContinue: false,
+      optionsSuccessStatus: 200 // Some legacy browsers choke on 204
     })
   );
   

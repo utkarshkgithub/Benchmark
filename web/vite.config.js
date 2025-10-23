@@ -17,6 +17,23 @@ export default defineConfig({
       'X-Content-Type-Options': 'nosniff',
       'X-XSS-Protection': '1; mode=block',
       'Referrer-Policy': 'strict-origin-when-cross-origin'
+    },
+    // Proxy API requests to avoid CORS during development
+    proxy: {
+      '/api': {
+        target: 'https://benchmark-official.onrender.com',
+        changeOrigin: true,
+        secure: true,
+        timeout: 30000, // 30 second timeout for hibernated services
+        configure: (proxy, options) => {
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            console.log('Proxying request:', req.method, req.url);
+          });
+          proxy.on('error', (err, req, res) => {
+            console.log('Proxy error:', err.message);
+          });
+        }
+      }
     }
   },
   build: {
