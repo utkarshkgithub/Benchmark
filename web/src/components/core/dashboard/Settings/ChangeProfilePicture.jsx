@@ -61,7 +61,7 @@ export default function ChangeProfilePicture() {
 
   return (
   
-  <div className="flex items-center lg:ml-[100px] lg:w-[calc(100vw-450px)] justify-between rounded-md p-4" style={{
+  <div className="flex items-center justify-between rounded-md p-4" style={{
     backgroundColor: darkMode ? '#1f2937' : '#f9fafb',
     borderColor: darkMode ? '#374151' : '#e5e7eb'
   }}>

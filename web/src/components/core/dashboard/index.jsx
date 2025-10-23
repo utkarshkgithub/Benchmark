@@ -30,7 +30,7 @@ function MyProfile() {
           </div>
 
           {/* Profile Picture Section */}
-          <div className="flex flex-col lg:flex-row lg:items-center gap-8 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+          <div className="flex flex-col gap-8 animate-slide-up" style={{ animationDelay: '0.1s' }}>
             <div className="transform hover:scale-100 transition-transform duration-300">
               <ChangeProfilePicture />
             </div>

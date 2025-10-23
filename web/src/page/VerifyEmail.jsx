@@ -99,7 +99,7 @@ function VerifyEmail() {
               renderInput={(props) => (
                 <input 
                   {...props} 
-                  className="text-center border-2 mx-2 rounded-md text-white" 
+                  className="text-center border-2 w-12 h-10 mx-2 rounded-2xl text-white" 
                   style={{
                     backgroundColor: darkMode ? '#374151' : '#ffffff',
                     color: darkMode ? '#f9fafb' : '#111827',
