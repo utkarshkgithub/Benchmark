@@ -147,7 +147,7 @@ function PersonalDetails() {
 
   return (
     <div 
-      className="min-h-screen mt-20 flex items-center justify-center bg-gray-900 text-white"
+      className="min-h-screen mt-20 flex items-center justify-center"
       style={{
         backgroundColor: darkMode ? '#111827' : '#f9fafb',
         color: darkMode ? '#ffffff' : '#111827'
@@ -164,9 +164,12 @@ function PersonalDetails() {
         </div>
       ) : (
         <div 
-          className="w-full max-w-md p-6 bg-gray-800 rounded-lg shadow-md"
+          className="w-full max-w-md p-6 rounded-lg shadow-md"
           style={{
-            backgroundColor: darkMode ? '#1f2937' : '#ffffff'
+            backgroundColor: darkMode ? '#1f2937' : '#ffffff',
+            boxShadow: darkMode 
+              ? '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+              : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
           }}
         >
           <h1 
@@ -186,7 +189,12 @@ function PersonalDetails() {
                 value={formData.deviceId}
                 onChange={handleOnChange}
                 placeholder="Device ID"
-                className="w-full px-3 py-2 border rounded-md text-white"
+                className="w-full px-3 py-2 border rounded-md"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  borderColor: darkMode ? '#6b7280' : '#d1d5db',
+                  color: darkMode ? '#ffffff' : '#111827'
+                }}
                 required
               />
               <input
@@ -195,7 +203,12 @@ function PersonalDetails() {
                 value={formData.rollNumber}
                 onChange={handleOnChange}
                 placeholder="Roll Number"
-                className="w-full px-3 py-2 border rounded-md text-white"
+                className="w-full px-3 py-2 border rounded-md"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  borderColor: darkMode ? '#6b7280' : '#d1d5db',
+                  color: darkMode ? '#ffffff' : '#111827'
+                }}
                 required
               />
 
@@ -203,7 +216,12 @@ function PersonalDetails() {
                 name="branch"
                 value={formData.branch}
                 onChange={handleOnChange}
-                className="w-full px-3 py-2 border rounded-md text-white bg-black"
+                className="w-full px-3 py-2 border rounded-md"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  borderColor: darkMode ? '#6b7280' : '#d1d5db',
+                  color: darkMode ? '#ffffff' : '#111827'
+                }}
                 required
               >
                 <option value="">Select Branch</option>
@@ -218,7 +236,12 @@ function PersonalDetails() {
                 name="semester"
                 value={formData.semester}
                 onChange={handleOnChange}
-                className="w-full px-3 py-2 border rounded-md text-white bg-black"
+                className="w-full px-3 py-2 border rounded-md"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  borderColor: darkMode ? '#6b7280' : '#d1d5db',
+                  color: darkMode ? '#ffffff' : '#111827'
+                }}
                 required
               >
                 <option value="">Select Semester</option>
@@ -235,18 +258,36 @@ function PersonalDetails() {
               {/* Auto subjects (visible, checked, not changeable) */}
               {formData.branch && formData.semester && (
                 <div className="space-y-2">
-                  <h3 className="font-semibold">Your Subjects (Auto-selected)</h3>
+                  <h3 
+                    className="font-semibold"
+                    style={{
+                      color: darkMode ? '#f9fafb' : '#111827'
+                    }}
+                  >
+                    Your Subjects (Auto-selected)
+                  </h3>
                   {autoSubjects.length > 0 ? (
                     autoSubjects.map((sub) => (
                       <label key={sub._id} className="flex items-center gap-2 opacity-80">
                         <input type="checkbox" checked readOnly disabled />
-                        <span>
+                        <span
+                          style={{
+                            color: darkMode ? '#d1d5db' : '#374151'
+                          }}
+                        >
                           {sub.subjectName} ({sub.subjectCode})
                         </span>
                       </label>
                     ))
                   ) : (
-                    <p className="text-sm text-gray-300">No subjects found for this Branch & Semester.</p>
+                    <p 
+                      className="text-sm"
+                      style={{
+                        color: darkMode ? '#9ca3af' : '#6b7280'
+                      }}
+                    >
+                      No subjects found for this Branch & Semester.
+                    </p>
                   )}
                 </div>
               )}
@@ -259,13 +300,27 @@ function PersonalDetails() {
                   checked={isMinor}
                   onChange={(e) => setIsMinor(e.target.checked)}
                 />
-                <label htmlFor="isMinor">Opt for Minor Subjects</label>
+                <label 
+                  htmlFor="isMinor"
+                  style={{
+                    color: darkMode ? '#f9fafb' : '#111827'
+                  }}
+                >
+                  Opt for Minor Subjects
+                </label>
               </div>
 
               {/* Minor subjects (only when opted) */}
               {isMinor && formData.semester && (
                 <div className="space-y-2">
-                  <h3 className="font-semibold">Available Minor Subjects</h3>
+                  <h3 
+                    className="font-semibold"
+                    style={{
+                      color: darkMode ? '#f9fafb' : '#111827'
+                    }}
+                  >
+                    Available Minor Subjects
+                  </h3>
                   {minorSubjects.length > 0 ? (
                     minorSubjects.map((sub) => (
                       <label key={sub._id} className="flex items-center gap-2">
@@ -274,13 +329,22 @@ function PersonalDetails() {
                           checked={selectedMinorSubjects.includes(sub._id)}
                           onChange={() => handleMinorSelect(sub._id)}
                         />
-                        <span>
+                        <span
+                          style={{
+                            color: darkMode ? '#d1d5db' : '#374151'
+                          }}
+                        >
                           {sub.subjectName} ({sub.subjectCode})
                         </span>
                       </label>
                     ))
                   ) : (
-                    <p className="text-sm text-gray-300">
+                    <p 
+                      className="text-sm"
+                      style={{
+                        color: darkMode ? '#9ca3af' : '#6b7280'
+                      }}
+                    >
                       No minor subjects available for this semester.
                     </p>
                   )}
@@ -289,7 +353,7 @@ function PersonalDetails() {
 
               <button
                 type="submit"
-                className="w-full py-2 px-4 bg-teal-600 rounded-md text-white"
+                className="w-full py-2 px-4 rounded-md font-semibold transition-all duration-300 hover:scale-105 bg-gradient-to-r from-blue-600 via-green-500 to-indigo-800 text-white"
               >
                 Create Account
               </button>
@@ -304,10 +368,18 @@ function PersonalDetails() {
                 value={formData.department}
                 onChange={handleOnChange}
                 placeholder="Department"
-                className="w-full px-3 py-2 border rounded-md text-white"
+                className="w-full px-3 py-2 border rounded-md"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  borderColor: darkMode ? '#6b7280' : '#d1d5db',
+                  color: darkMode ? '#ffffff' : '#111827'
+                }}
                 required
               />
-              <button type="submit" className="w-full py-2 px-4 bg-teal-600 rounded-md text-white">
+              <button 
+                type="submit" 
+                className="w-full py-2 px-4 rounded-md font-semibold transition-all duration-300 hover:scale-105 bg-gradient-to-r from-blue-600 via-green-500 to-indigo-800 text-white"
+              >
                 Create Account
               </button>
             </form>
