@@ -1,6 +1,6 @@
-"use client";;
-import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
-import { motion, AnimatePresence } from "motion/react";
+"use client";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from "react";
 
@@ -150,7 +150,7 @@ export const AnimatedTestimonials = ({
               className="group/button flex h-7 w-7 items-center justify-center rounded-full"
               style={{ backgroundColor: darkMode ? '#374151' : '#f3f4f6' }}
             >
-              <IconArrowLeft
+              <ChevronLeft
                 className="h-5 w-5 transition-transform duration-300 group-hover/button:rotate-12" 
                 style={{ color: darkMode ? '#9ca3af' : '#000000' }}
               />
@@ -160,7 +160,7 @@ export const AnimatedTestimonials = ({
               className="group/button flex h-7 w-7 items-center justify-center rounded-full"
               style={{ backgroundColor: darkMode ? '#374151' : '#f3f4f6' }}
             >
-              <IconArrowRight
+              <ChevronRight
                 className="h-5 w-5 transition-transform duration-300 group-hover/button:-rotate-12" 
                 style={{ color: darkMode ? '#9ca3af' : '#000000' }}
               />
