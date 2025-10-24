@@ -202,7 +202,7 @@ function Home() {
                 <div className='flex flex-col justify-center items-center'>
                     <div className='w-10/12 flex flex-col justify-center items-center'>
                     <h3 
-                        className=' text-center p-4 sm:text-2xl text-lg rounded-4xl my-5 font-semibold'
+                        className=' text-center p-4 sm:text-2xl text-lg rounded-4xl mt-15 font-semibold'
                         style={{ color: darkMode ? '#ffffff' : '#111827' }}
                     >
                         <AnimatText text="*" />Trusted by Hundreds<AnimatText text="*" />
@@ -217,16 +217,16 @@ function Home() {
             </section>
 
             {/* How It Works Section */}
-            {/* <section>
-                <div>
-                    <h2>
+            <section className='my-10'>
+                <div className='w-full flex justify-center items-center flex-col'>
+                    <div className='text-3xl font-bold my-10'>
                         How It Works
-                    </h2>
-                    <div>
+                    </div>
+                    <div className='flex justify-center items-center gap-4'>
                         {[
-                            { step: "01", title: "Scan QR Code", desc: "Students scan the unique QR code displayed by instructors", icon: "🧾", color: "from-blue-500 to-cyan-500" },
-                            { step: "02", title: "Mark Attendance", desc: "System automatically records attendance with timestamp", icon: "✅", color: "from-green-500 to-emerald-500" },
-                            { step: "03", title: "Generate Reports", desc: "View detailed analytics and generate comprehensive reports", icon: "📊", color: "from-purple-500 to-pink-500" }
+                            { step: "01", title: "Scan QR Code", desc: "Students scan the unique QR code displayed by instructors", color: "from-blue-500 to-cyan-500" },
+                            { step: "02", title: "Mark Attendance", desc: "System automatically records attendance with timestamp", color: "from-green-500 to-emerald-500" },
+                            { step: "03", title: "Generate Reports", desc: "View detailed analytics and generate comprehensive reports", color: "from-purple-500 to-pink-500" }
                         ].map((item, index) => (
                             <div
                                 key={index}
@@ -241,7 +241,7 @@ function Home() {
                         ))}
                     </div>
                 </div>
-            </section> */}
+            </section>
 
         </div>
     )

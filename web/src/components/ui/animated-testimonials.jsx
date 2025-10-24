@@ -38,7 +38,7 @@ export const AnimatedTestimonials = ({
   };
   return (
     <div
-      className="mx-auto max-w-sm px-4 py-20 font-sans antialiased md:max-w-4xl md:px-8 lg:px-12">
+      className="mx-auto max-w-sm px-4 py-10 font-sans antialiased md:max-w-4xl md:px-8 lg:px-12">
       <div className="relative grid grid-cols-1 gap-20 md:grid-cols-2">
         <div>
           <div className="relative h-80 w-full">
@@ -148,21 +148,21 @@ export const AnimatedTestimonials = ({
             <button
               onClick={handlePrev}
               className="group/button flex h-7 w-7 items-center justify-center rounded-full"
-              style={{ backgroundColor: darkMode ? '#374151' : '#f3f4f6' }}
+              style={{ backgroundColor: darkMode ? '#f3f4f6' : '#374151' }}
             >
               <ChevronLeft
                 className="h-5 w-5 transition-transform duration-300 group-hover/button:rotate-12" 
-                style={{ color: darkMode ? '#9ca3af' : '#000000' }}
+                style={{ color: darkMode ? '#000000' : '#ffffff' }}
               />
             </button>
             <button
               onClick={handleNext}
               className="group/button flex h-7 w-7 items-center justify-center rounded-full"
-              style={{ backgroundColor: darkMode ? '#374151' : '#f3f4f6' }}
+              style={{ backgroundColor: darkMode ? '#f3f4f6' : '#374151' }}
             >
               <ChevronRight
                 className="h-5 w-5 transition-transform duration-300 group-hover/button:-rotate-12" 
-                style={{ color: darkMode ? '#9ca3af' : '#000000' }}
+                style={{ color: darkMode ? '#000000' : '#ffffff' }}
               />
             </button>
           </div>

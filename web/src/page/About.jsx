@@ -232,8 +232,8 @@ function About() {
         className="py-20 bg-gradient-to-br from-blue-50 to-purple-50"
         style={{
           background: darkMode 
-            ? 'linear-gradient(to bottom right, #1e3a8a, #581c87)'
-            : 'linear-gradient(to bottom right, #eff6ff, #faf5ff)'
+            ? 'linear-gradient(to bottom right, #17213f, #17212f)'
+            : 'linear-gradient(to bottom right, #eff6ff, #17212f)'
         }}
         initial="initial"
         whileInView="animate"
@@ -243,7 +243,7 @@ function About() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div variants={fadeInUp} className="text-center mb-16">
             <span 
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 rounded-full text-sm font-semibold mb-6"
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-100 to-black-100 text-blue-800 rounded-full text-sm font-semibold mb-6"
               style={{
                 background: darkMode 
                   ? 'linear-gradient(to right, #1e40af, #7c3aed)'
@@ -524,43 +524,7 @@ function About() {
         </div>
       </motion.section>
 
-      {/* Call to Action */}
-      <motion.section 
-        className="py-20 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600"
-        initial="initial"
-        whileInView="animate"
-        viewport={{ once: true }}
-        variants={fadeInUp}
-      >
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            Ready to Experience the Future of Attendance?
-          </h2>
-          <p 
-            className="text-xl text-blue-100 mb-8 leading-relaxed"
-            style={{
-              color: darkMode ? '#c7d2fe' : '#bfdbfe'
-            }}
-          >
-            Join hundreds of students and faculty members who are already using 
-            our innovative attendance management system.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link 
-              to="/signup"
-              className="px-8 py-4 bg-white text-blue-600 font-bold rounded-2xl hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
-            >
-              Get Started Today
-            </Link>
-            <Link 
-              to="/login"
-              className="px-8 py-4 border-2 border-white text-white font-bold rounded-2xl hover:bg-white hover:text-blue-600 transition-all duration-300 transform hover:scale-105"
-            >
-              Sign In
-            </Link>
-          </div>
-        </div>
-      </motion.section>
+      
     </div>
   )
 }
