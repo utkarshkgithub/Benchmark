@@ -8,13 +8,14 @@ import quScanImage from '../assets/Gemini_Generated_Image_lftu38lftu38lftu.png'
 import multirole from '../assets/Gemini_Generated_Image_83bpgh83bpgh83bp.png'
 import realTime from "../assets/Gemini_Generated_Image_hc7b9ahc7b9ahc7b.png"
 import automatedREports from '../assets/Gemini_Generated_Image_pw6qdkpw6qdkpw6q.png'
-
+import scenqrvideo2 from '../assets/Student_Attendance_Marked_Successfully.mp4'
 import { AnimatedTestimonialsDemo } from '../components/AnimatedTestimonialsDemo'
 
 function Home() {
     const [currentFeature, setCurrentFeature] = useState(0)
     const [isVisible, setIsVisible] = useState(false)
-    
+    const [selectedVideo, setSelectedVideo] = useState(null)
+    const arr = [scenqrvideo2, secanQr]
     // Get theme state
     const themeState = useSelector((state) => state.theme)
     const darkMode = themeState?.darkMode || false
@@ -67,6 +68,15 @@ function Home() {
 
     useEffect(() => {
         setIsVisible(true)
+        
+        // Generate random number between 1 and 10
+        const randomNum = Math.floor(Math.random() * 10) + 1
+        
+        // Select video based on random number
+        // 1-5: first video (arr[0]), 6-10: second video (arr[1])
+        const videoIndex = randomNum <= 5 ? 0 : 1
+        setSelectedVideo(arr[videoIndex])
+        
         const interval = setInterval(() => {
             setCurrentFeature((prev) => (prev + 1) % features.length)
         }, 3000)
@@ -130,7 +140,14 @@ function Home() {
                                     </div>
                                 </div>
                                 <div className='rounded-2xl w-full my-10'>
-                                    <video src={secanQr} autoPlay loop muted alt="" className='rounded-2xl'></video>
+                                    <video 
+                                        src={selectedVideo || secanQr} 
+                                        autoPlay 
+                                        loop 
+                                        muted 
+                                        alt="" 
+                                        className='rounded-2xl'
+                                    ></video>
                                 </div>
                             </div>
 
