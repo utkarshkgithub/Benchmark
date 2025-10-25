@@ -157,21 +157,77 @@ function MyProfile() {
               </div>
 
               <div className="space-y-6">
-                <div className="grid md:grid-cols-4 grid-cols-2 gap-6 p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl hover:from-green-100 hover:to-emerald-100 transition-colors duration-300">
+                <div 
+                  className="grid md:grid-cols-4 grid-cols-2 gap-6 p-6 rounded-xl transition-colors duration-300"
+                  style={{
+                    background: darkMode
+                      ? 'linear-gradient(to right, #064e3b, #065f46)'
+                      : 'linear-gradient(to right, #f0fdf4, #ecfdf5)'
+                  }}
+                >
                   <div className="space-y-1">
-                    <p className="text-gray-500 text-sm font-medium uppercase tracking-wider">Semester</p>
-                    <p className="text-gray-800 font-semibold text-lg">{user?.semester}</p>
+                    <p 
+                      className="text-sm font-medium uppercase tracking-wider"
+                      style={{
+                        color: darkMode ? '#9ca3af' : '#6b7280'
+                      }}
+                    >
+                      Semester
+                    </p>
+                    <p 
+                      className="font-semibold text-lg"
+                      style={{
+                        color: darkMode ? '#f9fafb' : '#1f2937'
+                      }}
+                    >
+                      {user?.semester}
+                    </p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-gray-500 text-sm font-medium uppercase tracking-wider">Branch</p>
-                    <p className="text-gray-800 font-semibold text-lg">{user?.branch}</p>
+                    <p 
+                      className="text-sm font-medium uppercase tracking-wider"
+                      style={{
+                        color: darkMode ? '#9ca3af' : '#6b7280'
+                      }}
+                    >
+                      Branch
+                    </p>
+                    <p 
+                      className="font-semibold text-lg"
+                      style={{
+                        color: darkMode ? '#f9fafb' : '#1f2937'
+                      }}
+                    >
+                      {user?.branch}
+                    </p>
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-4 grid-cols-3 gap-6 p-6 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl hover:from-teal-100 hover:to-cyan-100 transition-colors duration-300">
+                <div 
+                  className="grid md:grid-cols-4 grid-cols-3 gap-6 p-6 rounded-xl transition-colors duration-300"
+                  style={{
+                    background: darkMode
+                      ? 'linear-gradient(to right, #0c4a6e, #0369a1)'
+                      : 'linear-gradient(to right, #f0f9ff, #e0f2fe)'
+                  }}
+                >
                   <div className="space-y-1">
-                    <p className="text-gray-500 text-sm font-medium uppercase tracking-wider">Roll Number</p>
-                    <p className="text-gray-800 font-semibold text-lg">{user?.rollNumber}</p>
+                    <p 
+                      className="text-sm font-medium uppercase tracking-wider"
+                      style={{
+                        color: darkMode ? '#9ca3af' : '#6b7280'
+                      }}
+                    >
+                      Roll Number
+                    </p>
+                    <p 
+                      className="font-semibold text-lg"
+                      style={{
+                        color: darkMode ? '#f9fafb' : '#1f2937'
+                      }}
+                    >
+                      {user?.rollNumber}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -180,23 +236,70 @@ function MyProfile() {
 
           {/* Academic Information for Instructors */}
           {user?.accountType == "Instructor" && (
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 p-8 border border-white/20 animate-slide-up" style={{ animationDelay: '0.3s' }}>
+            <div 
+              className="backdrop-blur-sm rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 p-8 border animate-slide-up" 
+              style={{ 
+                animationDelay: '0.3s',
+                backgroundColor: darkMode ? 'rgba(31, 41, 55, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+                borderColor: darkMode ? 'rgba(75, 85, 99, 0.2)' : 'rgba(255, 255, 255, 0.2)'
+              }}
+            >
               <div className="flex justify-between items-center mb-8">
-                <h2 className="text-3xl font-bold text-gray-800 relative">
+                <h2 
+                  className="text-3xl font-bold relative"
+                  style={{
+                    color: darkMode ? '#f9fafb' : '#1f2937'
+                  }}
+                >
                   Academic Information
                   <div className="absolute -bottom-2 left-0 w-16 h-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full"></div>
                 </h2>
               </div>
 
               <div className="space-y-6">
-                <div className="grid md:grid-cols-4 grid-cols-2 gap-6 p-6 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl hover:from-orange-100 hover:to-red-100 transition-colors duration-300">
+                <div 
+                  className="grid md:grid-cols-4 grid-cols-2 gap-6 p-6 rounded-xl transition-colors duration-300"
+                  style={{
+                    background: darkMode
+                      ? 'linear-gradient(to right, #7c2d12, #dc2626)'
+                      : 'linear-gradient(to right, #fff7ed, #fef2f2)'
+                  }}
+                >
                   <div className="space-y-1">
-                    <p className="text-gray-500 text-sm font-medium uppercase tracking-wider">Department</p>
-                    <p className="text-gray-800 font-semibold text-lg">{user?.department}</p>
+                    <p 
+                      className="text-sm font-medium uppercase tracking-wider"
+                      style={{
+                        color: darkMode ? '#9ca3af' : '#6b7280'
+                      }}
+                    >
+                      Department
+                    </p>
+                    <p 
+                      className="font-semibold text-lg"
+                      style={{
+                        color: darkMode ? '#f9fafb' : '#1f2937'
+                      }}
+                    >
+                      {user?.department}
+                    </p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-gray-500 text-sm font-medium uppercase tracking-wider">Role</p>
-                    <p className="text-gray-800 font-semibold text-lg">{user?.accountType}</p>
+                    <p 
+                      className="text-sm font-medium uppercase tracking-wider"
+                      style={{
+                        color: darkMode ? '#9ca3af' : '#6b7280'
+                      }}
+                    >
+                      Role
+                    </p>
+                    <p 
+                      className="font-semibold text-lg"
+                      style={{
+                        color: darkMode ? '#f9fafb' : '#1f2937'
+                      }}
+                    >
+                      {user?.accountType}
+                    </p>
                   </div>
                 </div>
               </div>

@@ -97,7 +97,7 @@ function Home() {
 
 
             {/* Hero Section */}
-            <section>
+            <section className='px-4'>
                 <div>
                     {/* Main Content */}
                     <div className='flex flex-col justify-center items-center'>
@@ -179,30 +179,52 @@ function Home() {
 
 
                         {/* Feature Carousel */}
-                        <div className='relative mt-10 flex justify-center items-center flex-col'>
+                        <div className='relative mt-10 flex justify-center items-center flex-col w-full'>
                             <h3 
                                 className=' text-center p-4 sm:text-2xl text-lg rounded-4xl my-5 font-semibold'
                                 style={{ color: darkMode ? '#ffffff' : '#111827' }}
                             >
                                 <AnimatText text="*" />Key Features<AnimatText text="*" />
                             </h3>
-                            <div className='grid grid-cols-1 md:grid-cols-2 gap-10 w-11/12'>
+                            <div 
+                                className={`grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-4xl transition-all duration-300 hover:bg-transparent ${darkMode ? 'bg-black/20' : 'bg-white/40'}`}
+                                style={{
+                                    backdropFilter: 'blur(10px)'
+                                }}
+                            >
                                 {features.map((feature, index) => (
                                     <div
                                         key={index}
-                                        className='flex gap-4 items-center border-2 bg-[#203047e1] p-2 rounded-2xl' 
+                                        className='flex gap-4 items-center border-2 p-2 rounded-2xl hover:scale-105 transition-all duration-300'
+                                        style={{
+                                            borderColor: darkMode ? 'rgba(75, 85, 99, 0.5)' : 'rgba(156, 163, 175, 0.3)',
+                                            backdropFilter: 'blur(5px)'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.backgroundColor = darkMode ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.3)'
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.backgroundColor = darkMode ? 'rgba(32, 48, 78, 0.3)' : 'rgba(255, 255, 255, 0.2)'
+                                        }}
                                     >
-                                        <div className='w-40 '>
+                                        <div className='w-40'>
                                             <img src={feature.icon} alt="" className='rounded-2xl'/>
                                         </div>
-                                        <div 
-                                            className='font-bold text-lg'
-                                            style={{ color: darkMode ? '#ffffff' : '#ffffff' }}
-                                        >
-                                            <h4>
+                                        <div className='font-bold text-lg'>
+                                            <h4
+                                                style={{ 
+                                                    color: darkMode ? '#ffffff' : '#111827'
+                                                }}
+                                            >
                                                 {feature.title}
                                             </h4>
-                                            <h3 >
+                                            <h3
+                                                style={{ 
+                                                    color: darkMode ? '#d1d5db' : '#374151',
+                                                    fontWeight: 'normal',
+                                                    fontSize: '0.875rem'
+                                                }}
+                                            >
                                                 {feature.description}
                                             </h3>
                                         </div>
@@ -234,12 +256,16 @@ function Home() {
             </section>
 
             {/* How It Works Section */}
-            <section className='my-10'>
+            <section className='my-10 px-4'>
                 <div className='w-full flex justify-center items-center flex-col'>
-                    <div className='text-3xl font-bold my-10'>
+                    <div 
+                        className='text-3xl font-bold my-10'
+                        style={{ color: darkMode ? '#ffffff' : '#111827' }}
+                    >
                         How It Works
                     </div>
-                    <div className='flex justify-center items-center gap-4'>
+                    {/* <div className='grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4'> */}
+                    <div className='flex justify-center items-center flex-wrap gap-4'>
                         {[
                             { step: "01", title: "Scan QR Code", desc: "Students scan the unique QR code displayed by instructors", color: "from-blue-500 to-cyan-500" },
                             { step: "02", title: "Mark Attendance", desc: "System automatically records attendance with timestamp", color: "from-green-500 to-emerald-500" },
@@ -247,13 +273,37 @@ function Home() {
                         ].map((item, index) => (
                             <div
                                 key={index}
+                                className='flex flex-col items-center p-6 rounded-2xl transition-all duration-300 hover:scale-105'
+                                style={{
+                                    backgroundColor: darkMode ? 'rgba(31, 41, 55, 0.5)' : 'rgba(255, 255, 255, 0.5)',
+                                    backdropFilter: 'blur(10px)',
+                                    border: `1px solid ${darkMode ? 'rgba(75, 85, 99, 0.3)' : 'rgba(156, 163, 175, 0.2)'}`
+                                }}
                             >
-                                <div>
-                                    {item.icon}
+                                <div 
+                                    className='text-4xl mb-4'
+                                    style={{ color: darkMode ? '#60a5fa' : '#3b82f6' }}
+                                >
+                                    {item.icon || "🔄"}
                                 </div>
-                                <div>{item.step}</div>
-                                <h3>{item.title}</h3>
-                                <p>{item.desc}</p>
+                                <div 
+                                    className='text-2xl font-bold mb-2'
+                                    style={{ color: darkMode ? '#fbbf24' : '#f59e0b' }}
+                                >
+                                    {item.step}
+                                </div>
+                                <h3 
+                                    className='text-lg font-semibold mb-2 text-center'
+                                    style={{ color: darkMode ? '#ffffff' : '#111827' }}
+                                >
+                                    {item.title}
+                                </h3>
+                                <p 
+                                    className='text-sm text-center max-w-xs'
+                                    style={{ color: darkMode ? '#d1d5db' : '#4b5563' }}
+                                >
+                                    {item.desc}
+                                </p>
                             </div>
                         ))}
                     </div>

@@ -453,8 +453,22 @@ function About() {
                     <div className="text-3xl">{tech.icon}</div>
                   )}
                 </div>
-                <div className="text-gray-700 font-medium text-sm">{tech.name}</div>
-                <div className="text-xs text-gray-500 mt-1">{tech.category}</div>
+                <div 
+                  className="font-medium text-sm"
+                  style={{
+                    color: darkMode ? '#d1d5db' : '#374151'
+                  }}
+                >
+                  {tech.name}
+                </div>
+                <div 
+                  className="text-xs mt-1"
+                  style={{
+                    color: darkMode ? '#9ca3af' : '#6b7280'
+                  }}
+                >
+                  {tech.category}
+                </div>
               </div>
             ))}
           </motion.div>
@@ -516,8 +530,22 @@ function About() {
                     className="w-10 h-10 object-contain"
                   />
                 </div>
-                <div className="text-gray-700 font-medium text-sm">{tech.name}</div>
-                <div className="text-xs text-gray-500 mt-1">{tech.category}</div>
+                <div 
+                  className="font-medium text-sm"
+                  style={{
+                    color: darkMode ? '#d1d5db' : '#374151'
+                  }}
+                >
+                  {tech.name}
+                </div>
+                <div 
+                  className="text-xs mt-1"
+                  style={{
+                    color: darkMode ? '#9ca3af' : '#6b7280'
+                  }}
+                >
+                  {tech.category}
+                </div>
               </div>
             ))}
           </motion.div>
