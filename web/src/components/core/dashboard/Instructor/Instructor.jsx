@@ -130,7 +130,7 @@ const Instructor = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Subject Dropdown */}
-            <div className="space-y-3 transform hover:scale-105 transition-transform duration-300">
+            <div className="space-y-3 transform ">
               <label className="block text-sm font-bold mb-2 uppercase tracking-wider" style={{
                 color: darkMode ? '#d1d5db' : '#374151'
               }}>
@@ -165,7 +165,7 @@ const Instructor = () => {
             </div>
 
             {/* Date Search */}
-            <div className="space-y-3 transform hover:scale-105 transition-transform duration-300">
+            <div className="space-y-3 transform ">
               <label className="block text-sm font-bold mb-2 uppercase tracking-wider" style={{
                 color: darkMode ? '#d1d5db' : '#374151'
               }}>
@@ -174,7 +174,7 @@ const Instructor = () => {
               <div className="relative group">
                 <input
                   type="date"
-                  className="w-full border-2 rounded-xl px-6 py-4 pr-12 focus:outline-none transition-all duration-300 shadow-sm hover:shadow-md font-medium"
+                  className="w-full border-2 rounded-xl px-4 py-4  focus:outline-none transition-all duration-300 shadow-sm hover:shadow-md font-medium"
                   style={{
                     backgroundColor: darkMode ? '#374151' : '#fdf2f8',
                     borderColor: darkMode ? '#4b5563' : '#e2e8f0',
@@ -183,13 +183,7 @@ const Instructor = () => {
                   value={searchDate}
                   onChange={(e) => setSearchDate(e.target.value)}
                 />
-                <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none group-hover:text-purple-500 transition-colors duration-200">
-                  <svg className="w-6 h-6" style={{
-                    color: darkMode ? '#9ca3af' : '#6b7280'
-                  }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
+                
               </div>
             </div>
           </div>
