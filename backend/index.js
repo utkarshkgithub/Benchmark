@@ -5,14 +5,27 @@ import AuthRoutes from './routes/AuthRoutes.js'
 import SettingRoutes from './routes/SettingRoutes.js'
 import SubjectRoutes from "./routes/SubRoutes.js"
 import {connectDB} from './config/dbConnect.js'
-import { applySecurity } from "./middleware/security.js";
+// Temporarily disable security middleware
+// import { applySecurity } from "./middleware/security.js";
+import cors from "cors";
+import cookieParser from "cookie-parser";
 
 const app = express();
 dotenv.config()
 const PORT = process.env.PORT || 5001;
 
+// Temporarily use basic security instead of full security
+app.use(cors({
+  origin: ["https://ilitbh-benchmark.vercel.app", "http://localhost:3000", "http://localhost:5173"],
+  credentials: true
+}));
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser());
+
 // 🔒 Apply FULL comprehensive security middleware (handles everything)
-applySecurity(app);
+// applySecurity(app); // Temporarily disabled
 
 // console.log("🛡️ All security middleware applied - Server protected against spam attacks");
 
