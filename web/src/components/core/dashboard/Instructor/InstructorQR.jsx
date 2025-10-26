@@ -1,4 +1,7 @@
-// components/InstructorQR.jsx
+
+
+
+                // components/InstructorQR.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { QRCodeCanvas } from "qrcode.react";
@@ -432,24 +435,13 @@ export default function InstructorQR() {
                 {/* QR View */}
                 {viewMode === "qr" && (
                     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4 animate-fade-in">
-                        <div 
-                            style={{
-                                backgroundColor: darkMode ? 'rgba(31, 41, 55, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-                                color: darkMode ? '#e5e7eb' : '#374151'
-                            }}
-                            className="backdrop-blur-xl rounded-3xl shadow-3xl w-full max-w-md md:max-w-xl lg:max-w-3xl space-y-6 text-center animate-scale-in"
-                        >
+                        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-3xl w-full max-w-md md:max-w-xl lg:max-w-3xl space-y-6 text-center animate-scale-in">
                             <div className="flex justify-evenly mt-4">
                                 <div className="relative">
-                                <h3 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 via-green-500 to-indigo-800 bg-clip-text text-transparent">
+                                <h3 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                                     {selectedSubject?.subjectName}
                                 </h3>
-                                <p 
-                                    style={{
-                                        color: darkMode ? '#9ca3af' : '#6b7280'
-                                    }}
-                                    className="text-lg font-semibold"
-                                >
+                                <p className="text-lg text-gray-600 font-semibold">
                                     {selectedSubject?.subjectCode}
                                 </p>
                             </div>
@@ -462,22 +454,10 @@ export default function InstructorQR() {
                             </div>
                             </div>
 
-                            <div 
-                                style={{
-                                    background: darkMode 
-                                        ? 'linear-gradient(to bottom right, rgba(55, 65, 81, 0.8), rgba(75, 85, 99, 0.8))'
-                                        : 'linear-gradient(to bottom right, rgba(249, 250, 251, 1), rgba(243, 244, 246, 1))'
-                                }}
-                                className="rounded-2xl flex justify-center shadow-inner"
-                            >
+                            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl flex justify-center shadow-inner">
                                 <div className="relative">
-                                    <div className="absolute -inset-4 rounded-2xl opacity-20 blur-lg animate-pulse"></div>
-                                    <div 
-                                        style={{
-                                            backgroundColor: darkMode ? '#374151' : '#ffffff'
-                                        }}
-                                        className="relative rounded-2xl shadow-lg"
-                                    >
+                                    <div className="absolute -inset-4  rounded-2xl opacity-20 blur-lg animate-pulse"></div>
+                                    <div className="relative bg-white rounded-2xl shadow-lg">
                                         <QRCodeCanvas 
                                             value={qrData} 
                                             size={620} 
@@ -491,12 +471,7 @@ export default function InstructorQR() {
                             <div className="flex justify-center">
                                 <button
                                     onClick={closeQR}
-                                    style={{
-                                        backgroundColor: darkMode ? 'rgba(55, 65, 81, 0.8)' : 'rgba(219, 234, 254, 0.8)',
-                                        borderColor: darkMode ? '#6366f1' : '#3b82f6',
-                                        color: darkMode ? '#a5b4fc' : '#2563eb'
-                                    }}
-                                    className="w-fit p-4 rounded-xl border-2 font-bold hover:scale-105 transition-all duration-200"
+                                    className="w-fit p-4 rounded-xl border-2 border-blue-500 text-blue-600 bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 font-bold"
                                 >
                                     📋 Close & Review Attendance
                                 </button>
@@ -504,6 +479,7 @@ export default function InstructorQR() {
                         </div>
                     </div>
                 )}
+
 
                 {/* Attendance Review */}
                 {viewMode === "list" && (
