@@ -41,10 +41,13 @@ export function applySecurity(app) {
           "http://127.0.0.1:5173"
         ];
         
+        console.log(`🌐 CORS request from origin: ${origin}`);
+        
         // Development mein origin null ho sakta hai (for tools like Postman)
         if (!origin) return callback(null, true);
         
         if (allowedOrigins.indexOf(origin) !== -1) {
+          console.log(`✅ CORS allowed for origin: ${origin}`);
           callback(null, true);
         } else {
           console.log(`🚫 CORS blocked origin: ${origin}`);
@@ -68,6 +71,16 @@ export function applySecurity(app) {
       optionsSuccessStatus: 200 // Some legacy browsers choke on 204
     })
   );
+
+  // 3a. Additional explicit OPTIONS handler for all routes
+  app.options('*', (req, res) => {
+    console.log(`🔄 OPTIONS request for: ${req.path} from origin: ${req.get('Origin')}`);
+    res.header('Access-Control-Allow-Origin', req.get('Origin'));
+    res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,PATCH,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept,Origin');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.sendStatus(200);
+  });
   
   // 4. File upload middleware
   app.use(
