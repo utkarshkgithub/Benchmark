@@ -120,34 +120,37 @@ export function applySecurity(app) {
   
   // 5. Helmet: Secure HTTP headers set karta hai (Chrome-friendly configuration)
   app.use(helmet({
-    // Content Security Policy - More relaxed for better Chrome compatibility
+    // Content Security Policy - Chrome-compatible configuration
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https:", "data:"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https:"],
-        imgSrc: ["'self'", "data:", "https:", "http:", "blob:"],
-        connectSrc: ["'self'", "http:", "https:", "ws:", "wss:"],
-        fontSrc: ["'self'", "https:", "data:"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https:", "data:", "fonts.googleapis.com"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https:", "cdnjs.cloudflare.com"],
+        imgSrc: ["'self'", "data:", "https:", "http:", "blob:", "*.vercel.app"],
+        connectSrc: ["'self'", "http:", "https:", "ws:", "wss:", "*.vercel.app", "*.onrender.com"],
+        fontSrc: ["'self'", "https:", "data:", "fonts.gstatic.com", "fonts.googleapis.com"],
         mediaSrc: ["'self'", "https:", "data:"],
         objectSrc: ["'none'"],
         frameSrc: ["'self'", "https:"],
+        workerSrc: ["'self'", "blob:"],
+        childSrc: ["'self'", "blob:"],
+        manifestSrc: ["'self'"]
       },
     },
     // Hide X-Powered-By header
     hidePoweredBy: true,
-    // HTTP Strict Transport Security - More relaxed for development
-    hsts: process.env.NODE_ENV === 'production' ? {
-      maxAge: 31536000, // 1 year
-      includeSubDomains: true,
-      preload: false // Changed to false to avoid Chrome warnings
-    } : false, // Disable HSTS in development
-    // X-Frame-Options - Less restrictive
-    frameguard: { action: 'sameorigin' }, // Changed from 'deny' to 'sameorigin'
+    // HTTP Strict Transport Security - Chrome compatible
+    hsts: false, // Disable HSTS to prevent Chrome warnings
+    // X-Frame-Options - Chrome friendly
+    frameguard: { action: 'sameorigin' },
     // X-Content-Type-Options
     noSniff: true,
-    // Referrer Policy - More permissive
-    referrerPolicy: { policy: "strict-origin-when-cross-origin" } // Changed from "same-origin"
+    // Referrer Policy - Chrome compatible
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+    // Disable other problematic policies
+    crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: false,
+    crossOriginResourcePolicy: false
   }));
   // console.log("✅ Helmet configured");
 

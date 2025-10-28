@@ -5,21 +5,15 @@ import AuthRoutes from './routes/AuthRoutes.js'
 import SettingRoutes from './routes/SettingRoutes.js'
 import SubjectRoutes from "./routes/SubRoutes.js"
 import {connectDB} from './config/dbConnect.js'
-import { applySecurity } from "./middleware/security.js";
 import { applyDevSecurity } from "./middleware/security-dev.js";
 
 const app = express();
 dotenv.config()
 const PORT = process.env.PORT || 5001;
 
-// 🔒 Apply security middleware based on environment
-if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV !== 'production') {
-  console.log("🛠️ Using development-friendly security (Chrome compatible)");
-  applyDevSecurity(app);
-} else {
-  console.log("🔒 Using full production security");
-  applySecurity(app);
-}
+// 🔒 Use Chrome-friendly security for ALL environments to fix the warning
+console.log("🛠️ Using Chrome-compatible security for all environments");
+applyDevSecurity(app);
 
 // console.log("🛡️ All security middleware applied - Server protected against spam attacks");
 
