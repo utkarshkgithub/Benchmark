@@ -12,11 +12,11 @@ export default defineConfig({
   ],
   server: {
     historyApiFallback: true, // 👈 this makes dev server handle SPA routing
+    host: true, // Allow external connections
     headers: {
-      'X-Frame-Options': 'DENY',
       'X-Content-Type-Options': 'nosniff',
-      'X-XSS-Protection': '1; mode=block',
       'Referrer-Policy': 'strict-origin-when-cross-origin'
+      // Removed overly restrictive headers that might cause Chrome warnings
     },
     // Proxy API requests to avoid CORS during development
     proxy: {

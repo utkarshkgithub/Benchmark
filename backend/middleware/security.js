@@ -30,32 +30,46 @@ export function applySecurity(app) {
   // 2. Cookie parser
   app.use(cookieParser());
   
-  // 3. CORS configuration with enhanced preflight handling
+  // 3. CORS configuration with enhanced preflight handling (Chrome-friendly)
   app.use(
     cors({
       origin: function (origin, callback) {
         const allowedOrigins = [
           "https://iiitbhbenchmark.vercel.app",
+          "https://mtbbenchmark.vercel.app", // Add your Vercel domain if different
           "http://localhost:5173",
           "http://localhost:3000",
-          "http://127.0.0.1:5173"
+          "http://127.0.0.1:5173",
+          "http://localhost:5174", // Additional dev ports
+          "http://localhost:4173"  // Vite preview port
         ];
         
         console.log(`🌐 CORS request from origin: ${origin}`);
         
         // Development mein origin null ho sakta hai (for tools like Postman)
-        if (!origin) return callback(null, true);
+        // Also allow requests with no origin (like mobile apps or Postman)
+        if (!origin) {
+          console.log(`✅ CORS allowed for no-origin request`);
+          return callback(null, true);
+        }
         
         if (allowedOrigins.indexOf(origin) !== -1) {
           console.log(`✅ CORS allowed for origin: ${origin}`);
           callback(null, true);
         } else {
-          console.log(`🚫 CORS blocked origin: ${origin}`);
-          callback(new Error('Not allowed by CORS'));
+          // In development, be more permissive
+          if (process.env.NODE_ENV !== 'production' && 
+              (origin.includes('localhost') || origin.includes('127.0.0.1'))) {
+            console.log(`✅ CORS allowed for dev origin: ${origin}`);
+            callback(null, true);
+          } else {
+            console.log(`🚫 CORS blocked origin: ${origin}`);
+            callback(new Error('Not allowed by CORS'));
+          }
         }
       },
       credentials: true,
-      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"],
       allowedHeaders: [
         "Content-Type", 
         "Authorization", 
@@ -63,9 +77,11 @@ export function applySecurity(app) {
         "Accept",
         "Origin",
         "Access-Control-Request-Method",
-        "Access-Control-Request-Headers"
+        "Access-Control-Request-Headers",
+        "Cache-Control",
+        "Pragma"
       ],
-      exposedHeaders: ["Set-Cookie"],
+      exposedHeaders: ["Set-Cookie", "X-Total-Count"],
       maxAge: 86400, // Preflight requests cache for 24 hours
       preflightContinue: false,
       optionsSuccessStatus: 200 // Some legacy browsers choke on 204
@@ -102,32 +118,36 @@ export function applySecurity(app) {
     })
   );
   
-  // 5. Helmet: Secure HTTP headers set karta hai
+  // 5. Helmet: Secure HTTP headers set karta hai (Chrome-friendly configuration)
   app.use(helmet({
-    // Content Security Policy - XSS attacks se bachata hai
+    // Content Security Policy - More relaxed for better Chrome compatibility
     contentSecurityPolicy: {
       directives: {
-        defaultSrc: ["'self'"], // Only same origin se content load kar sakta hai
-        styleSrc: ["'self'", "'unsafe-inline'"], // CSS ke liye
-        scriptSrc: ["'self'"], // JavaScript ke liye
-        imgSrc: ["'self'", "data:", "https:"], // Images ke liye
-        connectSrc: ["'self'", "http:", "https:"], // AJAX calls ke liye (allowing both HTTP and HTTPS for development)
+        defaultSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https:", "data:"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https:"],
+        imgSrc: ["'self'", "data:", "https:", "http:", "blob:"],
+        connectSrc: ["'self'", "http:", "https:", "ws:", "wss:"],
+        fontSrc: ["'self'", "https:", "data:"],
+        mediaSrc: ["'self'", "https:", "data:"],
+        objectSrc: ["'none'"],
+        frameSrc: ["'self'", "https:"],
       },
     },
-    // Hide X-Powered-By header (attackers ko framework nahi pata chalega)
+    // Hide X-Powered-By header
     hidePoweredBy: true,
-    // HTTP Strict Transport Security - HTTPS force karta hai
-    hsts: {
+    // HTTP Strict Transport Security - More relaxed for development
+    hsts: process.env.NODE_ENV === 'production' ? {
       maxAge: 31536000, // 1 year
       includeSubDomains: true,
-      preload: true
-    },
-    // X-Frame-Options - Clickjacking attacks se bachata hai
-    frameguard: { action: 'deny' },
-    // X-Content-Type-Options - MIME type sniffing prevent karta hai
+      preload: false // Changed to false to avoid Chrome warnings
+    } : false, // Disable HSTS in development
+    // X-Frame-Options - Less restrictive
+    frameguard: { action: 'sameorigin' }, // Changed from 'deny' to 'sameorigin'
+    // X-Content-Type-Options
     noSniff: true,
-    // Referrer Policy - referrer information leak prevent karta hai
-    referrerPolicy: { policy: "same-origin" }
+    // Referrer Policy - More permissive
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" } // Changed from "same-origin"
   }));
   // console.log("✅ Helmet configured");
 
