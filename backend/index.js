@@ -5,15 +5,15 @@ import AuthRoutes from './routes/AuthRoutes.js'
 import SettingRoutes from './routes/SettingRoutes.js'
 import SubjectRoutes from "./routes/SubRoutes.js"
 import {connectDB} from './config/dbConnect.js'
-import { applyDevSecurity } from "./middleware/security-dev.js";
+import { applyChromeSafeSecurity } from "./middleware/chrome-safe-security.js";
 
 const app = express();
 dotenv.config()
 const PORT = process.env.PORT || 5001;
 
-// 🔒 Use Chrome-friendly security for ALL environments to fix the warning
-console.log("🛠️ Using Chrome-compatible security for all environments");
-applyDevSecurity(app);
+// � Use absolutely Chrome-safe security (NO problematic headers)
+console.log("� Using Chrome-safe security to eliminate dangerous site warning");
+applyChromeSafeSecurity(app);
 
 // console.log("🛡️ All security middleware applied - Server protected against spam attacks");
 
