@@ -13,8 +13,16 @@ dotenv.config();
 export const generateQr = async (req, res) => {
   try {
     const userId = req.user.id;
+    
+ 
+    
     const { subjectId } = req.body; // ✅ frontend se subjectId aayega
-
+    // console.log("Extracted subjectId:", subjectId);
+    
+    if (!subjectId) {
+      return res.status(400).json({ success: false, message: "Subject ID is required" });
+    }
+    
     const userDetails = await User.findById(userId);
     if (!userDetails) {
       return res.status(404).json({ success: false, message: "User not found" });
@@ -68,7 +76,7 @@ export const generateQr = async (req, res) => {
       message: "QR token generated successfully."
     });
   } catch (error) {
-    console.error("QR Generation error:", error);
+    // console.error("QR Generation error:", error);
     return res.status(500).json({ success: false, message: "Token generation failed" });
   }
 };
@@ -163,7 +171,7 @@ export const verifyQrCode = async (req, res) => {
       message: "Attendance marked successfully",
     });
   } catch (error) {
-    console.error("Verify QR error:", error);
+    // console.error("Verify QR error:", error);
     return res.status(500).json({
       success: false,
       message: "QR verification failed",
@@ -215,7 +223,7 @@ export const getAttendanceDetails = async (req, res) => {
     // 5️⃣ Build student status list with present/absent and markedAt if present
     const studentStatusList = students.map((student) => {
       if (!student.userId) {
-        console.warn(`Student ${student._id} has no userId`);
+        // console.warn(`Student ${student._id} has no userId`);
         return null;
       }
       
@@ -242,7 +250,7 @@ export const getAttendanceDetails = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Get attendance error:", error);
+    // console.error("Get attendance error:", error);
     return res
       .status(500)
       .json({ success: false, message: "Failed to get attendance", error: error.message });
@@ -290,7 +298,7 @@ export const updateAttendance = async (req, res) => {
       presentStudentCount: presentStudentEntries.length,
     });
   } catch (error) {
-    console.error("Update attendance error:", error);
+    // console.error("Update attendance error:", error);
     return res.status(500).json({ success: false, message: "Attendance update failed", error: error.message });
   }
 };
@@ -322,7 +330,7 @@ export const getInstructorAttendanceSummary = async (req, res) => {
 
       for (const student of students) {
         if (!student.userId) {
-          console.warn(`Student ${student._id} has no userId in instructor summary`);
+          // console.warn(`Student ${student._id} has no userId in instructor summary`);
           continue;
         }
         
@@ -373,7 +381,7 @@ export const getInstructorAttendanceSummary = async (req, res) => {
       summary,
     });
   } catch (error) {
-    console.error("Error fetching instructor summary:", error);
+    // console.error("Error fetching instructor summary:", error);
     return res.status(500).json({ success: false, message: "Failed to fetch attendance summary", error: error.message });
   }
 };
@@ -416,7 +424,7 @@ export const deleteSubject = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Error deleting subject:", error);
+    // console.error("Error deleting subject:", error);
     return res.status(500).json({ success: false, message: "Server Error" });
   }
 };

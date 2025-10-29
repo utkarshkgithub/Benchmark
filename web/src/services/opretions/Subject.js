@@ -112,7 +112,6 @@ export const fetchStudentAttendance = async (token) => {
 
 
 export const generateQr = async (token, formData) => {
-    // console.log("subjectCode",subjectCode)
     const toastId = toast.loading("Loading...");
     try {
         const response = await apiConnector(

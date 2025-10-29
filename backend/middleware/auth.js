@@ -44,7 +44,6 @@ export const auth = (req, res, next) => {
   }
 };
 
-// 🔒 Role-based middleware factory
 export const authorizeRole = (roles = []) => {
   return (req, res, next) => {
     try {
@@ -64,7 +63,6 @@ export const authorizeRole = (roles = []) => {
   };
 };
 
-// ✅ Predefined role checks for convenience
 export const isStudent = authorizeRole(["Student"]);
 export const isInstructor = authorizeRole(["Instructor"]);
 export const isAdmin = authorizeRole(["Admin"]);

@@ -74,7 +74,7 @@ export default function InstructorQR() {
 
     const onGenerate = async () => {
         if (!selectedSubject) return;
-
+        console.log(selectedSubject._id);
         // If QR is active, just show the existing QR without regenerating
         if (viewMode === "qr" && remaining > 0) {
             return;
