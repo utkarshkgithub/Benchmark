@@ -15,15 +15,15 @@ const PORT = process.env.PORT || 5001;
 connectDB();
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // ✅ Handle URL-encoded data
-app.use(fileUpload()); // ✅ Handle multipart/form-data
+app.use(express.urlencoded({ extended: true })); 
+app.use(fileUpload()); 
 app.use(cookieParser());
 
 
 
 app.use(
   cors({
-    origin: ["https://iiitbhbenchmark.vercel.app", "http://localhost:5173","https://benchmark-official.vercel.app"],
+    origin: ["https://iiitbhbenchmark.vercel.app", "http://localhost:5173","https://benchmark-official.vercel.app","benchmark.codes"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
