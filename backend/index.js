@@ -5,15 +5,15 @@ import AuthRoutes from './routes/AuthRoutes.js'
 import SettingRoutes from './routes/SettingRoutes.js'
 import SubjectRoutes from "./routes/SubRoutes.js"
 import {connectDB} from './config/dbConnect.js'
-import { applyChromeSafeSecurity } from "./middleware/chrome-safe-security.js";
+import { applyMinimalSecurity } from "./middleware/no-security.js";
 
 const app = express();
 dotenv.config()
 const PORT = process.env.PORT || 5001;
 
-// � Use absolutely Chrome-safe security (NO problematic headers)
-console.log("� Using Chrome-safe security to eliminate dangerous site warning");
-applyChromeSafeSecurity(app);
+// ⚠️ Using MINIMAL security - All Chrome-blocking features disabled
+console.log("⚠️ Running with NO security headers to avoid Chrome warnings");
+applyMinimalSecurity(app);
 
 // console.log("🛡️ All security middleware applied - Server protected against spam attacks");
 

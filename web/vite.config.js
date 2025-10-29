@@ -11,20 +11,15 @@ export default defineConfig({
     }),
   ],
   server: {
-    historyApiFallback: true, // 👈 this makes dev server handle SPA routing
-    host: true, // Allow external connections
-    headers: {
-      'X-Content-Type-Options': 'nosniff',
-      'Referrer-Policy': 'strict-origin-when-cross-origin'
-      // Removed overly restrictive headers that might cause Chrome warnings
-    },
-    // Proxy API requests to avoid CORS during development
+    historyApiFallback: true,
+    host: true,
+    // NO security headers - Chrome compatible
     proxy: {
       '/api': {
         target: 'https://benchmark-official.onrender.com',
         changeOrigin: true,
         secure: true,
-        timeout: 30000, // 30 second timeout for hibernated services
+        timeout: 30000,
         configure: (proxy, options) => {
           proxy.on('proxyReq', (proxyReq, req, res) => {
             console.log('Proxying request:', req.method, req.url);
