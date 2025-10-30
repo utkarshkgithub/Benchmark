@@ -7,6 +7,8 @@ import { useSelector, useDispatch } from 'react-redux'
 import { logout } from "../../services/opretions/Auth.js"
 import { NavLink, MobileNavLink } from './NavLink'
 import ThemeToggle from './ThemeToggle'
+import logodark from '../../assets/logodark.png'
+import logolight from '../../assets/logolight.png'
 
 function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -68,7 +70,7 @@ function Navbar() {
 
   return (
     <nav 
-      className={`w-full sticky top-0 z-50 transition-all duration-500 ${
+      className={`w-full sticky top-0 z-50 ${
         scrolled 
           ? 'backdrop-blur-xl shadow-xl border-b' 
           : 'backdrop-blur-sm shadow-md border-b'
@@ -92,9 +94,9 @@ function Navbar() {
           >
             <div className="relative">
               <img 
-                src="https://upload.wikimedia.org/wikipedia/en/thumb/c/c6/Indian_Institute_of_Information_Technology%2C_Bhagalpur_logo.png/250px-Indian_Institute_of_Information_Technology%2C_Bhagalpur_logo.png" 
+                src={darkMode ? logodark : logolight}
                 alt="IIIT Logo" 
-                className="h-8 w-8 sm:h-10 sm:w-10 object-contain transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-300"
+                className="h-8 w-8 sm:h-10 sm:w-10 object-contain transform "
               />
               <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-sm"></div>
             </div>
@@ -102,7 +104,6 @@ function Navbar() {
                             <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold bg-gradient-to-r from-blue-600 via-green-500 to-indigo-800 bg-clip-text text-transparent tracking-wide">
                 BENCHMARK
               </h2>
-              <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 group-hover:w-full transition-all duration-300"></div>
             </div>
           </Link>
 

@@ -60,7 +60,7 @@ useEffect(() => {
   return (
     <ThemeProvider>
       <div 
-        className="min-h-screen transition-colors duration-300" 
+        className="min-h-screen" 
         style={{
           backgroundColor: darkMode ? '#111827' : '#ffffff',
           color: darkMode ? '#ffffff' : '#111827'

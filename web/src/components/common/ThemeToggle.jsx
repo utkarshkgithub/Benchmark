@@ -15,14 +15,14 @@ const ThemeToggle = () => {
   return (
     <button
       onClick={handleToggle}
-      className="relative p-2 rounded-full transition-all duration-300"
+      className="relative p-2 rounded-full"
       aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
     >
       <div className="relative w-6 h-6 flex items-center justify-center">
         {darkMode ? (
-          <FaSun className="w-5 h-5 text-yellow-500 transition-all duration-300 transform" />
+          <FaSun className="w-5 h-5 text-yellow-500" />
         ) : (
-          <FaMoon className="w-5 h-5 text-gray-700 dark:text-gray-900 transition-all duration-300 transform" />
+          <FaMoon className="w-5 h-5 text-gray-700 dark:text-gray-900" />
         )}
       </div>
     </button>
