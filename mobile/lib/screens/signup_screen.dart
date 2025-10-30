@@ -209,7 +209,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     try {
       final response = await http.get(
         Uri.parse(
-          'https://benchmark-official.onrender.com/api/v2/subject/fetch-subjects',
+          'https://benchmark-official.onrender.com/api/v3/subject/fetch-subjects',
         ),
         headers: {'Content-Type': 'application/json'},
       );

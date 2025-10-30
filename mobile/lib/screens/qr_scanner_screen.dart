@@ -200,7 +200,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         qrJson = {'qr_data': qrData, 'raw': true};
       }
 
-      final uri = Uri.parse('$_backendUrl/api/v2/subject/verifyqrcode');
+      final uri = Uri.parse('$_backendUrl/api/v3/subject/verifyqrcode');
       final headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',

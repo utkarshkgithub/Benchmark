@@ -7,6 +7,7 @@ import 'screens/home_screen.dart';
 import 'screens/instructor_screen.dart';
 import 'models/user_models.dart';
 import 'screens/splash_screen.dart';
+import 'screens/security_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -64,7 +65,7 @@ class _MyAppState extends State<MyApp> {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: SplashScreen(
+        home: SecurityScreen(
           nextScreen: Consumer<AuthProvider>(
             builder: (context, authProvider, child) {
               if (authProvider.isAuthenticated && authProvider.user != null) {

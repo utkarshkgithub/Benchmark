@@ -1,5 +1,6 @@
 package com.iiitbh.benchmark
 
+import android.app.KeyguardManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -7,13 +8,14 @@ import android.os.Bundle
 import android.util.Base64
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.security.MessageDigest
 
-class MainActivity : FlutterActivity() {
+class MainActivity : FlutterFragmentActivity() {
     private val CHANNEL = "com.iiitbh.benchmark/keystore"
+    private val SECURITY_CHANNEL = "security_channel"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // First, let's temporarily disable clone detection for testing
@@ -32,6 +34,7 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         
+        // Keystore channel
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
             .setMethodCallHandler { call, result ->
                 when (call.method) {
@@ -80,6 +83,23 @@ class MainActivity : FlutterActivity() {
                             result.success(identifiers)
                         } catch (e: Exception) {
                             result.error("ERR", e.message, null)
+                        }
+                    }
+                    
+                    else -> result.notImplemented()
+                }
+            }
+        
+        // Security channel for device security checks
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, SECURITY_CHANNEL)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "isDeviceSecure" -> {
+                        try {
+                            val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+                            result.success(keyguardManager.isDeviceSecure)
+                        } catch (e: Exception) {
+                            result.error("ERR", "Failed to check device security: ${e.message}", null)
                         }
                     }
                     

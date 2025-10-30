@@ -160,12 +160,12 @@
 // class PasswordAPIEndpointVerification {
 //   static void logEndpointConfiguration() {
 //     AppLogger.info('=== Password API Endpoint Configuration ===');
-//     AppLogger.network('Send OTP Endpoint: {BACKEND_URL}/api/v2/auth/sendOTP');
+//     AppLogger.network('Send OTP Endpoint: {BACKEND_URL}/api/v3/auth/sendOTP');
 //     AppLogger.network(
-//       'Change Password Endpoint: {BACKEND_URL}/api/v2/auth/changepassword',
+//       'Change Password Endpoint: {BACKEND_URL}/api/v3/auth/changepassword',
 //     );
 //     AppLogger.network(
-//       'Forgot Password Endpoint: {BACKEND_URL}/api/v2/auth/forgotpassword',
+//       'Forgot Password Endpoint: {BACKEND_URL}/api/v3/auth/forgotpassword',
 //     );
 
 //     AppLogger.info('=== Expected Request Bodies ===');
