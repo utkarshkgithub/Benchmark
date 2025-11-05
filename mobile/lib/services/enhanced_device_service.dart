@@ -1,15 +1,11 @@
 import 'dart:developer';
 import 'dart:io';
-import 'dart:convert';
-import 'package:device_info_plus/device_info_plus.dart';
+import 'dart:async';
 import 'package:geolocator/geolocator.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:uuid/uuid.dart';
 import 'package:safe_device/safe_device.dart';
 import 'package:app_security/app_security.dart';
 import '../utils/keystore.dart';
 import '../utils/device_id_helper.dart';
-import '../utils/network_logger.dart';
 
 class EnhancedDeviceService {
   /// Get a comprehensive device identification using both legacy and enhanced methods
@@ -154,8 +150,16 @@ class EnhancedDeviceService {
   /// Validate location security before allowing QR scanner
   static Future<Map<String, dynamic>> validateLocationSecurity() async {
     try {
-      // Use the secure location service
-      Position position = await SecureLocationService.getCurrentLocation();
+      // Use the secure location service with additional timeout wrapper
+      Position
+      position = await SecureLocationService.getCurrentLocation().timeout(
+        Duration(seconds: 45),
+        onTimeout: () {
+          throw Exception(
+            'Location request timed out: Please ensure GPS is enabled and try in an open area',
+          );
+        },
+      );
 
       // Check location accuracy (if too inaccurate, might be spoofed)
       if (position.accuracy > 100) {
@@ -176,11 +180,32 @@ class EnhancedDeviceService {
         'message': 'Location security validation passed',
       };
     } catch (e) {
+      // Debug logging to see what error we're getting
+      print('DEBUG: Location validation error: $e');
+      print('DEBUG: Error type: ${e.runtimeType}');
+
       if (e is LocationSecurityException) {
         return {
           'isValid': false,
           'error': e.message,
           'errorCode': 'SECURITY_THREAT',
+        };
+      }
+
+      // Handle specific location timeout errors
+      String errorMessage = e.toString().toLowerCase();
+      print('DEBUG: Error message lowercase: $errorMessage');
+
+      if (errorMessage.contains('timeout') ||
+          errorMessage.contains('future not completed') ||
+          errorMessage.contains('location request timed out') ||
+          errorMessage.contains('gps signal not available')) {
+        print('DEBUG: Detected as timeout error');
+        return {
+          'isValid': false,
+          'error':
+              'Location request timed out. Please ensure GPS is enabled and try again in an open area.',
+          'errorCode': 'LOCATION_TIMEOUT',
         };
       }
 
@@ -263,13 +288,30 @@ class SecureLocationService {
         );
       }
 
-      // Get location with high accuracy
-      final position = await Geolocator.getCurrentPosition(
-        locationSettings: LocationSettings(
-          accuracy: LocationAccuracy.high,
-          timeLimit: Duration(seconds: 15),
-        ),
-      );
+      // Get location with high accuracy and longer timeout
+      Position position;
+      try {
+        position = await Geolocator.getCurrentPosition(
+          locationSettings: LocationSettings(
+            accuracy: LocationAccuracy.high,
+            timeLimit: Duration(seconds: 30), // Increased timeout
+          ),
+        );
+      } on TimeoutException catch (e) {
+        throw Exception(
+          'Location request timed out: ${e.message ?? "GPS signal not available"}',
+        );
+      } catch (e) {
+        // Handle other geolocator exceptions
+        String errorMsg = e.toString().toLowerCase();
+        if (errorMsg.contains('timeout') ||
+            errorMsg.contains('future not completed')) {
+          throw Exception(
+            'Location request timed out: Please ensure GPS is enabled and try in an open area',
+          );
+        }
+        throw Exception('Failed to get location: $e');
+      }
 
       // Final fallback check using geolocator's built-in detection
       if (position.isMocked) {

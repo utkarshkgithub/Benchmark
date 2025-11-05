@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'dart:async';
 import '../services/auth_service.dart';
 import '../models/user_models.dart';
 import '../providers/auth_provider.dart';
-import '../widgets/reusable_qr_scanner.dart';
 import 'login_screen.dart';
 
 // Attendance data models
@@ -88,6 +88,7 @@ class _InstructorPageState extends State<InstructorPage> {
 
   // Branch selection state - removed since branch selection was disabled
   // Map<String, bool> _selectedBranches = {};
+  static final String? _backendUrl = dotenv.env['BACKEND_URL'];
 
   @override
   void initState() {
@@ -321,12 +322,11 @@ class _InstructorPageState extends State<InstructorPage> {
       if (token == null) {
         throw Exception('No authentication token found');
       }
-
-      final url =
-          'https://benchmark-official.onrender.com/api/v3/subject/getAttendanceDetails';
+      //Uri.parse('$_backendUrl/api/v3/subject/getAttendanceDetails')
+      final url = Uri.parse('$_backendUrl/api/v3/subject/getAttendanceDetails');
 
       final response = await http.post(
-        Uri.parse(url),
+        url,
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -631,32 +631,6 @@ class _InstructorPageState extends State<InstructorPage> {
                             ? 'Show QR Code'
                             : 'Generate QR Code',
                       ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Scan QR Code Button for Instructor
-              ElevatedButton(
-                onPressed: _selectedSubject == null
-                    ? null
-                    : () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ReusableQRScanner(
-                              endpoint:
-                                  '/api/v3/subject/verifyqrcodeInstructor',
-                              title: 'Instructor QR Scanner',
-                            ),
-                          ),
-                        );
-                      },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green[700],
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: const Text('Scan QR Code'),
               ),
 
               // Show active QR status when QR is generated but not displayed

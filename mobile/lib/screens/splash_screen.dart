@@ -24,26 +24,21 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(seconds: 2),
     );
 
-    _fadeAnimation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeIn,
-    );
+    _fadeAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
 
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.6).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeOutBack,
-      ),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.6,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
     _controller.forward();
 
     // Delay navigation by 2 seconds
     Timer(const Duration(seconds: 2), () {
       if (!mounted) return;
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => widget.nextScreen),
-      );
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => widget.nextScreen));
     });
   }
 
@@ -65,7 +60,7 @@ class _SplashScreenState extends State<SplashScreen>
             child: Image.asset(
               "assets/icons/BENCHMARK.png",
               width: 160, // adjust size as needed
-              height: 160,
+              fit: BoxFit.contain,
             ),
           ),
         ),

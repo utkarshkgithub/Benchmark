@@ -123,6 +123,18 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                 Text('• Move to an open area'),
                 Text('• Restart the app and try again'),
               ],
+              if (securityResult['errorCode'] == 'LOCATION_TIMEOUT') ...[
+                SizedBox(height: 12),
+                Text(
+                  'GPS is taking too long to get your location.',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text('Please try:'),
+                Text('• Move to an open area with clear sky view'),
+                Text('• Enable high-accuracy GPS mode'),
+                Text('• Wait a moment and try again'),
+                Text('• Restart your device if GPS is not working'),
+              ],
             ],
           ),
           actions: [
@@ -133,6 +145,16 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               },
               child: Text('Close Scanner'),
             ),
+            if (securityResult['errorCode'] == 'LOCATION_TIMEOUT' ||
+                securityResult['errorCode'] == 'LOW_ACCURACY') ...[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close dialog
+                  _validateLocationSecurity(); // Retry validation
+                },
+                child: Text('Retry'),
+              ),
+            ],
           ],
         );
       },
