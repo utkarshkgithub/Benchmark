@@ -1,36 +1,31 @@
-
-import express from "express"
-import dotenv from "dotenv";
-import AuthRoutes from './routes/AuthRoutes.js'
-import SettingRoutes from './routes/SettingRoutes.js'
-import SubjectRoutes from "./routes/SubRoutes.js"
-import {connectDB} from './config/dbConnect.js'
+import express from "express";
+import serverlessExpress from "@codegenie/serverless-express";
+import AuthRoutes from './routes/AuthRoutes.js';
+import SettingRoutes from './routes/SettingRoutes.js';
+import SubjectRoutes from "./routes/SubRoutes.js";
+import connectDB from './db.js';
 import cookieParser from "cookie-parser";
-import cors from "cors";
 import fileUpload from "express-fileupload";
 
 const app = express();
-dotenv.config()
-const PORT = process.env.PORT || 5001;
-connectDB();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
-app.use(fileUpload()); 
 app.use(cookieParser());
+app.use(fileUpload());
 
+// ADD THIS: Handle API Gateway base path
+// app.use((req, res, next) => {
+//   // Strip /default/benchmark-backend from the path
+//   if (req.path.startsWith('/default/benchmark-backend')) {
+//     req.url = req.url.replace('/default/benchmark-backend', '') || '/';
+//   } else if (req.path.startsWith('/benchmark-backend')) {
+//     req.url = req.url.replace('/benchmark-backend', '') || '/';
+//   }
+//   next();
+// });
 
-
-app.use(
-  cors({
-    origin: ["https://iiitbhbenchmark.vercel.app", "http://localhost:5173","https://benchmark-official.vercel.app","https://www.benchmark.codes"],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-
-
+// Your routes
 app.use("/api/v3/auth", AuthRoutes);
 app.use("/api/v3/setting", SettingRoutes);
 app.use("/api/v3/subject", SubjectRoutes);
@@ -42,6 +37,20 @@ app.get("/", (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`App is running at ${PORT}`);
+// Error handlers
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found' });
 });
+
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(err.status || 500).json({ 
+    error: err.message || 'Internal Server Error' 
+  });
+});
+
+// Connect DB
+await connectDB();
+
+// Export Lambda handler - KEEP IT SIMPLE
+export const handler = serverlessExpress({ app });

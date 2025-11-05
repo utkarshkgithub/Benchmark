@@ -1,2 +1,11 @@
 .env
 node_modules
+.samignore
+check-deployment.sh
+deploy-manual.sh
+deploy.sh
+quick-deploy.sh
+samconfig.toml
+template.yaml
+zi8zLjYu
+ziNspuUB

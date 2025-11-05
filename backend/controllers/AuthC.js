@@ -3,102 +3,89 @@ import OTP from "../models/OTP.js";
 import jwt from "jsonwebtoken";
 import otpGenerator from "otp-generator";
 import bcrypt from "bcryptjs";
-import dotenv from "dotenv";
 import Student from "../models/Student.js";
 import Instructor from "../models/Instructor.js"
 import Subject from "../models/Subject.js";
 import { normalizeBranchName } from "../utils/branchUtils.js";
 import { studentsMail } from "../mail/templates/data/studentMails.js";
-dotenv.config();
+import '../config/env.js';
 import crypto from 'crypto';
 
 
 //send otp
 export const sendOTP = async (req, res) => {
-    const startTime = Date.now();
-    
-    try {
-        const { email, extra = "" } = req.body;
+  try {
+    // fetch email from request ki body
+    const { email,extra="" } = req.body;
 
-        console.log(`🚀 Starting OTP generation for: ${email}`);
+    // check if user already exist
+    const chackUserPreSent = await User.findOne({ email });
 
-        // Perform user check and OTP cleanup in parallel for better performance
-        const [existingUser] = await Promise.all([
-            extra === "" ? User.findOne({ email }).lean() : Promise.resolve(null),
-            OTP.deleteMany({ email }) // Clean up existing OTPs
-        ]);
-
-        if (extra === "" && existingUser) {
-            console.log(`⚠️ User already exists: ${email}`);
-            return res.status(401).json({
-                success: false,
-                message: "User already registered",
-            });
-        }
-
-        console.log(`🔄 Generating unique OTP...`);
-
-        // Generate unique OTP more efficiently
-        let otp;
-        let attempts = 0;
-        const maxAttempts = 10;
-        
-        do {
-            otp = otpGenerator.generate(6, {
-                upperCaseAlphabets: false,
-                lowerCaseAlphabets: false,
-                specialChars: false,
-            });
-            attempts++;
-            
-            // Add timestamp to make it more unique
-            if (attempts > 5) {
-                const timestamp = Date.now().toString().slice(-2);
-                otp = otp.slice(0, 4) + timestamp;
-            }
-            
-            const existingOtp = await OTP.findOne({ otp });
-            if (!existingOtp) break;
-            
-        } while (attempts < maxAttempts);
-        
-        if (attempts >= maxAttempts) {
-            // Fallback: use timestamp-based OTP
-            otp = Math.floor(100000 + Math.random() * 900000).toString();
-        }
-
-        console.log(`✅ Unique OTP generated after ${attempts} attempts`);
-
-        // console.log("Result is Generate OTP Func");
-        // console.log("Result", result);
-
-        const otpPayload = { email, otp, extra };
-
-        console.log(`💾 Saving OTP to database...`);
-        const otpBody = await OTP.create(otpPayload);
-        // console.log("OTP body:-",otpBody);
-
-        const responseTime = Date.now() - startTime;
-        console.log(`🎯 OTP process completed in ${responseTime}ms for: ${email}`);
-
-        // return response successfully
-        res.status(200).json({
-            success: true,
-            message: "OTP sent Successfully.",
-            // otp,
-        });
-    } catch (error) {
-        const responseTime = Date.now() - startTime;
-        console.log(`❌ OTP generation failed after ${responseTime}ms`);
-        console.log("Issues Occure in generate Otp");
-        console.error(error.message);
-        return res.status(500).json({
-            success: false,
-            message: error.message,
-        });
+    //if user is already exits,then return a response.
+    if (chackUserPreSent && extra != "Forgot-Password") {
+      return res.status(401).json({
+        success: false,
+        message: "User already registered",
+      });
+    }else if(!chackUserPreSent && extra == "Forgot-Password"){
+        return res.status(401).json({
+        success: false,
+        message: "User Not registered",
+      });
     }
-};
 
+    //if user not exist already,then we generate OTP.
+
+    //generate otp
+
+    var otp = otpGenerator.generate(6, {
+      upperCaseAlphabets: false,
+      lowerCaseAlphabets: false,
+      specialChars: false,
+    });
+		
+    console.log("OTP generated:-", otp);
+
+    //check unique otp or not
+    let result = await OTP.findOne({ otp: otp });
+
+    while (result) {
+      otp = otpGenerator.generate(6, {
+        upperCaseAlphabets: false,
+        lowerCaseAlphabets: false,
+        specialChars: false,
+      });
+
+      result = await OTP.findOne({ otp: otp });
+    }
+   
+    
+		// console.log("Result is Generate OTP Func");
+		// console.log("Result", result);
+
+    const otpPayload = {email, otp, extra};
+
+    //create an en entry in db for otp
+
+    const otpBody = await OTP.create(otpPayload);
+    console.log("OTP body:-",otpBody);
+
+    // return response successfully
+
+    res.status(200).json({
+      success: true,
+      message: "OTP sent Successfully.",
+      otp,
+    });
+  } catch (error) {
+    console.log("Issues Occure in generate Otp");
+    console.error(error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 export const signUp = async (req, res) => {
     try {
@@ -430,12 +417,12 @@ console.log(email,password,deviceId,additionaldeviceId)
             });
         }
         if(user.accountType == "Student" 
-            && 
-            !["amit3.230101023@iiitbh.ac.in", "utkarsh2.230101147@iiitbh.ac.in"].includes(user.email)
+            // && 
+            // !["amit3.230101023@iiitbh.ac.in"].includes(user.email)
         ){
 
         const currentTime = new Date();
-        const waitDurationMs = 1.5 * 60 * 1000;
+        const waitDurationMs = 0.5 * 60 * 1000;
 
         if (user.isActiveToken === false) {
             const tokenString = crypto.randomBytes(32).toString("hex");
@@ -456,7 +443,7 @@ console.log(email,password,deviceId,additionaldeviceId)
 
             return res.status(403).json({
                 success: false,
-                message: "You can not login again within 1 minute 30 seconds. Please wait.",
+                message: "You can not login again within 30 seconds. Please wait.",
             });
         }
 

@@ -1,6 +1,6 @@
 import OTP from "../models/OTP.js";
 import User from "../models/User.js";
-import mailSender from "../utils/mailSender.js";
+import {mailSender} from "../utils/mailSender.js";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 

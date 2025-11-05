@@ -1,5 +1,7 @@
 
 import {v2 as cloudinary} from 'cloudinary';
+import './env.js';
+
 export function cloudinaryConnect() {
   try{
     cloudinary.config({

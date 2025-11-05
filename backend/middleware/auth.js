@@ -1,7 +1,6 @@
 // middleware/auth.js
 import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
-dotenv.config();
+import '../config/env.js';
 
 // 🔒 Verify JWT token
 export const auth = (req, res, next) => {

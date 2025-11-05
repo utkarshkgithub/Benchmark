@@ -1,5 +1,4 @@
 import User from "../models/User.js";
-import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import Attendance from "../models/Attendance.js";
 import Subject from "../models/Subject.js";
@@ -7,8 +6,7 @@ import crypto from "crypto";
 import Token from "../models/Token.js";
 import Student from "../models/Student.js";
 import Instructor from "../models/Instructor.js";
-
-dotenv.config();
+import '../config/env.js';
 
 export const generateQr = async (req, res) => {
   try {
