@@ -16,6 +16,12 @@ const tokenSchema = new mongoose.Schema({
     default: Date.now,
     index: { expires: "2m" }, // auto-delete after 2 minutes
   }
+  ,
+  // Optional location where the QR was generated (instructor/device)
+  location: {
+    latitude: { type: Number },
+    longitude: { type: Number }
+  }
 });
 
 const Token = mongoose.model("Token", tokenSchema);

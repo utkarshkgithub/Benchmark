@@ -84,8 +84,29 @@ export default function InstructorQR() {
         setError(null);
         setSuccessMessage(null);
 
+        // Try to get the instructor/device location to embed in the QR token
+        const getCurrentPosition = () => new Promise((resolve, reject) => {
+            if (!navigator.geolocation) return reject(new Error('Geolocation not supported'));
+            navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 });
+        });
+
+        let lat, lon;
+        try {
+            const pos = await getCurrentPosition();
+            lat = pos.coords.latitude;
+            lon = pos.coords.longitude;
+        } catch (err) {
+            // Could not get location (permission denied or timeout) — proceed without coords
+            console.warn('Could not obtain geolocation for QR generation:', err);
+        }
+
         const formData = new FormData();
         formData.append("subjectId", selectedSubject._id);
+        if (lat != null && lon != null) {
+            // append numeric coordinates (will be sent as strings in multipart/form-data)
+            formData.append("latitude", String(lat));
+            formData.append("longitude", String(lon));
+        }
 
         try {
             const res = await generateQr(token, formData);

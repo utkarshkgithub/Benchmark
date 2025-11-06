@@ -13,8 +13,7 @@ export const generateQr = async (req, res) => {
     const userId = req.user.id;
     
  
-    
-    const { subjectId } = req.body; // ✅ frontend se subjectId aayega
+  const { subjectId } = req.body; // ✅ frontend se subjectId aayega
     // console.log("Extracted subjectId:", subjectId);
     
     if (!subjectId) {
@@ -53,15 +52,24 @@ export const generateQr = async (req, res) => {
       subjectId: subjectDetails._id.toString(),
       attendanceId: attendance._id.toString(),
     };
-    const jwtToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "2m" });
+  const jwtToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "2m" });
 
     // shortId generate karo
     const shortId = crypto.randomBytes(4).toString("hex").slice(0, 7);
+
+    // accept optional coordinates from instructor/device when generating QR
+    // form-data sends values as strings, so coerce them if present
+    let latitude = req.body?.latitude;
+    let longitude = req.body?.longitude;
+    if (latitude != null) latitude = Number(latitude);
+    if (longitude != null) longitude = Number(longitude);
+    const location = (Number.isFinite(latitude) && Number.isFinite(longitude)) ? { latitude, longitude } : undefined;
 
     await Token.create({
       shortId,
       jwt: jwtToken,
       expireAt: Date.now() + 2 * 60 * 1000, // auto-expire 2 minutes
+      location,
     });
 
     return res.status(200).json({
@@ -70,7 +78,7 @@ export const generateQr = async (req, res) => {
       attendanceId: attendance._id,
       subjectName: subjectDetails.subjectName,
       subjectCode: subjectDetails.subjectCode,
-      presentStudents: attendance.presentStudent, // ✅ purane students bhi bhej diye
+      presentStudents: attendance.presentStudent,
       message: "QR token generated successfully."
     });
   } catch (error) {
@@ -82,7 +90,10 @@ export const generateQr = async (req, res) => {
 export const verifyQrCode = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { qr_data } = req.body;
+  const { qr_data } = req.body;
+  // Coerce student-provided coords (may arrive as strings)
+  let studentLatitude = req.body?.latitude != null ? Number(req.body.latitude) : undefined;
+  let studentLongitude = req.body?.longitude != null ? Number(req.body.longitude) : undefined;
 
     if (!qr_data || !userId) {
       return res.status(400).json({ success: false, message: "Invalid request" });
@@ -92,6 +103,33 @@ export const verifyQrCode = async (req, res) => {
     const tokenDoc = await Token.findOne({ shortId: qr_data });
     if (!tokenDoc) {
       return res.status(401).json({ success: false, message: "Invalid or expired QR code" });
+    }
+
+    // If the token has a location, require student coords and verify distance
+    const MAX_DISTANCE_METERS = 40; // allowed radius
+    if (tokenDoc.location && (tokenDoc.location.latitude != null && tokenDoc.location.longitude != null)) {
+      // ensure student provided coords and are valid numbers
+      if (!Number.isFinite(studentLatitude) || !Number.isFinite(studentLongitude)) {
+        return res.status(400).json({ success: false, message: 'Student location required for proximity verification' });
+      }
+
+      // Haversine formula
+      const toRad = (deg) => (deg * Math.PI) / 180;
+      const earthRadius = 6371000; // meters
+      const dLat = toRad(studentLatitude - tokenDoc.location.latitude);
+      const dLon = toRad(studentLongitude - tokenDoc.location.longitude);
+      const lat1 = toRad(tokenDoc.location.latitude);
+      const lat2 = toRad(studentLatitude);
+
+      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const distance = earthRadius * c; // meters
+
+      if (distance > MAX_DISTANCE_METERS) {
+        return res.status(403).json({ success: false, message: `You are too far from the QR location. Distance: ${Math.round(distance)} meters` });
+      }
+      // else continue to mark
     }
 
     // Decode JWT

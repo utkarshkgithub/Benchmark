@@ -9,46 +9,31 @@ import { useSelector, useDispatch } from 'react-redux'
 import { initializeTheme } from './Slices/themeSlice.js'
 import Error from './components/common/Error.jsx'
 import { ThemeProvider } from './context/ThemeContext.jsx'
-import { Suspense, lazy, useEffect } from 'react'
-
-// Lazy load heavy components
-const About = lazy(() => import('./page/About.jsx'))
-const Signup = lazy(() => import('./page/Signup.jsx'))
-const Login = lazy(() => import('./page/Login.jsx'))
-const VerifyEmail = lazy(() => import('./page/VerifyEmail.jsx'))
-const DashBoard = lazy(() => import('./page/DashBoard.jsx'))
-const MyProfile = lazy(() => import('./components/core/dashboard/index.jsx'))
-const ForgotPassword = lazy(() => import('./components/core/outside/ForgotPassword.jsx'))
-const UpdatePassword = lazy(() => import('./components/core/outside/UpdatePassword.jsx'))
-const Admin = lazy(() => import('./components/core/dashboard/Admin/Admin.jsx'))
-const AddSubject = lazy(() => import('./components/core/dashboard/Admin/AddSubject.jsx'))
-const Instructor = lazy(() => import('./components/core/dashboard/Instructor/Instructor.jsx'))
-const Student = lazy(() => import('./components/core/dashboard/Student/Student.jsx'))
-const ContectUs = lazy(() => import('./components/core/outside/ContectUs.jsx'))
-const PersonalDetails = lazy(() => import('./page/PersonalDetails.jsx'))
-const InstructorQR = lazy(() => import('./components/core/dashboard/Instructor/InstructorQR.jsx'))
-const InstructorSummary = lazy(() => import('./components/core/dashboard/Instructor/InstructorSummary.jsx'))
-
-// Loading component
-const LoadingSpinner = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-  </div>
-)
-
+import { useEffect } from 'react' 
+import About from './page/About.jsx'
+import Signup from './page/Signup.jsx'
+import Login from './page/Login.jsx'
+import VerifyEmail from './page/VerifyEmail.jsx'
+import DashBoard from './page/DashBoard.jsx'
+import MyProfile from './components/core/dashboard/index.jsx'
+import ForgotPassword from './components/core/outside/ForgotPassword.jsx'
+import UpdatePassword from './components/core/outside/UpdatePassword.jsx'
+import Admin from './components/core/dashboard/Admin/Admin.jsx'
+import AddSubject from './components/core/dashboard/Admin/AddSubject.jsx'
+import Instructor from './components/core/dashboard/Instructor/Instructor.jsx'
+import Student from './components/core/dashboard/Student/Student.jsx'
+import ContectUs from './components/core/outside/ContectUs.jsx'
+import PersonalDetails from './page/PersonalDetails.jsx'
+import InstructorQR from './components/core/dashboard/Instructor/InstructorQR.jsx'
+import InstructorSummary from './components/core/dashboard/Instructor/InstructorSummary.jsx'
 function App() {
-
 const { user } = useSelector((state) => state.auth);
 const themeState = useSelector((state) => state.theme);
 const darkMode = themeState?.darkMode || false;
-const dispatch = useDispatch();
-
-// Initialize theme on app load
+const dispatch = useDispatch(); 
 useEffect(() => {
   dispatch(initializeTheme());
-}, [dispatch]);
-
-// Apply dark class to html element
+}, [dispatch]); 
 useEffect(() => {
   if (darkMode) {
     document.documentElement.classList.add('dark');
@@ -67,7 +52,6 @@ useEffect(() => {
         }}
       >
         <Navbar />
-        <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="learn" element={<About />} />
@@ -110,12 +94,7 @@ useEffect(() => {
           }
         </Route>
         <Route path='*' element={<Error/>}></Route>
-        </Routes>
-      </Suspense>
-
-        
-      {/* <PWABadge /> */}
-      {/* <BackgroundBeams/> */}
+        </Routes> 
       </div>
     </ThemeProvider>
   )
