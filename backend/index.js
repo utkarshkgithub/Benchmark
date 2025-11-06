@@ -3,6 +3,7 @@ import serverlessExpress from "@codegenie/serverless-express";
 import AuthRoutes from "./routes/AuthRoutes.js";
 import SettingRoutes from "./routes/SettingRoutes.js";
 import SubjectRoutes from "./routes/SubRoutes.js";
+import LocationRoutes from "./routes/LocationRoutes.js";
 import connectDB from "./db.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -57,6 +58,7 @@ app.use((req, res, next) => {
 app.use("/api/v3/auth", AuthRoutes);
 app.use("/api/v3/setting", SettingRoutes);
 app.use("/api/v3/subject", SubjectRoutes);
+app.use("/api/v3/location", LocationRoutes);
 
 // Root route
 app.get("/", (req, res) => {

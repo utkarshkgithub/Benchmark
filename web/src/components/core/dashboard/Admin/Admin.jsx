@@ -8,6 +8,7 @@ import {
   fetchAllSubjects
 } from "../../../../services/opretions/Subject";
 import { deleteStudent } from "../../../../services/opretions/Settings";
+import AddLocation from './AddLocation';
 
 const Admin = () => {
   const { token } = useSelector((state) => state.auth);
@@ -21,6 +22,7 @@ const Admin = () => {
   const [subjectSortOrder, setSubjectSortOrder] = useState("asc");
   const [studentSortField, setStudentSortField] = useState(null);
   const [studentSortOrder, setStudentSortOrder] = useState("asc");
+  const [showAddLocation, setShowAddLocation] = useState(false);
   
   // Get theme state
   const themeState = useSelector((state) => state.theme)
@@ -66,6 +68,13 @@ const Admin = () => {
 
   const handleAddSubject = () => {
     navigate("/dashboard/create-subject");
+  };
+
+  const handleSaveLocation = (location) => {
+    // For now we'll just log and show a toast. Replace with API call as needed.
+    console.log("Saved location:", location);
+    toast.success("Location saved");
+    setShowAddLocation(false);
   };
 
   const handleDeleteSubject = async (subjectId) => {
@@ -246,9 +255,14 @@ const Admin = () => {
                   {filteredSubjects.length} subject{filteredSubjects.length !== 1 ? 's' : ''} found
                 </p>
               </div>
-              <button onClick={handleAddSubject} className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105">
-                + Add Subject
-              </button>
+              <div className="flex items-center space-x-3">
+                <button onClick={handleAddSubject} className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105">
+                  + Add Subject
+                </button>
+                <button onClick={() => setShowAddLocation(true)} className="bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105">
+                  + Add Location
+                </button>
+              </div>
             </div>
           </div>
           
@@ -492,6 +506,12 @@ const Admin = () => {
           animation: slide-up 0.8s ease-out forwards;
         }
       `}</style>
+      {showAddLocation && (
+        <AddLocation
+          onClose={() => setShowAddLocation(false)}
+          onSave={handleSaveLocation}
+        />
+      )}
     </div>
   );
 };

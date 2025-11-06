@@ -14,6 +14,8 @@ import {
     getAttendanceDetails,
     updateAttendance,
 } from "../../../../services/opretions/Subject";
+import { apiConnector } from "../../../../services/apiconnector";
+import { locationEndPoints } from "../../../../services/api";
 import { Link } from "react-router-dom";
 import Button from "../../../common/Button";
 
@@ -37,6 +39,8 @@ export default function InstructorQR() {
     const [students, setStudents] = useState([]);
     const [attendance, setAttendance] = useState({});
     const [initialAttendance, setInitialAttendance] = useState({});
+    const [locations, setLocations] = useState([]);
+    const [selectedLocation, setSelectedLocation] = useState(null);
     const [viewMode, setViewMode] = useState("initial"); // "initial", "qr", "list", "submitted"
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState("name"); // sorting option
@@ -56,6 +60,20 @@ export default function InstructorQR() {
             }
         };
         fetchSubjects();
+        // fetch locations as well
+        const fetchLocations = async () => {
+            try {
+                const res = await apiConnector("GET", locationEndPoints.FETCH_LOCATIONS_API, null, {
+                    Authorization: `Bearer ${token}`,
+                });
+                const list = res?.data?.data || [];
+                setLocations(list);
+                if (list.length > 0) setSelectedLocation(list[0]);
+            } catch (e) {
+                console.warn("Could not fetch locations:", e);
+            }
+        };
+        fetchLocations();
     }, [token]);
 
     useEffect(() => {
@@ -102,8 +120,14 @@ export default function InstructorQR() {
 
         const formData = new FormData();
         formData.append("subjectId", selectedSubject._id);
-        if (lat != null && lon != null) {
-            // append numeric coordinates (will be sent as strings in multipart/form-data)
+        // If instructor picked a location, send its coordinates. Otherwise try device geolocation.
+        if (selectedLocation) {
+            // Send locationId so backend uses stored coordinates for security/consistency
+            formData.append("locationId", selectedLocation._id);
+            // Also send coordinates for transparency (backend prefers locationId)
+            formData.append("latitude", String(selectedLocation.coordinates.latitude));
+            formData.append("longitude", String(selectedLocation.coordinates.longitude));
+        } else if (lat != null && lon != null) {
             formData.append("latitude", String(lat));
             formData.append("longitude", String(lon));
         }
@@ -439,9 +463,34 @@ export default function InstructorQR() {
                                 </div>
                             </div>
 
+                            {/* Location selector */}
+                            <div className="relative group mb-6">
+                                <label className="block text-sm font-bold mb-2" style={{ color: darkMode ? '#d1d5db' : '#374151' }}>Select Location</label>
+                                <select
+                                    className="w-full appearance-none bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-gray-200 rounded-xl px-6 py-4 pr-12 text-gray-700 focus:border-green-500 focus:ring-4 focus:ring-green-100 focus:outline-none transition-all duration-300 shadow-sm hover:border-gray-300 hover:shadow-md font-medium"
+                                    value={selectedLocation?._id || ""}
+                                    onChange={(e) => {
+                                        const loc = locations.find((l) => l._id === e.target.value);
+                                        setSelectedLocation(loc || null);
+                                    }}
+                                >
+                                    <option value="">-- Choose a location --</option>
+                                    {locations.map((loc) => (
+                                        <option key={loc._id} value={loc._id}>
+                                            {loc.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none group-hover:text-green-500 transition-colors duration-200">
+                                    <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
+
                             <Button
                                 onClick={onGenerate}
-                                disabled={!selectedSubject}
+                                disabled={!selectedSubject || !selectedLocation}
                                 loading={loading}
                                 variant="primary"
                                 size="lg"

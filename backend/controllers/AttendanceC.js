@@ -4,6 +4,7 @@ import Attendance from "../models/Attendance.js";
 import Subject from "../models/Subject.js";
 import crypto from "crypto";
 import Token from "../models/Token.js";
+import Location from "../models/Location.js";
 import Student from "../models/Student.js";
 import Instructor from "../models/Instructor.js";
 import '../config/env.js';
@@ -57,19 +58,37 @@ export const generateQr = async (req, res) => {
     // shortId generate karo
     const shortId = crypto.randomBytes(4).toString("hex").slice(0, 7);
 
-    // accept optional coordinates from instructor/device when generating QR
-    // form-data sends values as strings, so coerce them if present
-    let latitude = req.body?.latitude;
-    let longitude = req.body?.longitude;
-    if (latitude != null) latitude = Number(latitude);
-    if (longitude != null) longitude = Number(longitude);
-    const location = (Number.isFinite(latitude) && Number.isFinite(longitude)) ? { latitude, longitude } : undefined;
+    // If frontend provides a locationId, prefer it and load stored coordinates.
+    // Otherwise accept optional coordinates from instructor/device when generating QR
+    let location; // will hold { latitude, longitude }
+    let locationId = req.body?.locationId;
+    let locationName;
+
+    if (locationId) {
+      try {
+        const locDoc = await Location.findById(locationId);
+        if (locDoc) {
+          location = {
+            latitude: Number(locDoc.coordinates.latitude),
+            longitude: Number(locDoc.coordinates.longitude),
+          };
+          locationName = locDoc.name;
+        }
+      } catch (err) {
+        console.warn("Invalid locationId provided:", locationId);
+      }
+    }
+
+    // Do not accept raw latitude/longitude from the instructor anymore.
+    // Only use stored `locationId` (if provided). If none provided, token will have no location.
 
     await Token.create({
       shortId,
       jwt: jwtToken,
       expireAt: Date.now() + 2 * 60 * 1000, // auto-expire 2 minutes
       location,
+      locationId: locationId || undefined,
+      locationName: locationName || undefined,
     });
 
     return res.status(200).json({
@@ -91,9 +110,8 @@ export const verifyQrCode = async (req, res) => {
   try {
     const userId = req.user.id;
   const { qr_data } = req.body;
-  // Coerce student-provided coords (may arrive as strings)
-  let studentLatitude = req.body?.latitude != null ? Number(req.body.latitude) : undefined;
-  let studentLongitude = req.body?.longitude != null ? Number(req.body.longitude) : undefined;
+  // Note: student geolocation no longer required. Tokens may contain stored location coords,
+  // but we will not enforce proximity checks based on student-sent coordinates.
 
     if (!qr_data || !userId) {
       return res.status(400).json({ success: false, message: "Invalid request" });
@@ -105,31 +123,33 @@ export const verifyQrCode = async (req, res) => {
       return res.status(401).json({ success: false, message: "Invalid or expired QR code" });
     }
 
-    // If the token has a location, require student coords and verify distance
-    const MAX_DISTANCE_METERS = 40; // allowed radius
-    if (tokenDoc.location && (tokenDoc.location.latitude != null && tokenDoc.location.longitude != null)) {
-      // ensure student provided coords and are valid numbers
-      if (!Number.isFinite(studentLatitude) || !Number.isFinite(studentLongitude)) {
-        return res.status(400).json({ success: false, message: 'Student location required for proximity verification' });
-      }
+    // Optional proximity verification:
+    // If the token contains a stored location and the student provides their coordinates
+    // (studentLatitude, studentLongitude) in the request body, compute distance and optionally
+    // reject if too far. Threshold is 200 meters.
+  const studentLat = req.body?.studentLatitude !== undefined ? Number(req.body.studentLatitude) : null;
+  const studentLng = req.body?.studentLongitude !== undefined ? Number(req.body.studentLongitude) : null;
+  let distanceMeters = null;
 
-      // Haversine formula
+    if (tokenDoc.location && studentLat != null && studentLng != null && !Number.isNaN(studentLat) && !Number.isNaN(studentLng)) {
+      // haversine distance
       const toRad = (deg) => (deg * Math.PI) / 180;
-      const earthRadius = 6371000; // meters
-      const dLat = toRad(studentLatitude - tokenDoc.location.latitude);
-      const dLon = toRad(studentLongitude - tokenDoc.location.longitude);
+      const R = 6371000; // earth radius in meters
       const lat1 = toRad(tokenDoc.location.latitude);
-      const lat2 = toRad(studentLatitude);
-
-      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+      const lon1 = toRad(tokenDoc.location.longitude);
+      const lat2 = toRad(studentLat);
+      const lon2 = toRad(studentLng);
+      const dlat = lat2 - lat1;
+      const dlon = lon2 - lon1;
+      const a = Math.sin(dlat / 2) * Math.sin(dlat / 2) + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dlon / 2) * Math.sin(dlon / 2);
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      const distance = earthRadius * c; // meters
+      const distance = R * c; // in meters
+      distanceMeters = Math.round(distance);
 
-      if (distance > MAX_DISTANCE_METERS) {
-        return res.status(403).json({ success: false, message: `You are too far from the QR location. Distance: ${Math.round(distance)} meters` });
+      const PROXIMITY_THRESHOLD_METERS = 200; // configurable threshold
+      if (distance > PROXIMITY_THRESHOLD_METERS) {
+        return res.status(403).json({ success: false, message: "You are not within the required location to mark attendance", distanceMeters });
       }
-      // else continue to mark
     }
 
     // Decode JWT
@@ -202,10 +222,17 @@ export const verifyQrCode = async (req, res) => {
     });
     await attendance.save();
 
-    return res.status(200).json({
+    // Return success and include location context when available
+    const responsePayload = {
       success: true,
       message: "Attendance marked successfully",
-    });
+    };
+
+    if (tokenDoc.locationName) responsePayload.locationName = tokenDoc.locationName;
+    if (tokenDoc.location) responsePayload.location = tokenDoc.location;
+    if (distanceMeters != null) responsePayload.distanceMeters = distanceMeters;
+
+    return res.status(200).json(responsePayload);
   } catch (error) {
     // console.error("Verify QR error:", error);
     return res.status(500).json({

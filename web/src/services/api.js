@@ -39,3 +39,8 @@ export const subjectEndPoints = {
   INSTRUCTOR_SUMMARY_API: BASE_URL + "/subject/instructor-summary",
   DELETE_SUBJECT_API:BASE_URL + "/subject/delete-subject"
 }
+
+export const locationEndPoints = {
+  ADD_LOCATION_API: BASE_URL + "/location/create",
+  FETCH_LOCATIONS_API: BASE_URL + "/location/all",
+};

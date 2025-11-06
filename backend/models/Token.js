@@ -22,6 +22,14 @@ const tokenSchema = new mongoose.Schema({
     latitude: { type: Number },
     longitude: { type: Number }
   }
+  ,
+  locationId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Location",
+  },
+  locationName: {
+    type: String,
+  }
 });
 
 const Token = mongoose.model("Token", tokenSchema);
