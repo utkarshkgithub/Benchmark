@@ -135,8 +135,8 @@ export const verifyQrCode = async (req, res) => {
 
     // MANDATORY proximity verification for ALL QR codes:
     // Student MUST provide their coordinates and be within 50 meters of the class location
-    const studentLat = req.body?.studentLatitude !== undefined ? Number(req.body.studentLatitude) : null;
-    const studentLng = req.body?.studentLongitude !== undefined ? Number(req.body.studentLongitude) : null;
+    const studentLat = req.body?.latitude !== undefined ? Number(req.body.latitude) : null;
+    const studentLng = req.body?.longitude !== undefined ? Number(req.body.longitude) : null;
     let distanceMeters = null;
 
     // Student coordinates are ALWAYS REQUIRED for attendance marking
