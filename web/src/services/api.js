@@ -33,6 +33,7 @@ export const subjectEndPoints = {
   FETCH_SUBJECTS_BY_INSTRUCTOR: BASE_URL + "/subject/instructor-subjects",
   FETCH_ATTENDANCE_BY_SUBJECT: BASE_URL + "/subject/fetch-by-subject",
   FETCH_GENRATE_API: BASE_URL + "/subject/qrcode",
+  VERIFY_QR_API: BASE_URL + "/subject/verifyqrcode",
   GET_SUBJECT_STUDENTS_API: BASE_URL + "/subject/getSubjectStudents",
   GET_ATTENDANCE_DETAILS_API: BASE_URL + "/subject/getAttendanceDetails",
   UPDATE_ATTENDANCE_API: BASE_URL + "/subject/updateAttendance",

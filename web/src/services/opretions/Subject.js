@@ -195,6 +195,40 @@ export const getSubjectStudents = async (token, subjectId) => {
     }
 };
 
+export const verifyQr = async (token, qrData, studentLatitude, studentLongitude) => {
+    const toastId = toast.loading("Verifying QR...");
+    try {
+        const body = {
+            qr_data: qrData,
+        };
+        if (studentLatitude !== undefined && studentLongitude !== undefined) {
+            body.studentLatitude = studentLatitude;
+            body.studentLongitude = studentLongitude;
+        }
+
+        const response = await apiConnector(
+            "POST",
+            subjectEndPoints.VERIFY_QR_API,
+            body,
+            {
+                Authorization: `Bearer ${token}`,
+            }
+        );
+
+        if (!response.data.success) {
+            throw new Error(response.data.message);
+        }
+
+        toast.success("QR verified successfully");
+        return response;
+    } catch (error) {
+        console.error("VERIFY QR API ERROR:", error);
+        toast.error(error?.response?.data?.message || error.message || "Failed to verify QR");
+    } finally {
+        toast.dismiss(toastId);
+    }
+};
+
 export const getAttendanceDetails = async (token, attendanceId) => {
     const toastId = toast.loading("Fetching attendance...");
     try {
