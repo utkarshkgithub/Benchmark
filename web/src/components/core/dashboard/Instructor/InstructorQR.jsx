@@ -102,35 +102,17 @@ export default function InstructorQR() {
         setError(null);
         setSuccessMessage(null);
 
-        // Try to get the instructor/device location to embed in the QR token
-        const getCurrentPosition = () => new Promise((resolve, reject) => {
-            if (!navigator.geolocation) return reject(new Error('Geolocation not supported'));
-            navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 });
-        });
-
-        let lat, lon;
-        try {
-            const pos = await getCurrentPosition();
-            lat = pos.coords.latitude;
-            lon = pos.coords.longitude;
-        } catch (err) {
-            // Could not get location (permission denied or timeout) — proceed without coords
-            console.warn('Could not obtain geolocation for QR generation:', err);
+        // Location selection is mandatory
+        if (!selectedLocation) {
+            setError("Please select a location from the dropdown before generating QR code.");
+            setLoading(false);
+            return;
         }
 
+        // Only send subjectId and locationId - that's it!
         const formData = new FormData();
         formData.append("subjectId", selectedSubject._id);
-        // If instructor picked a location, send its coordinates. Otherwise try device geolocation.
-        if (selectedLocation) {
-            // Send locationId so backend uses stored coordinates for security/consistency
-            formData.append("locationId", selectedLocation._id);
-            // Also send coordinates for transparency (backend prefers locationId)
-            formData.append("latitude", String(selectedLocation.coordinates.latitude));
-            formData.append("longitude", String(selectedLocation.coordinates.longitude));
-        } else if (lat != null && lon != null) {
-            formData.append("latitude", String(lat));
-            formData.append("longitude", String(lon));
-        }
+        formData.append("locationId", selectedLocation._id);
 
         try {
             const res = await generateQr(token, formData);
