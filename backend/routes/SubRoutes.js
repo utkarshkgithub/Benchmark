@@ -2,6 +2,7 @@ import express from 'express'
 import { createSubject, fetchAttendanceBySubject, fetchInstructor,fetchInstructorSubjects,fetchStudent,fetchSubjects, getSubjectStudents } from '../controllers/SubjectC.js';
 import { auth, isAdmin, isInstructor, isStudent } from '../middleware/auth.js';
 import { fetchStudentAttendance } from '../controllers/getStudentAttendance.js';
+import { getDetailedAttendanceBySubject } from '../controllers/getDetailedAttendance.js';
 import { deleteSubject, generateQr, getAttendanceDetails, getInstructorAttendanceSummary, updateAttendance, verifyQrCode } from '../controllers/AttendanceC.js';
 
 const router = express.Router()
@@ -47,6 +48,13 @@ router.get("/student",
   auth, 
   isStudent, 
   fetchStudentAttendance
+);
+
+// Get detailed attendance for a specific subject (calendar view)
+router.get("/student-subject/:subjectId", 
+  auth, 
+  isStudent, 
+  getDetailedAttendanceBySubject
 );
 
 router.get("/fetch-instructor", fetchInstructor);

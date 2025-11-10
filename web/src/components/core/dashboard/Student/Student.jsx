@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { fetchStudentAttendance } from "../../../../services/opretions/Subject";
 
 const Student = () => {
   const { user, token } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
   const [attendance, setAttendance] = useState([]);
   const [filteredAttendance, setFilteredAttendance] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -37,6 +39,13 @@ const Student = () => {
     );
     setFilteredAttendance(filtered);
   }, [attendance, searchTerm]);
+
+  // Handle card click to navigate to calendar view
+  const handleCardClick = (subjectId, subjectName) => {
+    navigate(`/dashboard/student/attendance/${subjectId}`, {
+      state: { subjectName }
+    });
+  };
 
   if (loading) {
     return (
@@ -73,12 +82,12 @@ const Student = () => {
 
   return (
     <div 
-      className="max-h-[calc(100vh-70px)] w-[calc(100vw-30px)] overflow-hidden mt-4"
+      className="max-h-[calc(100vh-70px)] flex  items-center justify-center overflow-hidden mt-4"
       style={{
         backgroundColor: darkMode ? '#111827' : 'transparent'
       }}
     >
-      <div className="overflow-scroll max-h-[calc(100vh-70px)]">
+      <div className=" flex flex-col w-10/12 ">
         <div className="flex justify-between items-center mb-6">
           <h1 
             className="text-2xl font-bold text-gray-800"
@@ -105,52 +114,53 @@ const Student = () => {
                 borderColor: darkMode ? '#4b5563' : '#d1d5db'
               }}
             />
-            <svg
-              className="absolute right-3 top-2.5 h-5 w-5 text-gray-400"
-              style={{
-                color: darkMode ? '#9ca3af' : '#6b7280'
-              }}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
+            
           </div>
         </div>
 
         {/* Attendance Cards */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {/* <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 grid-cols-1"> */}
+        <div className="flex flex-col gap-5 max-w-[90%] m-auto min-w-[70%]">
           {filteredAttendance.length > 0 ? (
             filteredAttendance.map((record, index) => (
               <div
                 key={index}
-                className="bg-gray-200 rounded-2xl shadow-lg p-6 flex flex-col items-start transition hover:shadow-xl"
+                onClick={() => handleCardClick(record.subjectId, record.subjectName)}
+                className="bg-gray-200 rounded-2xl shadow-lg p-6 flex flex-col items-start transition hover:shadow-xl cursor-pointer transform hover:scale-105"
                 style={{
                   backgroundColor: darkMode ? '#1f2937' : '#e5e7eb'
                 }}
               >
-                <h2 
-                  className="text-lg font-bold text-gray-800 mb-1"
-                  style={{
-                    color: darkMode ? '#f9fafb' : '#1f2937'
-                  }}
-                >
-                  {record.subjectName}
-                </h2>
+                <div className="flex items-center justify-between w-full mb-1">
+                  <h2 
+                    className="text-lg font-bold text-gray-800"
+                    style={{
+                      color: darkMode ? '#f9fafb' : '#1f2937'
+                    }}
+                  >
+                    {record.subjectName}
+                  </h2>
+                  <svg 
+                    className="w-5 h-5 text-blue-500" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
                 <p 
-                  className="text-sm text-gray-500 mb-4"
+                  className="text-sm text-gray-500 mb-2"
                   style={{
                     color: darkMode ? '#9ca3af' : '#6b7280'
                   }}
                 >
                   Total Classes: {record.totalClasses}
+                </p>
+                <p 
+                  className="text-xs text-blue-500 mb-2"
+                >
+                  Click to view attendance calendar →
                 </p>
 
                 <div className="w-full flex justify-between items-center">

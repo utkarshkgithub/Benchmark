@@ -109,7 +109,33 @@ export const fetchStudentAttendance = async (token) => {
     }
 };
 
+// Get detailed attendance for a specific subject (calendar view)
+export const getDetailedAttendanceBySubject = async (token, subjectId) => {
+    const toastId = toast.loading("Loading detailed attendance...");
+    try {
+        const response = await apiConnector(
+            "GET",
+            `${subjectEndPoints.FETCH_STUDENT_ATTENDANCE_API}-subject/${subjectId}`,
+            null,
+            {
+                Authorization: `Bearer ${token}`,
+            }
+        );
 
+        if (!response.data.success) {
+            throw new Error(response.data.message);
+        }
+
+        toast.success("Detailed attendance fetched successfully");
+        return response.data.data;
+    } catch (error) {
+        console.error("Detailed Attendance API ERROR:", error);
+        toast.error(error.message || "Failed to fetch detailed attendance");
+        throw error;
+    } finally {
+        toast.dismiss(toastId);
+    }
+};
 
 export const generateQr = async (token, formData) => {
     const toastId = toast.loading("Loading...");

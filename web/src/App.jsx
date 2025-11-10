@@ -22,6 +22,7 @@ import Admin from './components/core/dashboard/Admin/Admin.jsx'
 import AddSubject from './components/core/dashboard/Admin/AddSubject.jsx'
 import Instructor from './components/core/dashboard/Instructor/Instructor.jsx'
 import Student from './components/core/dashboard/Student/Student.jsx'
+import AttendanceCalendar from './components/core/dashboard/Student/AttendanceCalendar.jsx'
 import ContectUs from './components/core/outside/ContectUs.jsx'
 import PersonalDetails from './page/PersonalDetails.jsx'
 import InstructorQR from './components/core/dashboard/Instructor/InstructorQR.jsx'
@@ -71,6 +72,7 @@ useEffect(() => {
             user?.accountType === ACCOUNT_TYPE.STUDENT && (
               <>
                 <Route path="dashboard/student" element={<ProtectedRoute><Student/></ProtectedRoute>} />
+                <Route path="dashboard/student/attendance/:subjectId" element={<ProtectedRoute><AttendanceCalendar/></ProtectedRoute>} />
               </>
             )
           }
