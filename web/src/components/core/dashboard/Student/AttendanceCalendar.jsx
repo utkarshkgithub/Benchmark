@@ -45,7 +45,11 @@ const AttendanceCalendar = () => {
   };
 
   const formatDate = (date) => {
-    return date.toISOString().split('T')[0];
+    // Use local date to avoid timezone issues
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   const getAttendanceForDate = (date) => {
@@ -97,7 +101,10 @@ const AttendanceCalendar = () => {
 
   const daysInMonth = getDaysInMonth(currentMonth);
   const firstDay = getFirstDayOfMonth(currentMonth);
+  
+  // Create today's date without time to avoid timezone issues
   const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   return (
     <div 
@@ -276,13 +283,14 @@ const AttendanceCalendar = () => {
           {Array.from({ length: daysInMonth }, (_, index) => {
             const day = index + 1;
             const currentDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+            currentDate.setHours(0, 0, 0, 0); // Normalize time to avoid timezone issues
             const attendance = getAttendanceForDate(currentDate);
             const isToday = formatDate(currentDate) === formatDate(today);
 
             return (
               <div
                 key={day}
-                className={`h-20 border-b border-r p-2 relative ${
+                className={`h-20 border-2 p-2 relative ${
                   isToday ? 'ring-2 ring-blue-500' : ''
                 }`}
                 style={{ 
