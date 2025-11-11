@@ -82,20 +82,21 @@ const Student = () => {
 
   return (
     <div 
-      className="max-h-[calc(100vh-70px)] flex  items-center justify-center overflow-hidden mt-4"
+      className="max-h-[calc(100vh-70px)] flex  items-center justify-center overflow-hidden "
       style={{
         backgroundColor: darkMode ? '#111827' : 'transparent'
       }}
     >
-      <div className=" flex flex-col w-10/12 ">
-        <div className="flex justify-between items-center mb-6">
+      <div className=" flex flex-col w-10/12 mt-10">
+      <div className="flex justify-between">
+                <div className="flex justify-between items-center mb-6">
           <h1 
             className="text-2xl font-bold text-gray-800"
             style={{
               color: darkMode ? '#f9fafb' : '#1f2937'
             }}
           >
-            Welcome {user.firstName} {user.lastName} 👋
+            Welcome {user.firstName} {user.lastName} 
           </h1>
         </div>
 
@@ -117,10 +118,11 @@ const Student = () => {
             
           </div>
         </div>
+      </div>
 
         {/* Attendance Cards */}
         {/* <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 grid-cols-1"> */}
-        <div className="flex flex-col gap-5 max-w-[90%] m-auto min-w-[70%]">
+        <div className="flex flex-col gap-5 max-w-[90%] m-auto min-w-[70%] mt-5">
           {filteredAttendance.length > 0 ? (
             filteredAttendance.map((record, index) => (
               <div

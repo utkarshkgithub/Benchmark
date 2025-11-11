@@ -105,7 +105,7 @@ const AttendanceCalendar = () => {
       style={{ backgroundColor: darkMode ? '#111827' : '#ffffff' }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-4 justify-between mb-6">
         <button
           onClick={() => navigate(-1)}
           className="flex items-center text-blue-600 hover:text-blue-800 transition-colors"
@@ -118,7 +118,7 @@ const AttendanceCalendar = () => {
         </button>
         
         <h1 
-          className="text-2xl font-bold"
+          className="lg:text-2xl sm:text-xl  font-bold"
           style={{ color: darkMode ? '#f9fafb' : '#1f2937' }}
         >
           {attendanceData.subject.name} - Attendance Calendar
