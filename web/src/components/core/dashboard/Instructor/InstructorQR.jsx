@@ -383,7 +383,7 @@ export default function InstructorQR() {
                 {viewMode === "initial" && (
                     <div className="grid lg:grid-cols-2 gap-8">
                         {/* Welcome Card */}
-                        <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-600 text-white p-8 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 animate-slide-up">
+                        <div className="bg-gradient-to-br h-fit from-gray-600 via-black-800 to-gray-900 text-white p-8 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 animate-slide-up">
                             <div className="relative">
                                 <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full animate-pulse"></div>
                                 <div className="absolute -bottom-2 -left-2 w-16 h-16 bg-white/10 rounded-full animate-bounce-slow"></div>
@@ -434,7 +434,11 @@ export default function InstructorQR() {
                             
                             <div className="relative group mb-8">
                                 <select
-                                    className="w-full appearance-none bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-gray-200 rounded-xl px-6 py-4 pr-12 text-gray-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-300 shadow-sm hover:border-gray-300 hover:shadow-md font-medium"
+                                    className={`w-full appearance-none border-2 rounded-xl px-6 py-4 pr-12 focus:outline-none transition-all duration-300 shadow-sm hover:shadow-md font-medium ${
+                                        darkMode 
+                                            ? 'bg-gray-700 text-white border-gray-600 focus:border-blue-400 focus:ring-4 focus:ring-blue-900/20 hover:border-gray-500' 
+                                            : 'bg-gradient-to-r from-blue-50 to-purple-50 text-gray-700 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 hover:border-gray-300'
+                                    }`}
                                     value={selectedSubject?._id || ""}
                                     onChange={(e) => {
                                         const subj = subjects.find((s) => s._id === e.target.value);
@@ -459,7 +463,11 @@ export default function InstructorQR() {
                             <div className="relative group mb-6">
                                 <label className="block text-sm font-bold mb-2" style={{ color: darkMode ? '#d1d5db' : '#374151' }}>Select Location</label>
                                 <select
-                                    className="w-full appearance-none bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-gray-200 rounded-xl px-6 py-4 pr-12 text-gray-700 focus:border-green-500 focus:ring-4 focus:ring-green-100 focus:outline-none transition-all duration-300 shadow-sm hover:border-gray-300 hover:shadow-md font-medium"
+                                    className={`w-full appearance-none border-2 rounded-xl px-6 py-4 pr-12 focus:outline-none transition-all duration-300 shadow-sm hover:shadow-md font-medium ${
+                                        darkMode 
+                                            ? 'bg-gray-700 text-white border-gray-600 focus:border-green-400 focus:ring-4 focus:ring-green-900/20 hover:border-gray-500' 
+                                            : 'bg-gradient-to-r from-blue-50 to-purple-50 text-gray-700 border-gray-200 focus:border-green-500 focus:ring-4 focus:ring-green-100 hover:border-gray-300'
+                                    }`}
                                     value={selectedLocation?._id || ""}
                                     onChange={(e) => {
                                         const loc = locations.find((l) => l._id === e.target.value);
@@ -489,12 +497,11 @@ export default function InstructorQR() {
                                         min="1"
                                         max="60"
                                         step="1"
-                                        className="w-full bg-gradient-to-r from-orange-50 to-red-50 border-2 border-gray-200 rounded-xl px-6 py-4 pr-16 text-gray-700 focus:border-orange-500 focus:ring-4 focus:ring-orange-100 focus:outline-none transition-all duration-300 shadow-sm hover:border-gray-300 hover:shadow-md font-medium"
-                                        style={{
-                                            backgroundColor: darkMode ? '#374151' : '',
-                                            color: darkMode ? '#f9fafb' : '#374151',
-                                            borderColor: darkMode ? '#4b5563' : ''
-                                        }}
+                                        className={`w-full border-2 rounded-xl px-6 py-4 pr-16 focus:outline-none transition-all duration-300 shadow-sm hover:shadow-md font-medium ${
+                                            darkMode 
+                                                ? 'bg-gray-700 text-white border-gray-600 focus:border-orange-400 focus:ring-4 focus:ring-orange-900/20 hover:border-gray-500' 
+                                                : 'bg-gradient-to-r from-orange-50 to-red-50 text-gray-700 border-gray-200 focus:border-orange-500 focus:ring-4 focus:ring-orange-100 hover:border-gray-300'
+                                        }`}
                                         value={expiryMinutes}
                                         onChange={(e) => {
                                             let value = Number(e.target.value);
@@ -514,9 +521,21 @@ export default function InstructorQR() {
                                             }
                                         }}
                                         placeholder="Enter minutes (1-60)"
+                                        style={{
+                                            ...(darkMode && {
+                                                backgroundColor: '#374151',
+                                                color: '#f9fafb',
+                                                borderColor: '#4b5563'
+                                            })
+                                        }}
                                     />
                                     <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
-                                        <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg 
+                                            className={`w-6 h-6 ${darkMode ? 'text-gray-400' : 'text-gray-400'}`} 
+                                            fill="none" 
+                                            stroke="currentColor" 
+                                            viewBox="0 0 24 24"
+                                        >
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                     </div>
