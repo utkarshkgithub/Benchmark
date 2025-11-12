@@ -14,13 +14,28 @@ export const generateQr = async (req, res) => {
     const userId = req.user.id;
     
  
-  const { subjectId } = req.body; // ✅ frontend se subjectId aayega
+  const { subjectId, expiryMinutes } = req.body; // ✅ frontend se subjectId aur expiryMinutes aayega
     // console.log("Extracted subjectId:", subjectId);
+    // console.log("Extracted expiryMinutes:", expiryMinutes);
     
     if (!subjectId) {
       return res.status(400).json({ success: false, message: "Subject ID is required" });
     }
-    
+
+    // Validate expiry time (default to 2 minutes, allow 1-60 minutes range)
+    let expiryDuration = 2; // default 2 minutes
+    if (expiryMinutes){
+      if (expiryMinutes >= 1 && expiryMinutes <= 60) {
+        expiryDuration = expiryMinutes;
+      } else {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Expiry time must be between 1 and 60 minutes" 
+        });
+      }
+    }
+
+    console.log("expiryDuration",expiryDuration)
     const userDetails = await User.findById(userId);
     if (!userDetails) {
       return res.status(404).json({ success: false, message: "User not found" });
@@ -53,7 +68,7 @@ export const generateQr = async (req, res) => {
       subjectId: subjectDetails._id.toString(),
       attendanceId: attendance._id.toString(),
     };
-  const jwtToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "2m" });
+  const jwtToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: `${expiryDuration}m` });
 
     // shortId generate karo
     const shortId = crypto.randomBytes(4).toString("hex").slice(0, 7);
@@ -95,7 +110,7 @@ export const generateQr = async (req, res) => {
     await Token.create({
       shortId,
       jwt: jwtToken,
-      expireAt: Date.now() + 2 * 60 * 1000, // auto-expire 2 minutes
+      expireAt: Date.now() + expiryDuration * 60 * 1000, // dynamic expiry time
       location,
       locationId: locationId || undefined,
       locationName: locationName || undefined,
@@ -108,6 +123,7 @@ export const generateQr = async (req, res) => {
       subjectName: subjectDetails.subjectName,
       subjectCode: subjectDetails.subjectCode,
       presentStudents: attendance.presentStudent,
+      expiryMinutes: expiryDuration,
       message: "QR token generated successfully."
     });
   } catch (error) {

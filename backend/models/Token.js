@@ -14,7 +14,7 @@ const tokenSchema = new mongoose.Schema({
   expireAt: {
     type: Date,
     default: Date.now,
-    index: { expires: "2m" }, // auto-delete after 2 minutes
+    index: { expires: 0 }, // TTL index - documents will expire based on this field value
   }
   ,
   // Optional location where the QR was generated (instructor/device)

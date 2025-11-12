@@ -101,7 +101,12 @@ function Navbar() {
               <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-sm"></div>
             </div>
             <div className="relative">
-                            <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold bg-gradient-to-r from-blue-600 via-green-500 to-indigo-800 bg-clip-text text-transparent tracking-wide">
+              <h2 
+                className="text-lg sm:text-xl md:text-2xl font-extrabold tracking-wide"
+                style={{
+                  color: darkMode ? '#ffffff' : '#111827'
+                }}
+              >
                 BENCHMARK
               </h2>
             </div>

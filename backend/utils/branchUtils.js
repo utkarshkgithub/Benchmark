@@ -33,7 +33,7 @@ export const normalizeBranchNames = (branches) => {
 /**
  * Valid branch names after normalization
  */
-export const VALID_BRANCHES = ["CSE", "ECE", "MAE", "MNC", "PG"];
+export const VALID_BRANCHES = ["CSE", "ECE", "MAE", "MNC", "PG","NONE"];
 
 /**
  * Legacy branch name mappings

@@ -19,8 +19,6 @@ import { locationEndPoints } from "../../../../services/api";
 import { Link } from "react-router-dom";
 import Button from "../../../common/Button";
 
-const TWO_MINUTES = 119; // 2 minutes = 120 seconds, minus 1 for display purposes
-
 export default function InstructorQR() {
     const { token, user } = useSelector((s) => s.auth);
     const { darkMode } = useSelector((s) => s.theme);
@@ -33,7 +31,7 @@ export default function InstructorQR() {
 
     const [qrData, setQrData] = useState("");
     const [currentAttendanceId, setCurrentAttendanceId] = useState(null);
-    const [remaining, setRemaining] = useState(TWO_MINUTES);
+    const [remaining, setRemaining] = useState(0);
     const timerRef = useRef(null);
 
     const [students, setStudents] = useState([]);
@@ -41,6 +39,7 @@ export default function InstructorQR() {
     const [initialAttendance, setInitialAttendance] = useState({});
     const [locations, setLocations] = useState([]);
     const [selectedLocation, setSelectedLocation] = useState(null);
+    const [expiryMinutes, setExpiryMinutes] = useState(2); // Default 2 minutes
     const [viewMode, setViewMode] = useState("initial"); // "initial", "qr", "list", "submitted"
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState("name"); // sorting option
@@ -109,10 +108,19 @@ export default function InstructorQR() {
             return;
         }
 
-        // Only send subjectId and locationId - that's it!
+        // Validate expiry time
+        const expiry = Number(expiryMinutes) || 2;
+        if (expiry < 1 || expiry > 60) {
+            setError("Expiry time must be between 1 and 60 minutes.");
+            setLoading(false);
+            return;
+        }
+
+        // Send subjectId, locationId, and expiryMinutes
         const formData = new FormData();
         formData.append("subjectId", selectedSubject._id);
         formData.append("locationId", selectedLocation._id);
+        formData.append("expiryMinutes", expiry);
 
         try {
             const res = await generateQr(token, formData);
@@ -126,7 +134,9 @@ export default function InstructorQR() {
             setQrData(code);
             setCurrentAttendanceId(attendanceId);
             setViewMode("qr");
-            setRemaining(TWO_MINUTES);
+            // Use dynamic expiry time (convert minutes to seconds, minus 1 for display)
+            const dynamicTimerSeconds = (expiry * 60) - 1;
+            setRemaining(dynamicTimerSeconds);
             startCountdown();
         } catch (e) {
             console.error("Generate QR failed:", e);
@@ -269,7 +279,7 @@ export default function InstructorQR() {
         setInitialAttendance({});
         setCurrentAttendanceId(null);
         setSearchTerm("");
-        setRemaining(TWO_MINUTES);
+        setRemaining(0); // Reset timer to 0 when going back to initial state
         setError(null);
         setSuccessMessage(null);
         setAllSelected(false);
@@ -468,6 +478,52 @@ export default function InstructorQR() {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                     </svg>
                                 </div>
+                            </div>
+
+                            {/* Expiry Time input */}
+                            <div className="relative group mb-6">
+                                <label className="block text-sm font-bold mb-2" style={{ color: darkMode ? '#d1d5db' : '#374151' }}>QR Code Expiry Time (minutes)</label>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        max="60"
+                                        step="1"
+                                        className="w-full bg-gradient-to-r from-orange-50 to-red-50 border-2 border-gray-200 rounded-xl px-6 py-4 pr-16 text-gray-700 focus:border-orange-500 focus:ring-4 focus:ring-orange-100 focus:outline-none transition-all duration-300 shadow-sm hover:border-gray-300 hover:shadow-md font-medium"
+                                        style={{
+                                            backgroundColor: darkMode ? '#374151' : '',
+                                            color: darkMode ? '#f9fafb' : '#374151',
+                                            borderColor: darkMode ? '#4b5563' : ''
+                                        }}
+                                        value={expiryMinutes}
+                                        onChange={(e) => {
+                                            let value = Number(e.target.value);
+                                            // Allow empty input while typing
+                                            if (e.target.value === '') {
+                                                setExpiryMinutes('');
+                                                return;
+                                            }
+                                            // Enforce range 1-60
+                                            value = Math.max(1, Math.min(60, value || 1));
+                                            setExpiryMinutes(value);
+                                        }}
+                                        onBlur={(e) => {
+                                            // Ensure valid value on blur
+                                            if (e.target.value === '' || Number(e.target.value) < 1) {
+                                                setExpiryMinutes(2); // Reset to default
+                                            }
+                                        }}
+                                        placeholder="Enter minutes (1-60)"
+                                    />
+                                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
+                                        <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p className="text-xs mt-1" style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
+                                    Range: 1-60 minutes (default: 2 minutes)
+                                </p>
                             </div>
 
                             <Button

@@ -171,7 +171,7 @@ const AddSubject = () => {
                 color: darkMode ? '#d1d5db' : '#374151'
               }}>Branches</label>
               <div className="space-y-2 mt-1">
-                {["CSE", "ECE", "MNC", "MAE", "PG"].map((branch) => (
+                {["CSE", "ECE", "MNC", "MAE", "PG","NONE"].map((branch) => (
                   <label key={branch} className="flex items-center space-x-2">
                     <input
                       type="checkbox"

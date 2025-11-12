@@ -230,6 +230,7 @@ function PersonalDetails() {
                 <option value="MAE">MAE</option>
                 <option value="MNC">MNC</option>
                 <option value="PG">PG</option>
+                <option value="NONE">NONE</option>
               </select>
 
               <select

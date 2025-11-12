@@ -16,7 +16,7 @@ const SubjectSchema = new mongoose.Schema({
   },
   branches: [{
     type: String,
-    enum: ["CSE", "ECE", "MAE", "MNC","PG"],
+    enum: ["CSE", "ECE", "MAE", "MNC","PG","NONE"],
   }],
   instructor: {
     type: mongoose.Schema.Types.ObjectId,
