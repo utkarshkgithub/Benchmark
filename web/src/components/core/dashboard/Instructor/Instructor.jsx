@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { subjectEndPoints } from "../../../../services/api";
 import { apiConnector } from "../../../../services/apiconnector";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import * as XLSX from "xlsx";
 
 const Instructor = () => {
   const { token, user } = useSelector((state) => state.auth);
@@ -64,6 +67,202 @@ const Instructor = () => {
       );
     }
   }, [searchDate, attendanceRecords]);
+
+  // Export to PDF function
+  const exportToPDF = () => {
+    try {
+      if (filteredRecords.length === 0) {
+        alert("No attendance records to export!");
+        return;
+      }
+
+      console.log("Starting PDF export...");
+      const doc = new jsPDF();
+      const selectedSubjectName = subjects.find(s => s._id === selectedSubject)?.subjectName || "All Subjects";
+      console.log("PDF document created, subject:", selectedSubjectName);
+    
+    // Title
+    doc.setFontSize(20);
+    doc.setTextColor(40, 40, 40);
+    doc.text("Attendance Report", 14, 22);
+    
+    // Subject and date info
+    doc.setFontSize(12);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Subject: ${selectedSubjectName}`, 14, 35);
+    doc.text(`Date Filter: ${searchDate || "All Dates"}`, 14, 45);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 55);
+    
+    // Prepare detailed student data for each date
+    let allStudentData = [];
+    
+    filteredRecords.forEach((record) => {
+      // Handle date properly - if it's already in YYYY-MM-DD format, use it directly
+      const date = record.date.includes('T') 
+        ? new Date(record.date).toLocaleDateString() 
+        : record.date;
+      
+      // Add each student as a separate row
+      record.presentStudent.forEach((stu) => {
+        const studentData = [
+          date,
+          stu.student?.firstName && stu.student?.lastName 
+            ? `${stu.student.firstName} ${stu.student.lastName}`
+            : stu.name || `${stu.firstName || ''} ${stu.lastName || ''}`.trim() || 'N/A',
+          stu.student?.email || stu.email || 'N/A',
+          stu.markedAt 
+            ? new Date(stu.markedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+            : 'N/A'
+        ];
+        allStudentData.push(studentData);
+      });
+    });
+
+    // Updated table headers for detailed view
+    const tableColumn = ["Attendance Date", "Full Name", "Email", "Marked At"];
+
+    // Create manual table since autoTable is not working
+    let currentY = 75;
+    const rowHeight = 8;
+    const colWidths = [35, 50, 60, 30]; // Column widths
+    const colPositions = [14, 49, 99, 159]; // X positions for columns
+    
+    // Draw table headers
+    doc.setFillColor(71, 85, 105);
+    doc.rect(14, currentY - 6, 175, rowHeight, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(10);
+    doc.text("Attendance Date", colPositions[0] + 2, currentY);
+    doc.text("Full Name", colPositions[1] + 2, currentY);
+    doc.text("Email", colPositions[2] + 2, currentY);
+    doc.text("Marked At", colPositions[3] + 2, currentY);
+    
+    currentY += rowHeight;
+    
+    // Draw table rows
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(8);
+    
+    allStudentData.forEach((row, index) => {
+      // Alternate row colors
+      if (index % 2 === 0) {
+        doc.setFillColor(245, 247, 250);
+        doc.rect(14, currentY - 6, 175, rowHeight, 'F');
+      }
+      
+      // Draw cell borders and text
+      doc.setDrawColor(200, 200, 200);
+      
+      // Draw vertical lines
+      doc.line(14, currentY - 6, 14, currentY + 2);
+      doc.line(colPositions[1], currentY - 6, colPositions[1], currentY + 2);
+      doc.line(colPositions[2], currentY - 6, colPositions[2], currentY + 2);
+      doc.line(colPositions[3], currentY - 6, colPositions[3], currentY + 2);
+      doc.line(189, currentY - 6, 189, currentY + 2);
+      
+      // Draw horizontal line
+      doc.line(14, currentY + 2, 189, currentY + 2);
+      
+      // Add text content
+      doc.setTextColor(0, 0, 0);
+      doc.text(String(row[0]).substring(0, 15), colPositions[0] + 2, currentY);
+      doc.text(String(row[1]).substring(0, 20), colPositions[1] + 2, currentY);
+      doc.text(String(row[2]).substring(0, 25), colPositions[2] + 2, currentY);
+      doc.text(String(row[3]).substring(0, 12), colPositions[3] + 2, currentY);
+      
+      currentY += rowHeight;
+      
+      // Add new page if needed
+      if (currentY > 270) {
+        doc.addPage();
+        currentY = 20;
+      }
+    });
+    
+    // Draw final border
+    doc.line(14, currentY, 189, currentY);
+
+    // Add summary at the bottom
+    const finalY = currentY + 10;
+    doc.setFontSize(12);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Total Records: ${allStudentData.length} students across ${filteredRecords.length} class session(s)`, 14, finalY);
+
+    // Save the PDF with detailed student information
+    const fileName = `detailed_attendance_${selectedSubjectName.replace(/\s+/g, '_')}_${searchDate || 'all_dates'}.pdf`;
+    console.log("Saving PDF with filename:", fileName);
+    doc.save(fileName);
+    console.log("PDF export completed successfully!");
+    
+    } catch (error) {
+      console.error("PDF export failed:", error);
+      alert("Failed to export PDF. Please check the console for details.");
+    }
+  };
+
+  // Export to Excel function
+  const exportToExcel = () => {
+    if (filteredRecords.length === 0) {
+      alert("No attendance records to export!");
+      return;
+    }
+
+    const selectedSubjectName = subjects.find(s => s._id === selectedSubject)?.subjectName || "All Subjects";
+    
+    // Prepare detailed student data for Excel
+    const excelData = [];
+    
+    filteredRecords.forEach((record) => {
+      // Handle date properly - if it's already in YYYY-MM-DD format, use it directly
+      const date = record.date.includes('T') 
+        ? new Date(record.date).toLocaleDateString() 
+        : record.date;
+      
+      // Add each student as a separate row
+      record.presentStudent.forEach((stu) => {
+        excelData.push({
+          "Attendance Date": date,
+          "Full Name": stu.student?.firstName && stu.student?.lastName 
+            ? `${stu.student.firstName} ${stu.student.lastName}`
+            : stu.name || `${stu.firstName || ''} ${stu.lastName || ''}`.trim() || 'N/A',
+          "Email": stu.student?.email || stu.email || 'N/A',
+          "Marked At": stu.markedAt 
+            ? new Date(stu.markedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+            : 'N/A'
+        });
+      });
+    });    // Create workbook with detailed student data
+    const ws = XLSX.utils.json_to_sheet(excelData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Student Details");
+    
+    // Create summary sheet
+    const summaryData = filteredRecords.map((record) => ({
+      "Date": record.date.includes('T') 
+        ? new Date(record.date).toLocaleDateString() 
+        : record.date,
+      "Subject": selectedSubjectName,
+      "Present Students": record.presentStudent.length,
+      "Class Duration": "N/A", // Can be added if available
+      "Notes": `${record.presentStudent.length} students attended this class`
+    }));
+    
+    const summaryWs = XLSX.utils.json_to_sheet(summaryData);
+    XLSX.utils.book_append_sheet(wb, summaryWs, "Summary");
+
+    // Set column widths for detailed data
+    const columnWidths = [
+      { wch: 18 }, // Attendance Date
+      { wch: 30 }, // Full Name
+      { wch: 35 }, // Email
+      { wch: 18 }  // Marked At (with seconds)
+    ];
+    ws['!cols'] = columnWidths;
+
+    // Save the Excel file with detailed student data
+    const fileName = `detailed_attendance_${selectedSubjectName.replace(/\s+/g, '_')}_${searchDate || 'all_dates'}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+  };
 
   return (
     <div 
@@ -187,6 +386,57 @@ const Instructor = () => {
               </div>
             </div>
           </div>
+          
+          {/* Export Buttons - Only show when records are available */}
+          {filteredRecords.length > 0 && (
+            <div className="mt-6">
+              <p className="text-sm mb-3 text-center md:text-right" style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
+                Export detailed student data from {filteredRecords.length} class session{filteredRecords.length !== 1 ? 's' : ''} 
+                ({filteredRecords.reduce((sum, rec) => sum + rec.presentStudent.length, 0)} total attendance records)
+              </p>
+              <div className="flex flex-wrap gap-4 justify-center md:justify-end">
+              <button
+                onClick={exportToPDF}
+                className="group flex items-center px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                style={{
+                  backgroundColor: darkMode ? '#dc2626' : '#ef4444',
+                  color: '#ffffff'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = darkMode ? '#b91c1c' : '#dc2626';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = darkMode ? '#dc2626' : '#ef4444';
+                }}
+              >
+                <svg className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                Detailed PDF
+              </button>
+              
+              <button
+                onClick={exportToExcel}
+                className="group flex items-center px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                style={{
+                  backgroundColor: darkMode ? '#16a34a' : '#22c55e',
+                  color: '#ffffff'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = darkMode ? '#15803d' : '#16a34a';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = darkMode ? '#16a34a' : '#22c55e';
+                }}
+              >
+                <svg className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Detailed Excel
+              </button>
+            </div>
+            </div>
+          )}
         </div>
 
         {/* Attendance Table Card with Animation */}
@@ -362,60 +612,152 @@ const Instructor = () => {
                               }}
                               className="backdrop-blur-sm rounded-xl p-6 border shadow-lg"
                             >
-                              <h4 
-                                style={{
-                                  color: darkMode ? '#e5e7eb' : '#1f2937'
-                                }}
-                                className="text-lg font-bold mb-4 flex items-center"
-                              >
-                                <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full flex items-center justify-center mr-3">
-                                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                  </svg>
-                                </div>
-                                Present Students ({rec.presentStudent.length})
-                              </h4>
-                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {rec.presentStudent.map((stu, stuIndex) => (
-                                  <div 
-                                    key={stu.studentId || stu._id} 
-                                    style={{
-                                      background: darkMode 
-                                        ? 'linear-gradient(to right, rgba(75, 85, 99, 0.6), rgba(55, 65, 81, 0.6))'
-                                        : 'linear-gradient(to right, rgba(249, 250, 251, 1), rgba(243, 244, 246, 1))',
-                                      borderColor: darkMode ? '#4b5563' : '#d1d5db',
-                                      animationDelay: `${stuIndex * 0.1}s`
-                                    }}
-                                    className="flex items-center p-4 rounded-xl border hover:border-blue-200 transition-all duration-300 transform hover:scale-105 hover:shadow-md animate-fade-in-student"
-                                  >
-                                    <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white text-lg font-bold mr-4 shadow-md">
-                                      {(stu.name ? stu.name.charAt(0) : stu.firstName.charAt(0)).toUpperCase()}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                      <p 
-                                        style={{
-                                          color: darkMode ? '#e5e7eb' : '#111827'
-                                        }}
-                                        className="text-sm font-semibold truncate"
-                                      >
-                                        {stu.name || `${stu.firstName} ${stu.lastName}`}
-                                      </p>
-                                      <p 
-                                        style={{
-                                          color: darkMode ? '#9ca3af' : '#4b5563'
-                                        }}
-                                        className="text-xs truncate"
-                                      >
-                                        {stu.email}
-                                      </p>
-                                      {stu.markedAt && (
-                                        <p className="text-xs text-blue-600 font-medium mt-1">
-                                          Marked: {new Date(stu.markedAt).toLocaleTimeString()}
-                                        </p>
-                                      )}
-                                    </div>
+                              <div className="flex justify-between items-center mb-4">
+                                <h4 
+                                  style={{
+                                    color: darkMode ? '#e5e7eb' : '#1f2937'
+                                  }}
+                                  className="text-lg font-bold flex items-center"
+                                >
+                                  <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full flex items-center justify-center mr-3">
+                                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                    </svg>
                                   </div>
-                                ))}
+                                  Present Students ({rec.presentStudent.length})
+                                </h4>
+                                <div className="text-sm" style={{
+                                  color: darkMode ? '#9ca3af' : '#6b7280'
+                                }}>
+                                  Class Date: {rec.date.includes('T') 
+                                    ? new Date(rec.date).toLocaleDateString() 
+                                    : rec.date}
+                                </div>
+                              </div>
+                              {/* Present Students Table */}
+                              <div className="overflow-x-auto">
+                                <div className="mb-4 flex flex-wrap gap-2 justify-end">
+                                  <button
+                                    onClick={() => {
+                                      const sortedStudents = [...rec.presentStudent].sort((a, b) => {
+                                        const nameA = (a.student?.firstName && a.student?.lastName 
+                                          ? `${a.student.firstName} ${a.student.lastName}`
+                                          : a.name || `${a.firstName || ''} ${a.lastName || ''}`.trim()).toLowerCase();
+                                        const nameB = (b.student?.firstName && b.student?.lastName 
+                                          ? `${b.student.firstName} ${b.student.lastName}`
+                                          : b.name || `${b.firstName || ''} ${b.lastName || ''}`.trim()).toLowerCase();
+                                        return nameA.localeCompare(nameB);
+                                      });
+                                      const updatedRecords = [...filteredRecords];
+                                      updatedRecords[index].presentStudent = sortedStudents;
+                                      setFilteredRecords(updatedRecords);
+                                    }}
+                                    className="px-3 py-1 text-xs rounded-lg font-medium transition-all duration-200 hover:scale-105"
+                                    style={{
+                                      backgroundColor: darkMode ? '#4b5563' : '#e5e7eb',
+                                      color: darkMode ? '#ffffff' : '#374151'
+                                    }}
+                                  >
+                                    Sort by Name
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      const sortedStudents = [...rec.presentStudent].sort((a, b) => {
+                                        const timeA = new Date(a.markedAt).getTime();
+                                        const timeB = new Date(b.markedAt).getTime();
+                                        return timeA - timeB;
+                                      });
+                                      const updatedRecords = [...filteredRecords];
+                                      updatedRecords[index].presentStudent = sortedStudents;
+                                      setFilteredRecords(updatedRecords);
+                                    }}
+                                    className="px-3 py-1 text-xs rounded-lg font-medium transition-all duration-200 hover:scale-105"
+                                    style={{
+                                      backgroundColor: darkMode ? '#4b5563' : '#e5e7eb',
+                                      color: darkMode ? '#ffffff' : '#374151'
+                                    }}
+                                  >
+                                    Sort by Time
+                                  </button>
+                                </div>
+                                <table className="min-w-full divide-y" style={{
+                                  borderColor: darkMode ? '#374151' : '#e5e7eb'
+                                }}>
+                                  <thead style={{
+                                    backgroundColor: darkMode ? '#374151' : '#f9fafb'
+                                  }}>
+                                    <tr>
+                                      <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{
+                                        color: darkMode ? '#d1d5db' : '#374151'
+                                      }}>
+                                        Name
+                                      </th>
+                                      <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{
+                                        color: darkMode ? '#d1d5db' : '#374151'
+                                      }}>
+                                        Email
+                                      </th>
+                                      <th className="px-6 py-3 text-center text-xs font-bold uppercase tracking-wider" style={{
+                                        color: darkMode ? '#d1d5db' : '#374151'
+                                      }}>
+                                        Marked At
+                                      </th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y" style={{
+                                    backgroundColor: darkMode ? 'transparent' : '#ffffff',
+                                    borderColor: darkMode ? '#374151' : '#e5e7eb'
+                                  }}>
+                                    {rec.presentStudent.map((stu, stuIndex) => (
+                                      <tr 
+                                        key={stu.studentId || stu._id}
+                                        className="transition-colors animate-fade-in-student"
+                                        style={{
+                                          animationDelay: `${stuIndex * 0.1}s`
+                                        }}
+                                        onMouseEnter={(e) => {
+                                          e.currentTarget.style.backgroundColor = darkMode ? '#374151' : '#f9fafb';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                          e.currentTarget.style.backgroundColor = 'transparent';
+                                        }}
+                                      >
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                          <div className="flex items-center">
+                                            
+                                            <div className="text-sm font-medium" style={{
+                                              color: darkMode ? '#ffffff' : '#1f2937'
+                                            }}>
+                                              {stu.student?.firstName && stu.student?.lastName 
+                                                ? `${stu.student.firstName} ${stu.student.lastName}`
+                                                : stu.name || `${stu.firstName || ''} ${stu.lastName || ''}`.trim() || 'N/A'
+                                              }
+                                            </div>
+                                          </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                          <div className="text-sm" style={{
+                                            color: darkMode ? '#9ca3af' : '#6b7280'
+                                          }}>
+                                            {stu.student?.email || stu.email || 'N/A'}
+                                          </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                                          <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium" style={{
+                                            backgroundColor: darkMode ? '#065f46' : '#d1fae5',
+                                            color: darkMode ? '#6ee7b7' : '#065f46'
+                                          }}>
+                                            {/* <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div> */}
+                                            {stu.markedAt 
+                                              ? new Date(stu.markedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' ,second:"2-digit"})
+                                              : 'N/A'
+                                            }
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
                               </div>
                             </div>
                           </td>

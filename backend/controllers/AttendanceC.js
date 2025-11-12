@@ -35,7 +35,7 @@ export const generateQr = async (req, res) => {
       }
     }
 
-    console.log("expiryDuration",expiryDuration)
+    // console.log("expiryDuration",expiryDuration)
     const userDetails = await User.findById(userId);
     if (!userDetails) {
       return res.status(404).json({ success: false, message: "User not found" });
@@ -55,8 +55,14 @@ export const generateQr = async (req, res) => {
 
     // agar nahi hai to naya create karo
     if (!attendance) {
+      // Store date in local timezone format (YYYY-MM-DD)
+      const today = new Date();
+      const localDate = today.getFullYear() + '-' + 
+        String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+        String(today.getDate()).padStart(2, '0');
+      
       attendance = await Attendance.create({
-        date: new Date().toISOString(),
+        date: localDate,
         subject: subjectDetails._id,
         presentStudent: []
       });
