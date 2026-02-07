@@ -68,14 +68,14 @@ export const sendOTP = async (req, res) => {
     //create an en entry in db for otp
 
     const otpBody = await OTP.create(otpPayload);
-    console.log("OTP body:-",otpBody);
+    // console.log("OTP body:-",otpBody);
 
     // return response successfully
 
     res.status(200).json({
       success: true,
       message: "OTP sent Successfully.",
-      otp,
+      // otp,
     });
   } catch (error) {
     console.log("Issues Occure in generate Otp");
