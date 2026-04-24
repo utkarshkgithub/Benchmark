@@ -4,21 +4,18 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { signUp } from "../services/opretions/Auth.js";
 import { fetchAllSubjects } from "../services/opretions/Subject.js";
+import Button from "../components/common/Button.jsx";
 
 function PersonalDetails() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { signupData } = useSelector((state) => state.auth);
-  
-  // Get theme state
-  const themeState = useSelector((state) => state.theme)
-  const darkMode = themeState?.darkMode || false
 
   const [loading, setLoading] = useState(false);
   const [subjects, setSubjects] = useState([]);
-  const [autoSubjects, setAutoSubjects] = useState([]);              // branch+semester subjects
-  const [minorSubjects, setMinorSubjects] = useState([]);            // semester + isMinor:true
-  const [selectedMinorSubjects, setSelectedMinorSubjects] = useState([]); // user-chosen minors
+  const [autoSubjects, setAutoSubjects] = useState([]);
+  const [minorSubjects, setMinorSubjects] = useState([]);
+  const [selectedMinorSubjects, setSelectedMinorSubjects] = useState([]);
   const [isMinor, setIsMinor] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -29,8 +26,7 @@ function PersonalDetails() {
     department: "",
   });
 
-  // Fetch all subjects on mount
-  const fetcheSubject = async () => {
+  const fetchSubjects = async () => {
     setLoading(true);
     try {
       const res = await fetchAllSubjects();
@@ -41,14 +37,14 @@ function PersonalDetails() {
     setLoading(false);
   };
 
-  useEffect(() => { fetcheSubject(); }, []);
+  useEffect(() => {
+    fetchSubjects();
+  }, []);
 
-  // Redirect if signupData missing
   useEffect(() => {
     if (!signupData) navigate("/signup");
   }, [signupData, navigate]);
 
-  // Recompute lists when branch/semester change
   useEffect(() => {
     if (formData.branch && formData.semester) {
       const autos = subjects.filter(
@@ -63,8 +59,6 @@ function PersonalDetails() {
         (sub) => sub.semester === formData.semester && sub.isMinor === true
       );
       setMinorSubjects(minors);
-
-      // Reset minor selections on change
       setSelectedMinorSubjects([]);
     } else {
       setAutoSubjects([]);
@@ -77,7 +71,6 @@ function PersonalDetails() {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  // Minor select toggles
   const handleMinorSelect = (subjectId) => {
     setSelectedMinorSubjects((prev) =>
       prev.includes(subjectId)
@@ -86,7 +79,6 @@ function PersonalDetails() {
     );
   };
 
-  // If user unticks Minor, clear chosen minors
   useEffect(() => {
     if (!isMinor) setSelectedMinorSubjects([]);
   }, [isMinor]);
@@ -97,9 +89,7 @@ function PersonalDetails() {
 
     const { accountType, firstName, lastName, email, password, confirmPassword, otp } = signupData;
 
-    // Combine auto + chosen minors
     const finalSubjects = [
-      // ...autoSubjects.map((s) => s._id),
       ...selectedMinorSubjects,
     ];
 
@@ -118,9 +108,9 @@ function PersonalDetails() {
           formData.rollNumber,
           formData.branch,
           formData.semester,
-          "",              // department (student ke liye khali)
-          isMinor,         // ✅ ab isMinor sahi jagah pe
-          finalSubjects    // ✅ ab selectedSubjects sahi jagah pe
+          "",
+          isMinor,
+          finalSubjects
         )
       );
 
@@ -146,82 +136,47 @@ function PersonalDetails() {
   };
 
   return (
-    <div 
-      className="min-h-screen mt-20 flex items-center justify-center"
-      style={{
-        backgroundColor: darkMode ? '#111827' : '#f9fafb',
-        color: darkMode ? '#ffffff' : '#111827'
-      }}
-    >
+    <div className="cb-auth-page">
       {loading ? (
-        <div 
-          className="text-xl"
-          style={{
-            color: darkMode ? '#ffffff' : '#111827'
-          }}
-        >
+        <div className="text-xl" style={{ color: "var(--text-primary)" }}>
           Loading...
         </div>
       ) : (
-        <div 
-          className="w-full max-w-md p-6 rounded-lg shadow-md"
-          style={{
-            backgroundColor: darkMode ? '#1f2937' : '#ffffff',
-            boxShadow: darkMode 
-              ? '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-              : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-          }}
-        >
-          <h1 
-            className="text-2xl font-bold mb-4"
-            style={{
-              color: darkMode ? '#f9fafb' : '#111827'
-            }}
-          >
-            Provide Additional Details
+        <div className="cb-auth-card !max-w-2xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.13em]" style={{ color: "var(--cb-link)" }}>
+            onboarding details
+          </p>
+          <h1 className="cb-display-tight mt-2 text-3xl font-medium" style={{ color: "var(--text-primary)" }}>
+            Complete your profile
           </h1>
+          <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
+            Add role-specific details to finalize your account creation.
+          </p>
 
           {signupData?.accountType === "Student" && (
-            <form onSubmit={handleOnSubmit} className="space-y-5">
-              <input
-                type="text"
-                name="deviceId"
-                value={formData.deviceId}
-                onChange={handleOnChange}
-                placeholder="Device ID"
-                className="w-full px-3 py-2 border rounded-md"
-                style={{
-                  backgroundColor: darkMode ? '#374151' : '#ffffff',
-                  borderColor: darkMode ? '#6b7280' : '#d1d5db',
-                  color: darkMode ? '#ffffff' : '#111827'
-                }}
-                required
-              />
-              <input
-                type="text"
-                name="rollNumber"
-                value={formData.rollNumber}
-                onChange={handleOnChange}
-                placeholder="Roll Number"
-                className="w-full px-3 py-2 border rounded-md"
-                style={{
-                  backgroundColor: darkMode ? '#374151' : '#ffffff',
-                  borderColor: darkMode ? '#6b7280' : '#d1d5db',
-                  color: darkMode ? '#ffffff' : '#111827'
-                }}
-                required
-              />
+            <form onSubmit={handleOnSubmit} className="mt-6 space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                    Roll number
+                  </label>
+                  <input
+                    type="text"
+                    name="rollNumber"
+                    value={formData.rollNumber}
+                    onChange={handleOnChange}
+                    placeholder="Roll Number"
+                    className="cb-input mt-2"
+                    required
+                  />
+                </div>
+              </div>
 
               <select
                 name="branch"
                 value={formData.branch}
                 onChange={handleOnChange}
-                className="w-full px-3 py-2 border rounded-md"
-                style={{
-                  backgroundColor: darkMode ? '#374151' : '#ffffff',
-                  borderColor: darkMode ? '#6b7280' : '#d1d5db',
-                  color: darkMode ? '#ffffff' : '#111827'
-                }}
+                className="cb-input"
                 required
               >
                 <option value="">Select Branch</option>
@@ -237,12 +192,7 @@ function PersonalDetails() {
                 name="semester"
                 value={formData.semester}
                 onChange={handleOnChange}
-                className="w-full px-3 py-2 border rounded-md"
-                style={{
-                  backgroundColor: darkMode ? '#374151' : '#ffffff',
-                  borderColor: darkMode ? '#6b7280' : '#d1d5db',
-                  color: darkMode ? '#ffffff' : '#111827'
-                }}
+                className="cb-input"
                 required
               >
                 <option value="">Select Semester</option>
@@ -256,133 +206,88 @@ function PersonalDetails() {
                 <option value="VIII">VIII</option>
               </select>
 
-              {/* Auto subjects (visible, checked, not changeable) */}
               {formData.branch && formData.semester && (
-                <div className="space-y-2">
-                  <h3 
-                    className="font-semibold"
-                    style={{
-                      color: darkMode ? '#f9fafb' : '#111827'
-                    }}
-                  >
-                    Your Subjects (Auto-selected)
+                <div className="space-y-2 rounded-2xl border p-4" style={{ borderColor: "var(--border-subtle)" }}>
+                  <h3 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                    Auto-selected subjects
                   </h3>
                   {autoSubjects.length > 0 ? (
                     autoSubjects.map((sub) => (
-                      <label key={sub._id} className="flex items-center gap-2 opacity-80">
+                      <label key={sub._id} className="flex items-center gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>
                         <input type="checkbox" checked readOnly disabled />
-                        <span
-                          style={{
-                            color: darkMode ? '#d1d5db' : '#374151'
-                          }}
-                        >
-                          {sub.subjectName} ({sub.subjectCode})
-                        </span>
+                        <span>{sub.subjectName} ({sub.subjectCode})</span>
                       </label>
                     ))
                   ) : (
-                    <p 
-                      className="text-sm"
-                      style={{
-                        color: darkMode ? '#9ca3af' : '#6b7280'
-                      }}
-                    >
+                    <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
                       No subjects found for this Branch & Semester.
                     </p>
                   )}
                 </div>
               )}
 
-              {/* Minor toggle */}
-              <div className="flex items-center gap-2 pt-1">
+              <div className="flex items-center gap-2 rounded-xl border px-3 py-2" style={{ borderColor: "var(--border-subtle)" }}>
                 <input
                   type="checkbox"
                   id="isMinor"
                   checked={isMinor}
                   onChange={(e) => setIsMinor(e.target.checked)}
                 />
-                <label 
-                  htmlFor="isMinor"
-                  style={{
-                    color: darkMode ? '#f9fafb' : '#111827'
-                  }}
-                >
+                <label htmlFor="isMinor" className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
                   Opt for Minor Subjects
                 </label>
               </div>
 
-              {/* Minor subjects (only when opted) */}
               {isMinor && formData.semester && (
-                <div className="space-y-2">
-                  <h3 
-                    className="font-semibold"
-                    style={{
-                      color: darkMode ? '#f9fafb' : '#111827'
-                    }}
-                  >
+                <div className="space-y-2 rounded-2xl border p-4" style={{ borderColor: "var(--border-subtle)" }}>
+                  <h3 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
                     Available Minor Subjects
                   </h3>
                   {minorSubjects.length > 0 ? (
                     minorSubjects.map((sub) => (
-                      <label key={sub._id} className="flex items-center gap-2">
+                      <label key={sub._id} className="flex items-center gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>
                         <input
                           type="checkbox"
                           checked={selectedMinorSubjects.includes(sub._id)}
                           onChange={() => handleMinorSelect(sub._id)}
                         />
-                        <span
-                          style={{
-                            color: darkMode ? '#d1d5db' : '#374151'
-                          }}
-                        >
-                          {sub.subjectName} ({sub.subjectCode})
-                        </span>
+                        <span>{sub.subjectName} ({sub.subjectCode})</span>
                       </label>
                     ))
                   ) : (
-                    <p 
-                      className="text-sm"
-                      style={{
-                        color: darkMode ? '#9ca3af' : '#6b7280'
-                      }}
-                    >
+                    <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
                       No minor subjects available for this semester.
                     </p>
                   )}
                 </div>
               )}
 
-              <button
-                type="submit"
-                className="w-full py-2 px-4 rounded-md font-semibold transition-all duration-300 hover:scale-105 bg-gradient-to-r from-blue-600 via-green-500 to-indigo-800 text-white"
-              >
+              <Button type="submit" variant="primary" size="lg" className="w-full">
                 Create Account
-              </button>
+              </Button>
             </form>
           )}
 
           {signupData?.accountType === "Instructor" && (
-            <form onSubmit={handleOnSubmit} className="space-y-5">
-              <input
-                type="text"
-                name="department"
-                value={formData.department}
-                onChange={handleOnChange}
-                placeholder="Department"
-                className="w-full px-3 py-2 border rounded-md"
-                style={{
-                  backgroundColor: darkMode ? '#374151' : '#ffffff',
-                  borderColor: darkMode ? '#6b7280' : '#d1d5db',
-                  color: darkMode ? '#ffffff' : '#111827'
-                }}
-                required
-              />
-              <button 
-                type="submit" 
-                className="w-full py-2 px-4 rounded-md font-semibold transition-all duration-300 hover:scale-105 bg-gradient-to-r from-blue-600 via-green-500 to-indigo-800 text-white"
-              >
+            <form onSubmit={handleOnSubmit} className="mt-6 space-y-4">
+              <div>
+                <label className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                  Department
+                </label>
+                <input
+                  type="text"
+                  name="department"
+                  value={formData.department}
+                  onChange={handleOnChange}
+                  placeholder="Department"
+                  className="cb-input mt-2"
+                  required
+                />
+              </div>
+
+              <Button type="submit" variant="primary" size="lg" className="w-full">
                 Create Account
-              </button>
+              </Button>
             </form>
           )}
         </div>

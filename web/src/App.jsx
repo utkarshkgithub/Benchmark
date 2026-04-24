@@ -45,13 +45,7 @@ useEffect(() => {
 
   return (
     <ThemeProvider>
-      <div 
-        className="min-h-screen" 
-        style={{
-          backgroundColor: darkMode ? '#111827' : '#ffffff',
-          color: darkMode ? '#ffffff' : '#111827'
-        }}
-      >
+      <div className="app-shell">
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />

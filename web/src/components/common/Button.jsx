@@ -14,39 +14,24 @@ function Button({
 }) {
   const { loading: globalLoading } = useSelector((state) => state.auth)
   const { loading: profileLoading } = useSelector((state) => state.profile)
-  
-  // Get theme state
-  const themeState = useSelector((state) => state.theme)
-  const darkMode = themeState?.darkMode || false
-  
-  // Button is disabled if any loading state is true or explicitly disabled
+
   const isDisabled = disabled || loading || globalLoading || profileLoading
 
-  const baseClasses = "font-medium rounded-lg transition-all duration-300 relative flex items-center justify-center gap-2"
-  
+  const baseClasses = 'inline-flex items-center justify-center gap-2 font-semibold transition-all duration-200'
+
   const variants = {
-    primary: isDisabled 
-      ? (darkMode ? "bg-gray-600 text-gray-400 cursor-not-allowed opacity-50" : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-50")
-      : "bg-blue-600 text-white hover:bg-blue-700 transform hover:scale-105",
-    secondary: isDisabled 
-      ? (darkMode ? "bg-gray-600 text-gray-400 cursor-not-allowed opacity-50" : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-50")
-      : (darkMode ? "bg-gray-700 text-gray-200 hover:bg-gray-600 transform hover:scale-105" : "bg-gray-200 text-gray-800 hover:bg-gray-300 transform hover:scale-105"),
-    danger: isDisabled 
-      ? (darkMode ? "bg-gray-600 text-gray-400 cursor-not-allowed opacity-50" : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-50")
-      : "bg-red-600 text-white hover:bg-red-700 transform hover:scale-105",
-    success: isDisabled 
-      ? (darkMode ? "bg-gray-600 text-gray-400 cursor-not-allowed opacity-50" : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-50")
-      : "bg-green-600 text-white hover:bg-green-700 transform hover:scale-105",
-    outline: isDisabled 
-      ? (darkMode ? "border border-gray-600 text-gray-400 cursor-not-allowed opacity-50" : "border border-gray-300 text-gray-500 cursor-not-allowed opacity-50")
-      : (darkMode ? "border border-blue-400 text-blue-400 hover:bg-blue-600 hover:text-white transform hover:scale-105" : "border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transform hover:scale-105")
+    primary: 'cb-pill-btn cb-pill-primary',
+    secondary: 'cb-pill-btn cb-pill-secondary',
+    danger: 'cb-pill-btn bg-[#0a0b0d] border border-[#0a0b0d] text-white hover:bg-[#282b31] hover:border-[#282b31]',
+    success: 'cb-pill-btn cb-pill-primary',
+    outline: 'cb-pill-btn bg-transparent border border-[#0052ff] text-[#0052ff] hover:bg-[#eef0f3]'
   }
-  
+
   const sizes = {
-    sm: "px-3 py-1.5 text-sm",
-    md: "px-4 py-2 text-base", 
-    lg: "px-6 py-3 text-lg",
-    xl: "px-8 py-4 text-xl"
+    sm: 'min-h-10 px-4 py-2 text-sm',
+    md: 'min-h-11 px-5 py-2.5 text-sm',
+    lg: 'min-h-12 px-6 py-3 text-base',
+    xl: 'min-h-14 px-8 py-3.5 text-lg'
   }
 
   return (
@@ -54,7 +39,9 @@ function Button({
       type={type}
       onClick={onClick}
       disabled={isDisabled}
-      className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`${baseClasses} ${variants[variant] || variants.primary} ${
+        sizes[size] || sizes.md
+      } ${isDisabled ? 'cursor-not-allowed opacity-60' : ''} ${className}`}
       {...props}
     >
       {(loading || globalLoading || profileLoading) ? (

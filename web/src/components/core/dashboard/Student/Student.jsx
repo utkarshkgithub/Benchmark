@@ -50,19 +50,14 @@ const Student = () => {
   if (loading) {
     return (
       <div 
-        className="flex justify-center items-center h-screen w-full bg-gray-100"
+        className="cb-auth-page"
         style={{
-          backgroundColor: darkMode ? '#111827' : '#f3f4f6'
+          minHeight: 'calc(100vh - 80px)'
         }}
       >
-        <p 
-          className="text-gray-600 text-lg"
-          style={{
-            color: darkMode ? '#d1d5db' : '#4b5563'
-          }}
-        >
+        <div className="cb-card rounded-3xl px-6 py-5 text-center" style={{ color: 'var(--text-primary)' }}>
           Loading attendance...
-        </p>
+        </div>
       </div>
     );
   }
@@ -70,97 +65,91 @@ const Student = () => {
   if (error) {
     return (
       <div 
-        className="flex justify-center items-center h-screen bg-gray-100"
+        className="cb-auth-page"
         style={{
-          backgroundColor: darkMode ? '#111827' : '#f3f4f6'
+          minHeight: 'calc(100vh - 80px)'
         }}
       >
-        <p className="text-red-500 text-lg">{error}</p>
+        <div className="cb-card rounded-3xl px-6 py-5 text-center text-red-600">
+          {error}
+        </div>
       </div>
     );
   }
 
   return (
     <div 
-      className="max-h-[calc(100vh-70px)] flex  items-center justify-center overflow-hidden "
+      className="min-h-[calc(100vh-80px)] px-4 py-8"
       style={{
-        backgroundColor: darkMode ? '#111827' : 'transparent'
+        background:
+          'radial-gradient(circle at 12% 18%, rgba(0, 82, 255, 0.10), transparent 34%), radial-gradient(circle at 86% 80%, rgba(10, 11, 13, 0.08), transparent 32%), var(--surface-primary)'
       }}
     >
-      <div className=" flex flex-col w-10/12 mt-10">
-      <div className="flex justify-between">
-                <div className="flex justify-between items-center mb-6">
-          <h1 
-            className="text-2xl font-bold text-gray-800"
-            style={{
-              color: darkMode ? '#f9fafb' : '#1f2937'
-            }}
-          >
-            Welcome {user.firstName} {user.lastName} 
-          </h1>
-        </div>
+      <div className="cb-container space-y-6">
+        <header className="cb-card rounded-3xl p-6 md:p-8">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.13em]" style={{ color: 'var(--cb-link)' }}>
+                Student Dashboard
+              </p>
+              <h1 className="cb-display-tight mt-2 text-3xl font-medium md:text-4xl" style={{ color: 'var(--text-primary)' }}>
+                Welcome {user.firstName} {user.lastName}
+              </h1>
+            </div>
 
-        {/* Search bar */}
-        <div className="mb-6 ml-1">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search by subject name..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full md:w-64 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              style={{
-                backgroundColor: darkMode ? '#374151' : '#ffffff',
-                color: darkMode ? '#f9fafb' : '#111827',
-                borderColor: darkMode ? '#4b5563' : '#d1d5db'
-              }}
-            />
-            
+            <div className="w-full md:w-72">
+              <input
+                type="text"
+                placeholder="Search by subject name..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="cb-input"
+              />
+            </div>
           </div>
-        </div>
-      </div>
+        </header>
 
-        {/* Attendance Cards */}
-        {/* <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 grid-cols-1"> */}
-        <div className="flex flex-col gap-5 max-w-[90%] m-auto min-w-[70%] mt-5">
+        <div className="space-y-4">
           {filteredAttendance.length > 0 ? (
             filteredAttendance.map((record, index) => (
               <div
                 key={index}
                 onClick={() => handleCardClick(record.subjectId, record.subjectName)}
-                className="bg-gray-200 rounded-2xl shadow-lg p-6 flex flex-col items-start transition hover:shadow-xl cursor-pointer transform hover:scale-105"
+                className="cb-card cursor-pointer rounded-3xl p-6 transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg"
                 style={{
-                  backgroundColor: darkMode ? '#1f2937' : '#e5e7eb'
+                  background: 'var(--surface-primary)'
                 }}
               >
                 <div className="flex items-center justify-between w-full mb-1">
                   <h2 
-                    className="text-lg font-bold text-gray-800"
+                    className="text-xl font-semibold"
                     style={{
-                      color: darkMode ? '#f9fafb' : '#1f2937'
+                      color: 'var(--text-primary)'
                     }}
                   >
                     {record.subjectName}
                   </h2>
                   <svg 
-                    className="w-5 h-5 text-blue-500" 
+                    className="h-5 w-5" 
                     fill="none" 
                     stroke="currentColor" 
                     viewBox="0 0 24 24"
+                    style={{ color: 'var(--cb-blue)' }}
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
                 <p 
-                  className="text-sm text-gray-500 mb-2"
+                  className="mb-2 text-sm"
                   style={{
-                    color: darkMode ? '#9ca3af' : '#6b7280'
+                    color: 'var(--text-secondary)'
                   }}
                 >
                   Total Classes: {record.totalClasses}
                 </p>
                 <p 
-                  className="text-xs text-blue-500 mb-2"
+                  className="mb-4 text-xs font-semibold"
+                  style={{ color: 'var(--cb-link)' }}
                 >
                   Click to view attendance calendar →
                 </p>
@@ -168,9 +157,9 @@ const Student = () => {
                 <div className="w-full flex justify-between items-center">
                   <div>
                     <p 
-                      className="text-gray-600 text-sm"
+                      className="text-sm"
                       style={{
-                        color: darkMode ? '#d1d5db' : '#4b5563'
+                        color: 'var(--text-secondary)'
                       }}
                     >
                       Present
@@ -178,7 +167,7 @@ const Student = () => {
                     <p 
                       className="text-lg font-semibold"
                       style={{
-                        color: darkMode ? '#f9fafb' : '#111827'
+                        color: 'var(--text-primary)'
                       }}
                     >
                       {record.presentCount}
@@ -187,15 +176,15 @@ const Student = () => {
 
                   <div>
                     <p 
-                      className="text-gray-600 text-sm"
+                      className="text-sm"
                       style={{
-                        color: darkMode ? '#d1d5db' : '#4b5563'
+                        color: 'var(--text-secondary)'
                       }}
                     >
                       Attendance
                     </p>
                     <span
-                      className={`px-3 py-1 rounded-lg font-semibold text-sm ${
+                      className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${
                         parseFloat(record.percentage) >= 75
                           ? "bg-green-100 text-green-700"
                           : "bg-red-100 text-red-700"
@@ -209,15 +198,15 @@ const Student = () => {
             ))
           ) : (
             <div 
-              className="col-span-full text-center text-gray-500"
+                className="text-center"
               style={{
-                color: darkMode ? '#9ca3af' : '#6b7280'
+                  color: 'var(--text-secondary)'
               }}
             >
               No attendance data available
             </div>
           )}
-        </div>
+          </div>
       </div>
     </div>
   );

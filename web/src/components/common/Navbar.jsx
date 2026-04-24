@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react'
 import CTAButton from './CTAButton'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { FaBars, FaTimes } from 'react-icons/fa'
-import { VscSignOut } from "react-icons/vsc"
+import { VscSignOut } from 'react-icons/vsc'
 import { useSelector, useDispatch } from 'react-redux'
-import { logout } from "../../services/opretions/Auth.js"
+import { logout } from '../../services/opretions/Auth.js'
 import { NavLink, MobileNavLink } from './NavLink'
 import ThemeToggle from './ThemeToggle'
 import logodark from '../../assets/logodark.png'
@@ -13,54 +13,36 @@ import logolight from '../../assets/logolight.png'
 function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
   const mobileMenuRef = useRef(null)
   const profileDropdownRef = useRef(null)
-  
+
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const location = useLocation()
 
-  const { token } = useSelector((state) => state.auth)
-  const { user } = useSelector((state) => state.auth)
+  const { token, user } = useSelector((state) => state.auth)
   const themeState = useSelector((state) => state.theme)
   const darkMode = themeState?.darkMode || false
 
-  const isActive = (path) => location.pathname === path
-
-  // Handle scroll effect
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+    setIsMobileMenuOpen(false)
+    setIsProfileDropdownOpen(false)
+  }, [location.pathname])
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
         setIsMobileMenuOpen(false)
       }
+
       if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
         setIsProfileDropdownOpen(false)
       }
     }
 
     document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen)
-    setIsProfileDropdownOpen(false)
-  }
-
-  const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false)
-  }
 
   const handleLogout = () => {
     dispatch(logout(navigate))
@@ -69,171 +51,107 @@ function Navbar() {
   }
 
   return (
-    <nav 
-      className={`w-full sticky top-0 z-50 ${
-        scrolled 
-          ? 'backdrop-blur-xl shadow-xl border-b' 
-          : 'backdrop-blur-sm shadow-md border-b'
-      }`}
+    <nav
+      className="sticky top-0 z-50 border-b backdrop-blur"
       style={{
-        backgroundColor: darkMode 
-          ? (scrolled ? 'rgba(17, 24, 39, 0.9)' : 'rgba(17, 24, 39, 0.95)')
-          : (scrolled ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.95)'),
-        color: darkMode ? '#ffffff' : '#111827',
-        borderColor: darkMode 
-          ? (scrolled ? 'rgba(75, 85, 99, 0.2)' : 'rgba(75, 85, 99, 1)')
-          : (scrolled ? 'rgba(255, 255, 255, 0.2)' : 'rgba(229, 231, 235, 1)')
+        background: darkMode ? 'rgba(10, 11, 13, 0.94)' : 'rgba(255, 255, 255, 0.94)',
+        borderColor: 'var(--border-subtle)'
       }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Brand with Animation */}
-          <Link 
-            to="/" 
-            className="flex items-center space-x-3 flex-shrink-0 group animate-fade-in-left"
-          >
-            <div className="relative">
-              <img 
-                src={darkMode ? logodark : logolight}
-                alt="IIIT Logo" 
-                className="h-8 w-8 sm:h-10 sm:w-10 object-contain transform "
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-sm"></div>
-            </div>
-            <div className="relative">
-              <h2 
-                className="text-lg sm:text-xl md:text-2xl font-extrabold tracking-wide"
-                style={{
-                  color: darkMode ? '#ffffff' : '#111827'
-                }}
-              >
-                BENCHMARK
-              </h2>
+      <div className="cb-container">
+        <div className="flex h-20 items-center justify-between gap-3">
+          <Link to="/" className="flex items-center gap-3">
+            <img
+              src={darkMode ? logodark : logolight}
+              alt="Benchmark"
+              className="h-10 w-10 rounded-xl object-contain"
+            />
+            <div>
+              <p className="cb-display-tight text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
+                Benchmark
+              </p>
+              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                Attendance Platform
+              </p>
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-8 animate-fade-in-down">
+          <div className="hidden items-center gap-6 lg:flex">
+            <ThemeToggle />
+            <NavLink to="/learn">About</NavLink>
+
             {!token ? (
-              <div className="flex items-center space-x-6 animate-fade-in-right" style={{ animationDelay: '0.2s' }}>
-                <ThemeToggle />
-                <NavLink to="/learn">About</NavLink>
-                <Link to='/login' className="transform hover:scale-105 transition-transform duration-200">
+              <div className="flex items-center gap-3">
+                <Link to="/login">
                   <CTAButton text="Login" active={false} />
                 </Link>
-                <Link to='/signup' className="transform hover:scale-105 transition-transform duration-200">
-                  <CTAButton text="Signup" active="true" />
+                <Link to="/signup">
+                  <CTAButton text="Create Account" active='true' />
                 </Link>
               </div>
             ) : (
               <>
-                {/* Desktop Navigation Links */}
-                <div className="flex items-center space-x-6">
-                  <ThemeToggle />
-                  <NavLink to="/learn">About</NavLink>
-                  <NavLink to="/dashboard/my-profile">Profile</NavLink>
+                <NavLink to="/dashboard/my-profile">Profile</NavLink>
 
-                  {user?.accountType === "Student" && (
-                    <NavLink to="/dashboard/student">Dashboard</NavLink>
-                  )}
+                {user?.accountType === 'Student' && <NavLink to="/dashboard/student">Dashboard</NavLink>}
 
-                  {user?.accountType === "Instructor" && (
-                    <>
-                      <NavLink to="/dashboard/genrate-qr">ShowQR</NavLink>
-                      <NavLink to="/dashboard/instructor">Dashboard</NavLink>
-                    </>
-                  )}
+                {user?.accountType === 'Instructor' && (
+                  <>
+                    <NavLink to="/dashboard/genrate-qr">Show QR</NavLink>
+                    <NavLink to="/dashboard/instructor">Dashboard</NavLink>
+                  </>
+                )}
 
-                  {user?.accountType === "Admin" && (
-                    <NavLink to="/dashboard/admin">Dashboard</NavLink>
-                  )}
-                </div>
+                {user?.accountType === 'Admin' && <NavLink to="/dashboard/admin">Dashboard</NavLink>}
 
-                {/* Desktop Profile Dropdown */}
-                <div className="relative animate-fade-in-right" ref={profileDropdownRef} style={{ animationDelay: '0.3s' }}>
+                <div className="relative" ref={profileDropdownRef}>
                   <button
-                    onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                    className="flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full p-1 group transition-all duration-300"
+                    onClick={() => setIsProfileDropdownOpen((prev) => !prev)}
+                    className="rounded-full p-0.5"
+                    aria-label="Open profile menu"
                   >
-                    <div className="relative">
-                      <img
-                        src={user?.image}
-                        alt={`${user?.firstName}`}
-                        className="h-10 w-10 rounded-full object-cover border-2 border-transparent group-hover:border-blue-400 transition-all duration-300 transform group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                  
-                    </div>
+                    <img
+                      src={user?.image}
+                      alt={user?.firstName || 'profile'}
+                      className="h-10 w-10 rounded-full border object-cover"
+                      style={{ borderColor: 'var(--border-subtle)' }}
+                    />
                   </button>
 
                   {isProfileDropdownOpen && (
-                    <div 
-                      className="absolute w-50 right-10 mt-3 backdrop-blur-xl rounded-2xl shadow-2xl border py-2 animate-dropdown-in"
+                    <div
+                      className="absolute right-0 top-12 w-72 rounded-2xl border p-4 shadow-lg"
                       style={{
-                        backgroundColor: darkMode ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-                        borderColor: darkMode ? 'rgba(75, 85, 99, 0.2)' : 'rgba(255, 255, 255, 0.2)'
+                        background: 'var(--surface-primary)',
+                        borderColor: 'var(--border-subtle)'
                       }}
                     >
-                      <div 
-                        className="px-2 py-2 border-b"
-                        style={{
-                          borderColor: darkMode ? 'rgba(75, 85, 99, 0.5)' : 'rgba(229, 231, 235, 0.5)'
-                        }}
-                      >
-                        <div className="flex gap-3 flex-col items-center ">
-                          <img
-                            src={user?.image}
-                            alt={`${user?.firstName}`}
-                            className="w-40 rounded-2xl object-cover border-2 hover:scale-105 transition-transform duration-200"
-                            style={{
-                              borderColor: darkMode ? 'rgba(75, 85, 99, 0.6)' : 'rgba(209, 213, 219, 0.6)'
-                            }}
-                            
-                          />
-                          <div className="flex-1 min-w-0 px-2">
-                            <p 
-                              className="text-sm font-bold truncate"
-                              style={{ color: darkMode ? '#ffffff' : '#111827' }}
-                            >
-                              {user?.firstName} {user?.lastName}
-                            </p>
-                            <p 
-                              className="text-xs truncate"
-                              style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}
-                            >
-                              {user?.email}
-                            </p>
-                            <span 
-                              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-1"
-                              style={{
-                                background: darkMode 
-                                  ? 'linear-gradient(to right, rgb(30, 58, 138), rgb(76, 29, 149))' 
-                                  : 'linear-gradient(to right, rgb(219, 234, 254), rgb(243, 232, 255))',
-                                color: darkMode ? '#93c5fd' : '#1e40af'
-                              }}
-                            >
-                              {user?.accountType}
-                            </span>
-                          </div>
+                      <div className="flex items-center gap-3 border-b pb-3" style={{ borderColor: 'var(--border-subtle)' }}>
+                        <img
+                          src={user?.image}
+                          alt={user?.firstName || 'profile'}
+                          className="h-12 w-12 rounded-full object-cover"
+                        />
+                        <div>
+                          <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                            {user?.firstName} {user?.lastName}
+                          </p>
+                          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                            {user?.email}
+                          </p>
+                          <p className="mt-1 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--cb-link)' }}>
+                            {user?.accountType}
+                          </p>
                         </div>
                       </div>
+
                       <button
                         onClick={handleLogout}
-                        className="flex items-center gap-3 w-full px-5 py-3 text-sm font-medium transition-all duration-200 group"
-                        style={{
-                          color: '#dc2626' // red-600
-                        }}
-                        onMouseEnter={(e) => {
-                          e.target.style.backgroundColor = darkMode ? 'rgba(220, 38, 38, 0.1)' : 'rgba(254, 242, 242, 1)';
-                          e.target.style.color = '#b91c1c'; // red-700
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.backgroundColor = 'transparent';
-                          e.target.style.color = '#dc2626'; // red-600
-                        }}
+                        className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50"
+                        style={{ borderColor: 'rgba(220, 38, 38, 0.35)' }}
                       >
-                        <VscSignOut className="text-lg group-hover:scale-110 transition-transform duration-200" />
-                        <span className="font-medium">Logout</span>
+                        <VscSignOut className="text-base" />
+                        Logout
                       </button>
                     </div>
                   )}
@@ -242,255 +160,86 @@ function Navbar() {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="lg:hidden animate-fade-in-right" ref={mobileMenuRef}>
-            {token ? (
-              <div className="flex items-center space-x-4">
-                <ThemeToggle />
-                <div className="relative">
-                  <img
-                    src={user?.image}
-                    alt={`${user?.firstName}`}
-                    className="h-10 w-10 rounded-full object-cover border-2 border-gray-300"
-                  />
-                </div>
-                <button
-                  onClick={toggleMobileMenu}
-                  className="inline-flex items-center justify-center p-2 rounded-lg focus:outline-none transform hover:scale-105 transition-all duration-200"
-                  style={{
-                    color: darkMode ? '#d1d5db' : '#374151'
-                  }}
-                >
-                  <div className="relative w-6 h-6">
-                    <FaBars className={`absolute inset-0 h-5 w-5 transition-all duration-300 transform ${isMobileMenuOpen ? 'opacity-0 rotate-180' : 'opacity-100 rotate-0'}`} />
-                    <FaTimes className={`absolute inset-0 h-5 w-5 transition-all duration-300 transform ${isMobileMenuOpen ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-180'}`} />
-                  </div>
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-4">
-                <ThemeToggle />
-                <button
-                  onClick={toggleMobileMenu}
-                  className="inline-flex items-center justify-center p-2 rounded-lg focus:outline-none transform hover:scale-105 transition-all duration-200"
-                  style={{
-                    color: darkMode ? '#d1d5db' : '#374151'
-                  }}
-                >
-                  <div className="relative w-6 h-6">
-                    <FaBars className={`absolute inset-0 h-5 w-5 transition-all duration-300 transform ${isMobileMenuOpen ? 'opacity-0 rotate-180' : 'opacity-100 rotate-0'}`} />
-                    <FaTimes className={`absolute inset-0 h-5 w-5 transition-all duration-300 transform ${isMobileMenuOpen ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-180'}`} />
-                  </div>
-                </button>
-              </div>
-            )}
+          <div className="relative lg:hidden" ref={mobileMenuRef}>
+            <button
+              onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+              className="cb-pill-btn cb-pill-secondary !min-h-[40px] !px-3 !py-2"
+              aria-label="Toggle menu"
+            >
+              {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
+            </button>
 
             {isMobileMenuOpen && (
-              <div 
-                className="absolute right-4 top-16 w-72 backdrop-blur-xl rounded-2xl shadow-2xl border py-3 z-50 animate-mobile-menu-in"
+              <div
+                className="absolute right-0 top-14 w-72 rounded-2xl border p-4 shadow-lg"
                 style={{
-                  backgroundColor: darkMode ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-                  borderColor: darkMode ? 'rgba(75, 85, 99, 0.2)' : 'rgba(255, 255, 255, 0.2)'
+                  background: 'var(--surface-primary)',
+                  borderColor: 'var(--border-subtle)'
                 }}
               >
-                {!token ? (
-                  <div className="px-5 py-4 space-y-4">
-                    <MobileNavLink to="/learn" onClick={closeMobileMenu}>About</MobileNavLink>
-                    <Link to='/login' onClick={closeMobileMenu} className="block transform hover:scale-105 transition-transform duration-200">
-                      <CTAButton text="Login" active={false} />
-                    </Link>
-                    <Link to='/signup' onClick={closeMobileMenu} className="block transform hover:scale-105 transition-transform duration-200">
-                      <CTAButton text="Signup" active="true" />
-                    </Link>
-                  </div>
-                ) : (
-                  <div>
-                    <div 
-                      className="px-5 py-4 border-b"
-                      style={{
-                        borderColor: darkMode ? 'rgba(75, 85, 99, 0.5)' : 'rgba(229, 231, 235, 0.5)'
-                      }}
-                    >
-                      <div className="flex items-center space-x-4">
-                        <div className="relative">
-                          <img
-                            src={user?.image}
-                            alt={`${user?.firstName}`}
-                            className="h-14 w-14 rounded-full object-cover border-2"
-                            style={{
-                              borderColor: darkMode ? 'rgba(75, 85, 99, 0.6)' : 'rgba(209, 213, 219, 0.6)'
-                            }}
-                          />
-                          
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p 
-                            className="text-base font-bold truncate"
-                            style={{ color: darkMode ? '#ffffff' : '#111827' }}
-                          >
-                            {user?.firstName} {user?.lastName}
-                          </p>
-                          <p 
-                            className="text-sm truncate"
-                            style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}
-                          >
-                            {user?.email}
-                          </p>
-                          <span 
-                            className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium mt-2"
-                            style={{
-                              background: darkMode 
-                                ? 'linear-gradient(to right, rgb(30, 58, 138), rgb(76, 29, 149))' 
-                                : 'linear-gradient(to right, rgb(219, 234, 254), rgb(243, 232, 255))',
-                              color: darkMode ? '#93c5fd' : '#1e40af'
-                            }}
-                          >
-                            {user?.accountType}
-                          </span>
-                        </div>
-                      </div>
+                <div className="mb-3 flex items-center justify-between">
+                  <ThemeToggle />
+                </div>
+
+                <div className="space-y-1">
+                  <MobileNavLink to="/learn" onClick={() => setIsMobileMenuOpen(false)}>
+                    About
+                  </MobileNavLink>
+
+                  {!token ? (
+                    <div className="mt-3 flex flex-col gap-2">
+                      <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                        <CTAButton text="Login" active={false} className="w-full" />
+                      </Link>
+                      <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
+                        <CTAButton text="Create Account" active='true' className="w-full" />
+                      </Link>
                     </div>
+                  ) : (
+                    <>
+                      <MobileNavLink to="/dashboard/my-profile" onClick={() => setIsMobileMenuOpen(false)}>
+                        Profile
+                      </MobileNavLink>
 
-                    <div className="py-2">
-                      <MobileNavLink to="/learn" onClick={closeMobileMenu}>About</MobileNavLink>
-                      <MobileNavLink to="/dashboard/my-profile" onClick={closeMobileMenu}>Profile</MobileNavLink>
-
-                      {user?.accountType === "Student" && (
-                        <MobileNavLink to="/dashboard/student" onClick={closeMobileMenu}>
+                      {user?.accountType === 'Student' && (
+                        <MobileNavLink to="/dashboard/student" onClick={() => setIsMobileMenuOpen(false)}>
                           Dashboard
                         </MobileNavLink>
                       )}
 
-                      {user?.accountType === "Instructor" && (
+                      {user?.accountType === 'Instructor' && (
                         <>
-                          <MobileNavLink to="/dashboard/genrate-qr" onClick={closeMobileMenu}>
-                            ShowQR
+                          <MobileNavLink to="/dashboard/genrate-qr" onClick={() => setIsMobileMenuOpen(false)}>
+                            Show QR
                           </MobileNavLink>
-                          <MobileNavLink to="/dashboard/instructor" onClick={closeMobileMenu}>
+                          <MobileNavLink to="/dashboard/instructor" onClick={() => setIsMobileMenuOpen(false)}>
                             Dashboard
                           </MobileNavLink>
                         </>
                       )}
 
-                      {user?.accountType === "Admin" && (
-                        <MobileNavLink to="/dashboard/admin" onClick={closeMobileMenu}>
+                      {user?.accountType === 'Admin' && (
+                        <MobileNavLink to="/dashboard/admin" onClick={() => setIsMobileMenuOpen(false)}>
                           Dashboard
                         </MobileNavLink>
                       )}
-                    </div>
 
-                    <div 
-                      className="border-t pt-2"
-                      style={{
-                        borderColor: darkMode ? 'rgba(75, 85, 99, 0.5)' : 'rgba(229, 231, 235, 0.5)'
-                      }}
-                    >
                       <button
                         onClick={handleLogout}
-                        className="flex items-center gap-4 w-full px-5 py-3 text-sm font-medium transition-all duration-200 group hover:bg-opacity-10"
-                        style={{
-                          color: '#dc2626', // red-600
-                          backgroundColor: 'transparent'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.target.style.backgroundColor = darkMode ? 'rgba(220, 38, 38, 0.1)' : 'rgba(254, 242, 242, 1)';
-                          e.target.style.color = '#b91c1c'; // red-700
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.backgroundColor = 'transparent';
-                          e.target.style.color = '#dc2626'; // red-600
-                        }}
+                        className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50"
+                        style={{ borderColor: 'rgba(220, 38, 38, 0.35)' }}
                       >
-                        <VscSignOut className="text-lg group-hover:scale-110 transition-transform duration-200" />
-                        <span>Logout</span>
+                        <VscSignOut />
+                        Logout
                       </button>
-                    </div>
-                  </div>
-                )}
+                    </>
+                  )}
+                </div>
               </div>
             )}
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes fade-in-left {
-          from {
-            opacity: 0;
-            transform: translateX(-30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-
-        @keyframes fade-in-right {
-          from {
-            opacity: 0;
-            transform: translateX(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-
-        @keyframes fade-in-down {
-          from {
-            opacity: 0;
-            transform: translateY(-20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes dropdown-in {
-          from {
-            opacity: 0;
-            transform: translateY(-10px) scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-
-        @keyframes mobile-menu-in {
-          from {
-            opacity: 0;
-            transform: translateY(-20px) scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-
-        .animate-fade-in-left {
-          animation: fade-in-left 0.6s ease-out forwards;
-        }
-
-        .animate-fade-in-right {
-          opacity: 0;
-          animation: fade-in-right 0.6s ease-out forwards;
-        }
-
-        .animate-fade-in-down {
-          opacity: 0;
-          animation: fade-in-down 0.6s ease-out forwards;
-        }
-
-        .animate-dropdown-in {
-          animation: dropdown-in 0.3s ease-out forwards;
-        }
-
-        .animate-mobile-menu-in {
-          animation: mobile-menu-in 0.3s ease-out forwards;
-        }
-      `}</style>
     </nav>
   )
 }

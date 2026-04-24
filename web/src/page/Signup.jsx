@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-// Icons
-// import { FaGraduationCap } from 'react-icons/fa';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { setSignupData } from '../Slices/authSlice.js';
 import { sendOtp } from '../services/opretions/Auth.js';
@@ -13,11 +11,6 @@ import Button from '../components/common/Button.jsx';
 const Signup = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { loading } = useSelector((state) => state.auth);
-
-  // Get theme state
-  const themeState = useSelector((state) => state.theme)
-  const darkMode = themeState?.darkMode || false
 
   const [formData, setFormData] = useState({
     accountType: "Instructor",
@@ -58,246 +51,129 @@ const Signup = () => {
   };
 
   return (
-    <div 
-      className="flex items-center justify-center  bg-gray-100 font-sans h-[calc(100vh-100px)]"
-      style={{
-        backgroundColor: darkMode ? '#111827' : '#f3f4f6'
-      }}
-    >
-      <div className="w-full max-w-2xl space-y-6">
-        <div className="text-center">
-          <h1 
-            className="text-4xl font-bold mt-4 text-gray-800"
-            style={{
-              color: darkMode ? '#f9fafb' : '#1f2937'
-            }}
-          >
-            Create Faculty Account
-          </h1>
-          <p 
-            className="mt-2 text-lg text-gray-600"
-            style={{
-              color: darkMode ? '#d1d5db' : '#4b5563'
-            }}
-          >
-            Join IIITBGP attendance management platform
-          </p>
-        </div>
+    <div className="cb-auth-page">
+      <div className="cb-auth-card !max-w-3xl">
+        <p className="text-xs font-semibold uppercase tracking-[0.13em]" style={{ color: 'var(--cb-link)' }}>
+          onboarding
+        </p>
+        <h1 className="cb-display-tight mt-2 text-4xl font-medium" style={{ color: 'var(--text-primary)' }}>
+          Create your Benchmark account
+        </h1>
+        <p className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
+          Start with OTP verification and continue with role-specific profile setup.
+        </p>
 
-        <div 
-          className="bg-white p-8 rounded-lg shadow-lg border border-gray-200"
-          style={{
-            backgroundColor: darkMode ? '#1f2937' : '#ffffff',
-            borderColor: darkMode ? '#374151' : '#e5e7eb'
-          }}
-        >
-          <h2 
-            className="text-2xl font-semibold"
-            style={{
-              color: darkMode ? '#f9fafb' : '#111827'
-            }}
-          >
-            Sign Up
-          </h2>
-          <p 
-            className="text-gray-500 mb-6"
-            style={{
-              color: darkMode ? '#9ca3af' : '#6b7280'
-            }}
-          >
-            Fill in your details to create your account
-          </p>
-
-          <form onSubmit={handleOnSubmit} className="space-y-5">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="w-full">
-                <label 
-                  className="block text-sm font-medium text-gray-700"
-                  style={{
-                    color: darkMode ? '#e5e7eb' : '#374151'
-                  }}
-                >
-                  First Name
-                </label>
-                <input
-                  type="text"
-                  name="firstName"
-                  value={firstName}
-                  onChange={handleOnChange}
-                  required
-                  placeholder="Enter First Name"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
-                  style={{
-                    backgroundColor: darkMode ? '#374151' : '#ffffff',
-                    color: darkMode ? '#f9fafb' : '#111827',
-                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
-                  }}
-                />
-              </div>
-              <div className="w-full">
-                <label 
-                  className="block text-sm font-medium text-gray-700"
-                  style={{
-                    color: darkMode ? '#e5e7eb' : '#374151'
-                  }}
-                >
-                  Last Name
-                </label>
-                <input
-                  type="text"
-                  name="lastName"
-                  value={lastName}
-                  onChange={handleOnChange}
-                  required
-                  placeholder="Enter Last Name"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
-                  style={{
-                    backgroundColor: darkMode ? '#374151' : '#ffffff',
-                    color: darkMode ? '#f9fafb' : '#111827',
-                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
-                  }}
-                />
-              </div>
+        <form onSubmit={handleOnSubmit} className="mt-7 space-y-5">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                First name
+              </label>
+              <input
+                type="text"
+                name="firstName"
+                value={firstName}
+                onChange={handleOnChange}
+                required
+                placeholder="Amit"
+                className="cb-input mt-2"
+              />
             </div>
 
             <div>
-              <label 
-                className="block text-sm font-medium text-gray-700"
-                style={{
-                  color: darkMode ? '#e5e7eb' : '#374151'
-                }}
-              >
-                Email
+              <label className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                Last name
               </label>
               <input
-                type="email"
-                name="email"
-                value={email}
+                type="text"
+                name="lastName"
+                value={lastName}
                 onChange={handleOnChange}
                 required
-                placeholder="user@iiitbh.ac.in"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
-                style={{
-                  backgroundColor: darkMode ? '#374151' : '#ffffff',
-                  color: darkMode ? '#f9fafb' : '#111827',
-                  borderColor: darkMode ? '#4b5563' : '#d1d5db'
-                }}
+                placeholder="Kumar"
+                className="cb-input mt-2"
               />
             </div>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative w-full">
-              <label 
-                className="block text-sm font-medium text-gray-700"
-                style={{
-                  color: darkMode ? '#e5e7eb' : '#374151'
-                }}
-              >
+          </div>
+
+          <div>
+            <label className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+              Institutional email
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={email}
+              onChange={handleOnChange}
+              required
+              placeholder="user@iiitbh.ac.in"
+              className="cb-input mt-2"
+            />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="relative">
+              <label className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                 Password
               </label>
               <input
-                type={showPassword ? "text" : "password"}
+                type={showPassword ? 'text' : 'password'}
                 name="password"
                 value={password}
                 onChange={handleOnChange}
                 required
                 placeholder="Create a strong password"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
-                style={{
-                  backgroundColor: darkMode ? '#374151' : '#ffffff',
-                  color: darkMode ? '#f9fafb' : '#111827',
-                  borderColor: darkMode ? '#4b5563' : '#d1d5db'
-                }}
+                className="cb-input mt-2"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute inset-y-0 right-0 top-6 pr-3 flex items-center"
-                style={{
-                  color: darkMode ? '#9ca3af' : '#6b7280'
-                }}
+                className="absolute right-3 top-[39px]"
+                style={{ color: 'var(--text-secondary)' }}
               >
                 {showPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
               </button>
             </div>
 
-            <div className="relative w-full">
-              <label 
-                className="block text-sm font-medium text-gray-700"
-                style={{
-                  color: darkMode ? '#e5e7eb' : '#374151'
-                }}
-              >
-                Confirm Password
+            <div className="relative">
+              <label className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                Confirm password
               </label>
               <input
-                type={showConfirmPassword ? "text" : "password"}
+                type={showConfirmPassword ? 'text' : 'password'}
                 name="confirmPassword"
                 value={confirmPassword}
                 onChange={handleOnChange}
                 required
-                placeholder="Confirm your password"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
-                style={{
-                  backgroundColor: darkMode ? '#374151' : '#ffffff',
-                  color: darkMode ? '#f9fafb' : '#111827',
-                  borderColor: darkMode ? '#4b5563' : '#d1d5db'
-                }}
+                placeholder="Re-enter password"
+                className="cb-input mt-2"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword((prev) => !prev)}
-                className="absolute inset-y-0 right-0 top-6 pr-3 flex items-center"
-                style={{
-                  color: darkMode ? '#9ca3af' : '#6b7280'
-                }}
+                className="absolute right-3 top-[39px]"
+                style={{ color: 'var(--text-secondary)' }}
               >
                 {showConfirmPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
               </button>
             </div>
-</div>
-             {/* <div>
-              <label className="block text-sm font-medium text-gray-700">Account Type</label>
-              <select
-                name="accountType"
-                value={accountType}
-                onChange={handleOnChange}
-                required
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
-              >
-                <option value="">Select your role</option>
-                <option value="Student">Student</option>
-                <option value="Instructor">Instructor</option>
-                <option value="Admin">Administrator</option>
-              </select>
-            </div>  */}
+          </div>
 
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              className="w-full bg-teal-600 hover:bg-teal-700"
-            >
-              Create Account
-            </Button>
-          </form>
-
-          <p 
-            className="mt-6 text-center text-sm text-gray-600 flex justify-center items-center"
-            style={{
-              color: darkMode ? '#d1d5db' : '#4b5563'
-            }}
-          >
-            Already have an account?{" "}
-            <Button 
-              onClick={() => navigate("/login")} 
-              variant="outline"
-              size="sm"
-              className="text-teal-600 hover:text-teal-500 border-none bg-transparent p-0 hover:bg-transparent hover:scale-100"
-            >
-              Sign in here
-            </Button>
+          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+            Account type defaults to Instructor during registration.
           </p>
-        </div>
+
+          <Button type="submit" variant="primary" size="lg" className="w-full">
+            Continue with OTP
+          </Button>
+        </form>
+
+        <p className="mt-6 text-sm" style={{ color: 'var(--text-secondary)' }}>
+          Already have an account?{' '}
+          <Link to="/login" className="cb-link font-semibold">
+            Sign in
+          </Link>
+        </p>
       </div>
     </div>
   );

@@ -11,10 +11,6 @@ function VerifyEmail() {
   const navigate = useNavigate();
   const { signupData, loading } = useSelector((state) => state.auth);
 
-  // Get theme state
-  const themeState = useSelector((state) => state.theme)
-  const darkMode = themeState?.darkMode || false
-
   const [otp, setOtp] = useState("");
   const [error, setError] = useState(null);
 
@@ -49,78 +45,55 @@ function VerifyEmail() {
   };
 
   return (
-    <div 
-      className="min-h-screen mt-20 flex items-center justify-center bg-gray-900 text-white"
-      style={{
-        backgroundColor: darkMode ? '#111827' : '#f9fafb',
-        color: darkMode ? '#ffffff' : '#111827'
-      }}
-    >
+    <div className="cb-auth-page">
       {loading ? (
-        <div 
-          className="text-xl"
-          style={{
-            color: darkMode ? '#ffffff' : '#111827'
-          }}
-        >
+        <div className="text-xl" style={{ color: 'var(--text-primary)' }}>
           Loading...
         </div>
       ) : (
-        <div 
-          className="w-full max-w-md p-6 bg-gray-800 rounded-lg shadow-md"
-          style={{
-            backgroundColor: darkMode ? '#1f2937' : '#ffffff'
-          }}
-        >
-          <h1 
-            className="text-2xl font-bold mb-4"
-            style={{
-              color: darkMode ? '#f9fafb' : '#111827'
-            }}
-          >
-            Verify Email
-          </h1>
-          <p 
-            className="mb-4"
-            style={{
-              color: darkMode ? '#e5e7eb' : '#374151'
-            }}
-          >
-            A verification code has been sent to your email. Enter the code below:
+        <div className="cb-auth-card !max-w-xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.13em]" style={{ color: 'var(--cb-link)' }}>
+            verification
           </p>
-          {error && <div className="text-red-500 mb-4">{error}</div>}
+          <h1 className="cb-display-tight mt-2 text-3xl font-medium" style={{ color: 'var(--text-primary)' }}>
+            Verify your email
+          </h1>
+          <p className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
+            Enter the 6-digit code sent to your inbox to continue onboarding.
+          </p>
+          {error && <div className="mt-3 text-sm text-red-600">{error}</div>}
 
-          <form onSubmit={onSubmitHandle} className="space-y-4">
+          <form onSubmit={onSubmitHandle} className="mt-6 space-y-5">
             <OtpInput
               value={otp}
               onChange={setOtp}
               numInputs={6}
-              renderSeparator={<span>-</span>}
+              containerStyle={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(6, minmax(0, 1fr))',
+                gap: '0.5rem'
+              }}
               renderInput={(props) => (
-                <input 
-                  {...props} 
-                  className="text-center border-2 w-12 h-10 mx-2 rounded-2xl text-white" 
-                  style={{
-                    backgroundColor: darkMode ? '#374151' : '#ffffff',
-                    color: darkMode ? '#f9fafb' : '#111827',
-                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
-                  }}
+                <input
+                  {...props}
+                  className="cb-input text-center"
+                  style={{ paddingLeft: 0, paddingRight: 0, textTransform: 'uppercase' }}
                 />
               )}
             />
             <button
-              className="w-full py-2 px-4 bg-blue-600 rounded-md text-white font-semibold hover:bg-blue-700"
+              className="cb-pill-btn cb-pill-primary w-full"
               disabled={loading}
             >
               Verify Email
             </button>
           </form>
 
-          <div className="mt-4 flex justify-between items-center">
-            <Link to="/login" className="flex items-center text-blue-400 hover:underline">
+          <div className="mt-5 flex items-center justify-between">
+            <Link to="/login" className="cb-link flex items-center gap-2 text-sm font-semibold">
               <FaArrowLeft className="mr-2" /> Back to Login
             </Link>
-            <button onClick={OtpHandler} className="text-blue-400 hover:underline">
+            <button onClick={OtpHandler} className="cb-link text-sm font-semibold">
               Resend OTP
             </button>
           </div>

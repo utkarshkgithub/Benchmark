@@ -1,13 +1,210 @@
-/* Reset & normalize styles */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 @import "tailwindcss/preflight";
-
-/* Core utility classes */
 @import "tailwindcss/utilities";
-
-/* Optional: enable theme() usage in CSS */
 @import "tailwindcss/theme";
 
-/* Your custom styles */
+:root {
+  --cb-blue: #0052ff;
+  --cb-blue-hover: #578bfa;
+  --cb-link: #0667d0;
+  --surface-primary: #ffffff;
+  --surface-secondary: #eef0f3;
+  --surface-dark: #0a0b0d;
+  --surface-card-dark: #282b31;
+  --text-primary: #0a0b0d;
+  --text-secondary: #5b616e;
+  --text-on-dark: #f5f7fb;
+  --border-subtle: rgba(91, 97, 110, 0.2);
+  --focus-ring: 2px solid #0a0b0d;
+  --font-display: 'Space Grotesk', 'Avenir Next', 'Segoe UI', sans-serif;
+  --font-ui: 'Manrope', 'Avenir Next', 'Segoe UI', sans-serif;
+  --font-body: 'Manrope', 'Avenir Next', 'Segoe UI', sans-serif;
+}
+
+html.dark {
+  --surface-primary: #0a0b0d;
+  --surface-secondary: #1e2228;
+  --surface-dark: #07080a;
+  --surface-card-dark: #282b31;
+  --text-primary: #f5f7fb;
+  --text-secondary: #a7afbf;
+  --text-on-dark: #f5f7fb;
+  --border-subtle: rgba(167, 175, 191, 0.28);
+  --focus-ring: 2px solid #f5f7fb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
-  font-family: 'Inter', sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  background: var(--surface-primary);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+p,
+span,
+label,
+input,
+button,
+textarea,
+select {
+  font-family: var(--font-ui);
+}
+
+.app-shell {
+  min-height: 100vh;
+  background: var(--surface-primary);
+  color: var(--text-primary);
+}
+
+.cb-container {
+  width: min(1200px, 100% - 2rem);
+  margin-inline: auto;
+}
+
+.cb-display-tight {
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.cb-muted {
+  color: var(--text-secondary);
+}
+
+.cb-pill-btn {
+  border-radius: 56px;
+  min-height: 48px;
+  padding: 0.65rem 1.3rem;
+  border: 1px solid transparent;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease,
+    transform 180ms ease;
+}
+
+.cb-pill-btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.cb-pill-primary {
+  background: var(--cb-blue);
+  border-color: var(--cb-blue);
+  color: #ffffff;
+}
+
+.cb-pill-primary:hover:not(:disabled) {
+  background: var(--cb-blue-hover);
+  border-color: var(--cb-blue-hover);
+  transform: translateY(-1px);
+}
+
+.cb-pill-secondary {
+  background: var(--surface-secondary);
+  border-color: var(--surface-secondary);
+  color: var(--text-primary);
+}
+
+.cb-pill-secondary:hover:not(:disabled) {
+  background: #d6dce6;
+  border-color: #d6dce6;
+}
+
+.cb-link {
+  color: var(--cb-link);
+  text-decoration: none;
+}
+
+.cb-link:hover {
+  color: var(--cb-blue);
+}
+
+.cb-card {
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  background: var(--surface-primary);
+}
+
+.cb-dark-card {
+  border: 1px solid rgba(167, 175, 191, 0.25);
+  border-radius: 16px;
+  background: var(--surface-card-dark);
+  color: var(--text-on-dark);
+}
+
+.cb-auth-page {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background:
+    radial-gradient(circle at 15% 12%, rgba(0, 82, 255, 0.08), transparent 42%),
+    radial-gradient(circle at 82% 86%, rgba(10, 11, 13, 0.08), transparent 36%),
+    var(--surface-primary);
+}
+
+.cb-auth-card {
+  width: min(680px, 100%);
+  border-radius: 24px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-primary);
+  padding: 2rem;
+  box-shadow: 0 16px 40px rgba(10, 11, 13, 0.08);
+}
+
+.cb-input {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  padding: 0.68rem 0.8rem;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.cb-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.cb-input:focus {
+  outline: none;
+  border-color: var(--cb-blue);
+  box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.15);
+}
+
+.reveal-up {
+  animation: reveal-up 420ms ease both;
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .cb-auth-card {
+    padding: 1.4rem;
+    border-radius: 18px;
+  }
 }

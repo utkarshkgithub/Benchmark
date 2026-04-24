@@ -1,183 +1,101 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { FaGraduationCap } from 'react-icons/fa';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../services/opretions/Auth';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import Button from '../components/common/Button';
 
 const SignIn = () => {
-  // State to manage password visibility
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { loading } = useSelector((state) => state.auth)
-  
-  // Get theme state
-  const themeState = useSelector((state) => state.theme)
-  const darkMode = themeState?.darkMode || false
-  
-  // Initialize react-hook-form
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
 
-
   const handleForgotPassword = () => {
     navigate("/forgot-password")
   }
 
-  // Handle the form submission
   const onSubmit = (data) => {
     dispatch(login(data.email, data.password, navigate))
   };
 
   return (
-    <div 
-      className="flex items-center justify-center bg-gray-100 font-sans h-[calc(100vh-100px)]"
-      style={{
-        backgroundColor: darkMode ? '#111827' : '#f3f4f6'
-      }}
-    >
-      <div className="w-full max-w-md p-8 space-y-6">
-        {/* Header Section */}
-        <div>
- <h1 
-   className="text-4xl text-center font-bold  text-gray-800"
-   style={{
-     color: darkMode ? '#f9fafb' : '#1f2937'
-   }}
- >
-   Welcome Back
- </h1>
-          <p 
-            className="text-lg text-center text-gray-600"
-            style={{
-              color: darkMode ? '#d1d5db' : '#4b5563'
-            }}
-          >
-            Sign in to your account to continue
-          </p>
-        </div>
-       
-        {/* Form Container */}
-        <div 
-          className="bg-white p-8 rounded-lg shadow-lg border border-gray-200"
-          style={{
-            backgroundColor: darkMode ? '#1f2937' : '#ffffff',
-            borderColor: darkMode ? '#374151' : '#e5e7eb'
-          }}
-        >
-          <h2 
-            className="text-2xl font-semibold"
-            style={{
-              color: darkMode ? '#f9fafb' : '#111827'
-            }}
-          >
+    <div className="cb-auth-page">
+      <div className="cb-auth-card">
+        <p className="text-xs font-semibold uppercase tracking-[0.13em]" style={{ color: 'var(--cb-link)' }}>
+          secure access
+        </p>
+        <h1 className="cb-display-tight mt-2 text-4xl font-medium" style={{ color: 'var(--text-primary)' }}>
+          Sign in to Benchmark
+        </h1>
+        <p className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
+          Access attendance dashboards and institution workflows.
+        </p>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-7 space-y-5">
+          <div>
+            <label className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+              Institutional email
+            </label>
+            <input
+              type="email"
+              placeholder="user@iiitbh.ac.in"
+              {...register('email', { required: 'Email is required' })}
+              className="cb-input mt-2"
+            />
+            {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
+          </div>
+
+          <div className="relative">
+            <label className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+              Password
+            </label>
+            <input
+              type={isPasswordVisible ? 'text' : 'password'}
+              placeholder="Enter your password"
+              {...register('password', { required: 'Password is required' })}
+              className="cb-input mt-2"
+            />
+            <button
+              type="button"
+              onClick={() => setIsPasswordVisible((prev) => !prev)}
+              className="absolute right-3 top-[39px]"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              {isPasswordVisible ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
+            </button>
+            {errors.password && <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>}
+          </div>
+
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              onClick={handleForgotPassword}
+              variant="outline"
+              size="sm"
+              className="!min-h-[32px] !border-0 !bg-transparent !px-0 !py-0 text-sm !text-[#0667d0] hover:!bg-transparent hover:underline"
+            >
+              Forgot Password?
+            </Button>
+          </div>
+
+          <Button type="submit" variant="primary" size="lg" className="w-full">
             Sign In
-          </h2>
+          </Button>
+        </form>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Username or Email Field */}
-            <div>
-              <label 
-                className="block text-sm font-medium text-gray-700"
-                style={{
-                  color: darkMode ? '#e5e7eb' : '#374151'
-                }}
-              >
-                Username or Email
-              </label>
-              <input
-                type="email"
-                placeholder="Enter your email"
-                {...register('email', { required: 'Username or email is required' })}
-                className={`mt-1 block w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500`}
-                style={{
-                  backgroundColor: darkMode ? '#374151' : '#ffffff',
-                  color: darkMode ? '#f9fafb' : '#111827',
-                  borderColor: errors.email ? '#ef4444' : (darkMode ? '#4b5563' : '#d1d5db')
-                }}
-              />
-              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
-            </div>
-
-            {/* Password Field */}
-            <div className="relative">
-              <label 
-                className="block text-sm font-medium text-gray-700"
-                style={{
-                  color: darkMode ? '#e5e7eb' : '#374151'
-                }}
-              >
-                Password
-              </label>
-              <input
-                type={isPasswordVisible ? 'text' : 'password'}
-                placeholder="Enter your password"
-                {...register('password', { required: 'Password is required' })}
-                className={`mt-1 block w-full px-3 py-2 border ${errors.password ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500`}
-                style={{
-                  backgroundColor: darkMode ? '#374151' : '#ffffff',
-                  color: darkMode ? '#f9fafb' : '#111827',
-                  borderColor: errors.password ? '#ef4444' : (darkMode ? '#4b5563' : '#d1d5db')
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-                className="absolute inset-y-0 right-0 top-6 pr-3 flex items-center text-gray-500"
-                style={{
-                  color: darkMode ? '#9ca3af' : '#6b7280'
-                }}
-              >
-                {isPasswordVisible ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
-              </button>
-              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
-            </div>
-
-            {/* Forgot Password Link */}
-            <div className="text-right">
-              <Button 
-                type='button' 
-                onClick={handleForgotPassword} 
-                variant="outline" 
-                size="sm"
-                className="text-sm font-medium text-teal-600 hover:underline border-none bg-transparent p-0 hover:bg-transparent hover:scale-100"
-              >
-                Forgot password?
-              </Button>
-            </div>
-
-            {/* Submit Button */}
-            <div>
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                className="w-full bg-teal-600 hover:bg-teal-700 focus:ring-teal-500"
-              >
-                Sign In
-              </Button>
-            </div>
-          </form>
-
-          {/* Sign Up Link */}
-          <p 
-            className="mt-8 text-center text-sm text-gray-600"
-            style={{
-              color: darkMode ? '#d1d5db' : '#4b5563'
-            }}
-          >
-            Don't have an account?{' '}
-            <Link to="/signup" className="font-medium text-teal-600 hover:text-teal-500">
-              Sign up here
-            </Link>
-          </p>
-        </div>
+        <p className="mt-6 text-sm" style={{ color: 'var(--text-secondary)' }}>
+          No account yet?{' '}
+          <Link to="/signup" className="cb-link font-semibold">
+            Create one
+          </Link>
+        </p>
       </div>
     </div>
   );

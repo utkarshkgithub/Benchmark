@@ -148,15 +148,15 @@ export function login(email, password, navigate) {
   return async (dispatch) => {
     const toastId = toast.loading("Loading...");
     dispatch(setLoading(true));
-    // console.log("email1:-", email)
-    // console.log("password:-", password)
+    console.log("email1:-", email)
+    console.log("password:-", password)
     try {
       const response = await apiConnector("POST", endpoints.LOGIN_API, {
         email,
         password,
       });
 
-      // console.log("LOGIN API RESPONSE............", response);
+      console.log("LOGIN API RESPONSE............", response);
 
       if (!response.data.success) {
         throw new Error(response.data.message);
@@ -180,7 +180,7 @@ export function login(email, password, navigate) {
       // Persist token and user in local storage
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify({ ...user, image: userImage }));
-      // console.log(user.accountType)
+      console.log(user.accountType)
       // Navigate to dashboard based on account type
       const dashboardPath = user.accountType === "Admin"
         ? "/dashboard/admin"
@@ -189,7 +189,7 @@ export function login(email, password, navigate) {
           : "/dashboard/student";
       navigate(dashboardPath);
     } catch (error) {
-      // console.log("LOGIN API ERROR............", error);
+      console.log("LOGIN API ERROR............", error);
       toast.error(error.response?.data?.message || "Login Failed");
     } finally {
       dispatch(setLoading(false));

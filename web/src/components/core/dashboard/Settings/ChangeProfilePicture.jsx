@@ -1,15 +1,12 @@
-import {  useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { FiUpload } from "react-icons/fi"
 import { useDispatch, useSelector } from "react-redux"
 import { updateDisplayPicture } from "../../../../services/opretions/Settings"
-import IconBTN from "../../../common/IconBTN"
 
 export default function ChangeProfilePicture() {
-  const { token } = useSelector((state) => state.auth)
-  const { user } = useSelector((state) => state.auth)
-  const { darkMode } = useSelector((state) => state.theme)
+  const { token, user } = useSelector((state) => state.auth)
   const dispatch = useDispatch()
-  // console.log("11>>11:-",user);
+
   const [loading, setLoading] = useState(false)
   const [imageFile, setImageFile] = useState(null)
   const [previewSource, setPreviewSource] = useState(null)
@@ -17,12 +14,11 @@ export default function ChangeProfilePicture() {
   const fileInputRef = useRef(null)
 
   const handleClick = () => {
-    fileInputRef.current.click()
+    fileInputRef.current?.click()
   }
 
   const handleFileChange = (e) => {
-    const file =  e.target.files[0] 
-    //// console.log(file)
+    const file = e.target.files[0]
     if (file) {
       setImageFile(file)
       previewFile(file)
@@ -37,45 +33,56 @@ export default function ChangeProfilePicture() {
     }
   }
 
-  const handleFileUpload = () => {
+  const handleFileUpload = async () => {
+    if (!imageFile) return
+
     try {
-      //// console.log("uploading...")
       setLoading(true)
       const formData = new FormData()
-      formData.append("displayPicture", imageFile);
-      dispatch(updateDisplayPicture(token, formData))
-        .then(() => {
-          setLoading(false)
-          setImageFile(null)
-          setPreviewSource(null)
-        })
-        .catch((error) => {
-          console.error("Error updating profile picture:", error)
-          setLoading(false)
-        })
+      formData.append("displayPicture", imageFile)
+      await dispatch(updateDisplayPicture(token, formData))
+      setImageFile(null)
+      setPreviewSource(null)
     } catch (error) {
-     // console.log("ERROR MESSAGE - ", error.message)
+      console.error("Error updating profile picture:", error)
+    } finally {
       setLoading(false)
     }
   }
 
   return (
-  
-  <div className="flex items-center justify-between rounded-md p-4" style={{
-    backgroundColor: darkMode ? '#1f2937' : '#f9fafb',
-    borderColor: darkMode ? '#374151' : '#e5e7eb'
-  }}>
-    <div className="flex gap-4">
-      <img
-        src={previewSource || user?.image || "/default-avatar.png"}
-        alt={`profile-${user?.firstName || "avatar"}`}
-        className="w-24 h-24 rounded-full object-cover"
-      />
-      <div className="space-y-2">
-        <p className="font-medium" style={{
-          color: darkMode ? '#ffffff' : '#1f2937'
-        }}>Change Profile Picture</p>
-        <div className="flex gap-3">
+    <div
+      className="rounded-2xl border p-4 md:p-5"
+      style={{
+        borderColor: "var(--border-subtle)",
+        background: "var(--surface-secondary)"
+      }}
+    >
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-4">
+          <img
+            src={previewSource || user?.image || "/default-avatar.png"}
+            alt={`profile-${user?.firstName || "avatar"}`}
+            className="h-20 w-20 rounded-full border object-cover"
+            style={{ borderColor: "var(--border-subtle)" }}
+          />
+
+          <div>
+            <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>
+              Change Profile Picture
+            </p>
+            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              Supported formats: PNG, JPG, GIF
+            </p>
+            {imageFile && (
+              <p className="mt-1 text-xs" style={{ color: "var(--cb-link)" }}>
+                Selected: {imageFile.name}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
           <input
             type="file"
             ref={fileInputRef}
@@ -83,37 +90,29 @@ export default function ChangeProfilePicture() {
             className="hidden"
             accept="image/png, image/gif, image/jpeg"
           />
+
           <button
             onClick={handleClick}
             disabled={loading}
-            className="rounded-md py-1 px-3 hover:opacity-80 disabled:opacity-50"
-            style={{
-              backgroundColor: darkMode ? '#374151' : '#6b7280',
-              color: '#ffffff'
-            }}
+            className={`cb-pill-btn cb-pill-secondary !min-h-[40px] !px-4 !py-2 ${loading ? "cursor-not-allowed opacity-60" : ""}`}
           >
-            Select
+            Choose File
           </button>
 
-          <IconBTN
-            active="true"
-            text={loading ? "Uploading..." : ""}
+          <button
             onClick={handleFileUpload}
             disabled={loading || !previewSource}
+            className={`cb-pill-btn cb-pill-primary !min-h-[40px] !px-4 !py-2 ${
+              loading || !previewSource ? "cursor-not-allowed opacity-60" : ""
+            }`}
           >
-            {loading ? (
-              <span className="animate-pulse"></span>
-            ) : (
-              <div className="flex items-center gap-1">
-                <p>Upload</p>
-                <FiUpload className="text-lg" />
-              </div>
-            )}
-          </IconBTN>
+            <span className="flex items-center gap-2">
+              {loading ? "Uploading..." : "Upload Photo"}
+              {!loading && <FiUpload className="text-base" />}
+            </span>
+          </button>
         </div>
       </div>
     </div>
-  </div>
-
   )
 }

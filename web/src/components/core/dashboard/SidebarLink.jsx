@@ -1,27 +1,26 @@
 
 import React from 'react'
 import * as Icons from 'react-icons/vsc'
-import { matchPath, NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 function SidebarLink({ link, iconName }) {
     const Icon = Icons[iconName];
-    const location = useLocation();
-
-    const matchRoute = (route) => {
-        return matchPath({ path: route }, location.pathname);
-    }
 
     return (
         <NavLink
             to={link.path}
-            className={`relative text-sm font-medium ${matchRoute(link.path) ? 'bg-gray-200 rounded-sm' : 'bg-opacity-0'}`}
+            className={({ isActive }) =>
+                `group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition-colors ${
+                    isActive
+                        ? 'bg-[var(--surface-secondary)] text-[var(--text-primary)] shadow-sm'
+                        : 'text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--text-primary)]'
+                }`
+            }
         >
-
-            <span className={`absolute left-0 top-0 w-[0.2rem] h-full bg-yellow-5 ${matchRoute(link.path) ? 'bg-opacity-100' : 'bg-opacity-0'}`}>
-                
-
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--surface-primary)] shadow-sm" style={{ border: '1px solid var(--border-subtle)' }}>
+                {Icon ? <Icon className="text-lg" /> : null}
             </span>
-            <div className='flex items-center gap-x-2'>
-            </div>
+            <span className="flex-1">{link.name}</span>
+            <span className="h-2 w-2 rounded-full bg-[var(--cb-blue)] opacity-0 transition-opacity group-hover:opacity-100" />
         </NavLink>
     )
 }
